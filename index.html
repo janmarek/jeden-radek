@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Jeden řádek</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="app">
+    <div id="backdrop">
+      <div class="backdrop-layer" data-layer="a"></div>
+      <div class="backdrop-layer" data-layer="b"></div>
+    </div>
+    <div id="stage"></div>
+    <div id="hud">
+      <div id="counter" aria-live="polite"></div>
+      <div id="hint">← → šipky nebo mezerník</div>
+    </div>
+  </main>
+  <script src="scenes.js"></script>
+  <script src="runtime.js"></script>
+</body>
+</html>

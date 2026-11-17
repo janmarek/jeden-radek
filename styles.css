@@ -1,0 +1,404 @@
+/* Press Start 2P (OFL, see fonts/OFL-PressStart2P.txt). Local copy so the
+   deck works offline at the venue. */
+@font-face {
+  font-family: "Press Start 2P";
+  src: url("fonts/PressStart2P-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: block;
+}
+
+:root {
+  /* Game world palette */
+  --night: #140d26;        /* default stage background */
+  --night-2: #23173f;
+  --ground: #3b2a63;
+  --paper: #fffef5;
+  --ink: #1b1325;
+  --pixel-yellow: #ffd23f;
+  --pixel-red: #ff4b5c;
+  --pixel-cyan: #5ee6e6;
+  --pixel-green: #5ccf5a;
+  --muted: #9a8fb8;
+
+  /* Bug sprite palette (override per instance or via modifier class) */
+  --bug-ink: #1b1325;
+  --bug-shell: #5ccf5a;
+  --bug-shell-dark: #2f8f3a;
+  --bug-shell-light: #b4f59a;
+  --bug-eye: #fffef5;
+  --bug-band: #ff4b5c;
+  --bug-limb: #8fe07e;
+
+  --font-pixel: "Press Start 2P", ui-monospace, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "SF Mono", "JetBrains Mono", Menlo, monospace;
+
+  --stage-w: 1600;
+  --stage-h: 900;
+}
+
+* { box-sizing: border-box; }
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--night);
+  color: var(--paper);
+  font-family: var(--font-sans);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Two visual worlds (runtime sets body[data-world] from scene.world):
+   "game"    8-bit: pixel font, night palette (default)
+   "serious" incident part: plain sans, calmer */
+body[data-world="game"] #stage { font-family: var(--font-pixel); }
+body[data-world="serious"] #stage { font-family: var(--font-sans); }
+
+#app {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--night);
+  /* Runtime sets #app.style.backgroundColor from scene.background. */
+  transition: background-color 0.8s ease-in-out;
+}
+
+#stage {
+  width: calc(var(--stage-w) * 1px);
+  height: calc(var(--stage-h) * 1px);
+  position: relative;
+  transform-origin: center center;
+  overflow: hidden;
+  /* No background: the tinted #app shows through. */
+}
+
+/* Full-screen backdrop image layer between #app and #stage. Two layers so
+   the runtime can crossfade (background-image isn't transitionable). */
+#backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+#backdrop .backdrop-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+}
+#backdrop .backdrop-layer.is-visible { opacity: 1; }
+
+#hud {
+  position: fixed;
+  right: 20px;
+  bottom: 16px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  z-index: 100;
+  pointer-events: none;
+}
+#counter { font-weight: 600; color: rgba(255, 255, 255, 0.65); }
+
+/* --- Scene root --- */
+.scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.scene-fallback { color: var(--pixel-red); font-size: 24px; }
+
+/* =====================================================================
+ * bug(): the hero sprite
+ *
+ * data-pose picks the visible leg frames:
+ *   idle  frame A + slow 1px "breathing" bob
+ *   walk  frames A/B alternate (steps(1), so it reads as sprite animation)
+ *   jump  tucked legs, no bob
+ * Modifiers:
+ *   .bug--left     faces left (mirrors the SVG only, root stays free for
+ *                  scene transforms)
+ *   .bug--stealth  near-invisible flicker ("nobody sees me in the diff")
+ *   .bug--clone    duller palette, for the database-duplication level
+ * One sprite pixel = 1/18 of the height, so a 1px bob = 5.556%.
+ * ===================================================================== */
+
+.bug { position: relative; }
+.bug svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.bug--left svg { transform: scaleX(-1); }
+
+.bug .bug-legs { display: none; }
+.bug[data-pose="idle"] .bug-legs-a { display: inline; }
+.bug[data-pose="jump"] .bug-legs-tuck { display: inline; }
+.bug[data-pose="walk"] .bug-legs-a,
+.bug[data-pose="walk"] .bug-legs-b { display: inline; }
+
+.bug[data-pose="walk"] .bug-legs-a { animation: bug-frame 0.36s steps(1) infinite; }
+.bug[data-pose="walk"] .bug-legs-b { animation: bug-frame 0.36s steps(1) -0.18s infinite; }
+@keyframes bug-frame {
+  0%   { opacity: 1; }
+  50%  { opacity: 0; }
+}
+
+.bug[data-pose="idle"] .bug-body { animation: bug-breathe 1.2s steps(1) infinite; }
+.bug[data-pose="walk"] .bug-body { animation: bug-breathe 0.36s steps(1) infinite; }
+@keyframes bug-breathe {
+  0%  { transform: translateY(0); }
+  50% { transform: translateY(1px); } /* SVG user units = 1 sprite pixel */
+}
+
+.bug--stealth { animation: bug-stealth 2.4s steps(1) infinite; }
+@keyframes bug-stealth {
+  0%   { opacity: 0.12; }
+  46%  { opacity: 0.3; }
+  50%  { opacity: 0.12; }
+  90%  { opacity: 0.22; }
+}
+
+.bug--clone {
+  --bug-shell: #8fbf6a;
+  --bug-shell-dark: #5f8a47;
+  --bug-shell-light: #c9e6a8;
+  --bug-band: #b07a86;
+  --bug-limb: #b5d19a;
+}
+
+/* =====================================================================
+ * Reusable .window pattern ("app window": chat, terminal, editor, browser)
+ * Two flush plates (header + body) + one drop-shadow on the wrapper.
+ * Splitting avoids the WebKit antialiasing fringe at the joint.
+ * ===================================================================== */
+
+.window {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-sans);
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.3));
+  transition: transform 0.6s cubic-bezier(.34, 1.4, .64, 1),
+              opacity 0.4s ease-out,
+              filter 0.4s ease-out;
+}
+.window-header {
+  flex: 0 0 auto;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.window-body {
+  flex: 1;
+  border-radius: 0 0 16px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.window-header--bold {
+  height: 76px;
+  padding: 0 28px;
+  font-size: 18px;
+  font-weight: 600;
+}
+.window-header--frame {
+  height: 40px;
+  padding: 0 16px;
+  background: #2a2a2e;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  gap: 10px;
+}
+.window-traffic { display: flex; gap: 8px; flex: 0 0 auto; }
+.window-traffic span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: block;
+  background: #555;
+}
+.window-traffic span:nth-child(1) { background: #ff5f57; }
+.window-traffic span:nth-child(2) { background: #febc2e; }
+.window-traffic span:nth-child(3) { background: #28c840; }
+.window-title { flex: 1; text-align: center; }
+
+.window-theme--chat     > .window-header { background: #2b2440; color: #fff; }
+.window-theme--chat     > .window-body   { background: var(--paper); color: #1d1c1d; }
+.window-theme--terminal > .window-body   { background: #0a0a0a; color: #e6e6e6; font-family: var(--font-mono); }
+.window-theme--editor   > .window-body   { background: #1e1e1e; color: #d4d4d4; font-family: var(--font-mono); }
+.window-theme--browser  > .window-body   { background: #ffffff; color: #1f2328; }
+
+/* Entrance / exit primitives. Per-scene CSS sets the visible state at the
+   right [data-step]; exits are driven by scene.exitDuration + .is-exiting. */
+.window-enter-from-right {
+  transform: translate(60%, -50%);
+  opacity: 0;
+  transition: transform 0.65s cubic-bezier(.34, 1.2, .64, 1),
+              opacity 0.45s ease-out;
+}
+.window-enter-scale {
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  transition: transform 0.6s cubic-bezier(.34, 1.56, .64, 1),
+              opacity 0.55s ease-out;
+}
+/* `.scene[data-step]` raises specificity to (0,4,0) so exits beat the
+   per-scene visible-state rules at (0,3,0). */
+.scene[data-step].is-exiting .window-exit-to-left {
+  transform: translate(-180%, -50%);
+  opacity: 0;
+  transition: transform 0.75s cubic-bezier(.7, 0, .84, 0.2),
+              opacity 0.55s ease-in 0.2s;
+}
+.scene[data-step].is-exiting .window-exit-fade {
+  opacity: 0;
+  transition: opacity 0.5s ease-in;
+}
+
+/* =====================================================================
+ * .typewriter + .cursor: animate max-width with steps() per scene step.
+ * ===================================================================== */
+.typewriter {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 0;
+  vertical-align: middle;
+  transition: max-width 0.3s steps(20, end);
+}
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background: currentColor;
+  vertical-align: middle;
+  margin-left: 2px;
+  opacity: 0;
+  animation: blink 0.9s steps(1) infinite;
+  transition: opacity 0.2s ease-out;
+}
+.cursor.is-on { opacity: 1; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* =====================================================================
+ * .stagger-fill > .stagger-item: sequential reveal (up to 8 items).
+ * ===================================================================== */
+.stagger-item {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+.stagger-item:nth-child(1) { transition-delay: 0.10s; }
+.stagger-item:nth-child(2) { transition-delay: 0.40s; }
+.stagger-item:nth-child(3) { transition-delay: 0.70s; }
+.stagger-item:nth-child(4) { transition-delay: 1.00s; }
+.stagger-item:nth-child(5) { transition-delay: 1.30s; }
+.stagger-item:nth-child(6) { transition-delay: 1.60s; }
+.stagger-item:nth-child(7) { transition-delay: 1.90s; }
+.stagger-item:nth-child(8) { transition-delay: 2.20s; }
+
+/* --- Pixel ground strip (reusable floor for game scenes) --- */
+.pixel-ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 120px;
+  background:
+    repeating-linear-gradient(90deg, var(--ground) 0 48px, var(--night-2) 48px 54px),
+    var(--ground);
+  border-top: 12px solid var(--pixel-green);
+  box-shadow: 0 -6px 0 0 #2f8f3a inset;
+}
+
+/* =====================================================================
+ * Scene: title (retro title screen)
+ *   0 bug walks in from the left, stops under the title (pose → idle
+ *     via onStep), "stiskni →" blinks
+ * ===================================================================== */
+.title .title-logo {
+  position: absolute;
+  left: 50%;
+  top: 220px;
+  transform: translateX(-50%);
+  font-size: 88px;
+  line-height: 1.2;
+  color: var(--pixel-yellow);
+  text-shadow: 8px 8px 0 var(--pixel-red);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+.title .title-press {
+  position: absolute;
+  left: 50%;
+  top: 420px;
+  transform: translateX(-50%);
+  font-size: 22px;
+  color: var(--paper);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.title[data-step="0"] .title-press {
+  opacity: 1;
+  transition-delay: 2.6s;
+  animation: blink 1.1s steps(1) 2.6s infinite;
+}
+.title .title-bug {
+  position: absolute;
+  bottom: 120px;
+  left: -220px;
+  transition: left 2.4s linear;
+}
+.title[data-step="0"] .title-bug { left: 700px; }
+
+/* =====================================================================
+ * Scene: bug-sheet (DEV ONLY: character sheet for reviewing the sprite;
+ * remove before the talk)
+ * ===================================================================== */
+.bug-sheet { flex-direction: column; gap: 48px; }
+.bug-sheet h2 {
+  margin: 0;
+  font-size: 28px;
+  color: var(--pixel-yellow);
+  font-weight: 400;
+}
+.bug-sheet .sheet-big { display: flex; align-items: flex-end; gap: 80px; }
+.bug-sheet .sheet-row { display: flex; align-items: flex-end; gap: 56px; }
+.bug-sheet figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.bug-sheet figcaption { font-size: 13px; color: var(--muted); }
+.bug-sheet .sheet-clones { display: flex; gap: 6px; }
+.bug-sheet .sheet-note {
+  max-width: 520px;
+  font-size: 14px;
+  line-height: 2;
+  color: var(--muted);
+}
+.bug-sheet .sheet-note b { color: var(--paper); font-weight: 400; }

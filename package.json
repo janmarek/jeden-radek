@@ -1,0 +1,11 @@
+{
+  "name": "jeden-radek",
+  "private": true,
+  "description": "Jeden řádek: talk deck (static HTML/CSS/JS, no build step)",
+  "scripts": {
+    "verify": "node verify.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.60.0"
+  }
+}
