@@ -45,6 +45,37 @@ function walkThenIdle(root, ms = 1600) {
   }, ms);
 }
 
+// Pub-tab tally marks ("čárky na účtu"): groups of 4 strokes + a cross
+// stroke, slightly wobbly like a pen. The last stroke (class tally-new) is the
+// author's own attempt, drawn in on its step via stroke-dashoffset.
+function tallySvg(count) {
+  const rnd = seeded(42);
+  const j = (n) => (rnd() - 0.5) * n;
+  const line = (x1, y1, x2, y2, cls = "") =>
+    `<line class="${cls}" pathLength="1" x1="${(x1 + j(3)).toFixed(1)}" y1="${(y1 + j(3)).toFixed(1)}" x2="${(x2 + j(3)).toFixed(1)}" y2="${(y2 + j(3)).toFixed(1)}"/>`;
+  let out = "";
+  let n = 0;
+  const pos = (k) => {
+    const group = Math.floor(k / 5);
+    const row = Math.floor(group / 2);
+    const gx = 24 + (group % 2) * 130;
+    return { group, gx, y: 20 + row * 82, inGroup: k % 5 };
+  };
+  for (; n < count; n++) {
+    const p = pos(n);
+    if (p.inGroup < 4) {
+      const x = p.gx + p.inGroup * 20;
+      out += line(x, p.y, x, p.y + 56);
+    } else {
+      out += line(p.gx - 10, p.y + 48, p.gx + 72, p.y + 8);
+    }
+  }
+  const p = pos(n);
+  const x = p.gx + p.inGroup * 20;
+  out += line(x, p.y, x, p.y + 56, "tally-new");
+  return `<svg class="tally" viewBox="0 0 300 262" aria-hidden="true">${out}</svg>`;
+}
+
 // Small "for juniors" sticker: one picture instead of a definition.
 const junior = (pic, text, from = 0, extra = "") => `
   <div class="junior ${extra}" data-from="${from}">
@@ -187,29 +218,27 @@ const scenes = [
     `,
   },
 
-  // ============================================================ Pojmenovaný problém
+  // ============================================================ Proč se s tím něco neudělá
   {
     id: "named-problem",
     world: "game",
-    steps: 2,
-    verifyWait: [900, 1400],
+    steps: 5,
+    verifyWait: [900, 900, 900, 1200, 1600],
     notes:
-      "Byl to pojmenovaný problém už několik let a docela dost lidí se s tím snažilo něco udělat. Jenže stránek byly nižší stovky. Hodně práce, která neměla prioritu: co z toho bude mít zákazník oproti jiným věcem?",
+      "Proč se s tím něco neudělá? Ve firmě to byl problém pojmenovaný už několik let. Jenže postaru bylo napsaných nižší stovky stránek. A co zákazníkovi přinese přepis? Oproti novým funkcím nic moc. Přesto se o to pokoušelo mnoho lidí a byl to jeden z cílů firmy v oblasti technických vylepšení. Tak jsem se rozhodl, že to zkusím taky. (Počet čárek na účtu je ilustrační.)",
     render: () => `
       <div class="scene slide named">
-        <div class="kicker">Známý problém</div>
-        <h1 class="headline">Pojmenovaný už několik let</h1>
-        <p class="lede">Hodně lidí se s tím snažilo něco udělat.</p>
-        <div class="pages">
-          <div class="pages-grid">${Array.from({ length: 160 }, () => "<i></i>").join("")}</div>
-          <div class="pages-label">nižší stovky stránek</div>
-        </div>
-        <div class="backlog">
-          <div class="bl-card bl-ours">Přepsat staré stránky</div>
-          <div class="bl-card bl-2">Funkce pro zákazníky</div>
-          <div class="bl-card bl-3">Funkce pro zákazníky</div>
-          <div class="bl-card bl-4">Funkce pro zákazníky</div>
-          <div class="bl-q" data-from="1">Co z toho bude mít zákazník?</div>
+        <h1 class="headline">Proč se s tím něco neudělá?</h1>
+        <ul class="plain-list named-list">
+          <li>Ve firmě to byl problém pojmenovaný už několik let.</li>
+          <li data-from="1">Postaru bylo napsaných <b>nižší stovky</b> stránek.</li>
+          <li data-from="2">Co zákazníkovi přinese přepis? Oproti novým funkcím nic moc.</li>
+          <li data-from="3">Přesto se o to pokoušelo mnoho lidí. Jeden z cílů firmy v technických vylepšeních.</li>
+          <li data-from="4" class="named-me">Rozhodl jsem se, že to zkusím taky.</li>
+        </ul>
+        <div class="tab" data-from="3">
+          <div class="tab-head">účet</div>
+          ${tallySvg(27)}
         </div>
       </div>
     `,
