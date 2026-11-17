@@ -108,72 +108,80 @@ const scenes = [
   },
 
   // ============================================================ Věřte nevěřte
+  // Mood borrowed from the "Věřte nevěřte" TV show (Beyond Belief): dark,
+  // fog, spotlight, glowing serif. Evoked with original CSS only, no logo.
   {
     id: "true-story",
-    world: "game",
+    world: "serious",
+    background: "#07060f",
     steps: 2,
+    verifyWait: [1600, 1200],
     notes:
-      "Věřte nevěřte, tohle se opravdu stalo. Pracoval jsem v Mews, firma dělá software pro hotely. Systém byl krásný, ale firma existuje 14 let, takže některé obrazovky jsou poněkud staršího data.",
+      "Věřte nevěřte, tohle se opravdu stalo. Pracoval jsem v Mews, firma dělá software pro hotely.",
     render: () => `
       <div class="scene slide truestory">
-        <h1 class="headline center">Věřte nevěřte…</h1>
-        <p class="lede center">…tohle se opravdu stalo.</p>
-        <div class="facts" data-from="1">
-          <span class="fact f-cyan">Mews</span>
-          <span class="fact f-yellow">software pro hotely</span>
-          <span class="fact f-lavender">firma existuje 14 let</span>
-        </div>
+        <div class="bb-spot"></div>
+        <div class="bb-fog bb-fog-1"></div>
+        <div class="bb-fog bb-fog-2"></div>
+        <h1 class="bb-title">Věřte nevěřte</h1>
+        <p class="bb-sub">…tohle se opravdu stalo.</p>
+        <div class="bb-caption" data-from="1">Mews <span>·</span> software pro hotely</div>
       </div>
     `,
   },
 
-  // ============================================================ Backend rendered pages
+  // ============================================================ Mews PMS
+  // step 0: modern screen (majority) · 1: older screen appears ·
+  // 2: "Backend rendered pages" label stamped over the old one
   {
-    id: "brp",
+    id: "mews-pms",
     world: "game",
     steps: 3,
     notes:
-      "Většina obrazovek byla v Reactu nad REST API. Ty starší renderoval backend pomocí Razor šablon, říkali jsme jim backend rendered pages. Jiná technologie, takže vypadaly trochu jinak a nedaly se snadno rozvíjet.",
+      "Mews PMS je hlavní produkt. Firma existuje 14 let. Většina obrazovek je v Reactu nad REST API. Ale jsou tam i starší části: ty renderuje backend pomocí Razor šablon. Říkali jsme jim backend rendered pages.",
     render: () => `
-      <div class="scene slide brp">
-        <div class="kicker">Svět</div>
-        <h1 class="headline">Backend rendered pages</h1>
-        <p class="lede" data-from="2">Jiná technologie: vypadají jinak a špatně se rozvíjejí.</p>
+      <div class="scene slide pms">
+        <h1 class="headline">Mews PMS</h1>
+        <p class="lede">Hlavní produkt. Firma existuje <b>14 let</b>.</p>
         <div class="screens">
           <figure class="screen-new">
-            <div class="mock-new">
-              <div class="mn-head"><span></span><button class="mn-danger">Smazat vybrané</button></div>
-              ${Array.from({ length: 5 }, (_, i) => `<div class="mn-row"><i class="mn-check${i === 1 || i === 2 ? " on" : ""}"></i><span></span><span class="mn-edit">✎</span></div>`).join("")}
+            <div class="mock mock-new">
+              <div class="mk-head"><span></span><button class="mn-danger">${icon("trash-2", { size: 20, stroke: 2.5 })} Smazat vybrané</button></div>
+              ${Array.from({ length: 5 }, (_, i) => `<div class="mk-row"><i class="mn-check${i === 1 || i === 2 ? " on" : ""}"></i><span class="mk-text"></span><span class="mn-edit">${icon("pencil", { size: 30, stroke: 2.75 })}</span></div>`).join("")}
             </div>
             <figcaption><b>Většina</b> · React + REST API</figcaption>
           </figure>
           <figure class="screen-old" data-from="1">
-            <div class="mock-old">
-              <div class="mo-head">Nastavení</div>
-              ${Array.from({ length: 5 }, () => `<div class="mo-row"><span></span><span></span><button>Upravit</button></div>`).join("")}
-              <div class="mo-foot"><button>Uložit</button></div>
+            <div class="mock mock-old">
+              <div class="mk-head"><span></span></div>
+              ${[180, 120, 220, 150, 200].map((w) => `<div class="mk-row"><span class="mk-text" style="width:${w}px"></span><a class="mo-edit">Upravit</a></div>`).join("")}
             </div>
-            <figcaption><b>Starší</b> · Razor šablony, HTML renderuje backend</figcaption>
+            <figcaption><b>Starší části</b> · Razor, HTML z backendu</figcaption>
+            <div class="brp-label" data-from="2">Backend rendered pages</div>
           </figure>
         </div>
       </div>
     `,
   },
 
-  // ============================================================ Dilema
+  // ============================================================ Co je na tom špatně (+ dilema)
   {
-    id: "dilemma",
+    id: "whats-wrong",
     world: "game",
+    steps: 4,
     notes:
-      "A teď potřebuješ na takové stránce něco malého doplnit. Dilema: doplnit to po staru, nebo celou stránku přepsat?",
+      "Co je na tom špatně? Jiná technologie, takže stránky vypadají jinak než zbytek aplikace a špatně se rozvíjejí. A pak přijde dilema: potřebuju na takové stránce doplnit něco malého. Doplním to po staru, nebo přepíšu celou stránku?",
     render: () => `
-      <div class="scene slide dilemma">
-        <div class="kicker">Dilema</div>
-        <h1 class="headline">Potřebuju doplnit něco malého.</h1>
-        <div class="choice card-ink">
-          <div class="choice-q">Co uděláš?</div>
-          <div class="choice-opt opt-a">Doplnit to po staru</div>
-          <div class="choice-opt opt-b">Přepsat celou stránku</div>
+      <div class="scene slide wrong">
+        <div class="kicker">Backend rendered pages</div>
+        <h1 class="headline">Co je na tom špatně?</h1>
+        <ul class="plain-list">
+          <li>Jiná technologie</li>
+          <li data-from="1">Vypadají jinak než zbytek aplikace</li>
+          <li data-from="2">Špatně se rozvíjejí</li>
+        </ul>
+        <div class="dilemma-line" data-from="3">
+          Potřebuju doplnit něco malého:<br><b>po staru</b>, nebo <b>přepsat celou stránku</b>?
         </div>
       </div>
     `,
@@ -219,10 +227,10 @@ const scenes = [
         <div class="kicker">Proč to stojí za to</div>
         <h1 class="headline">Lepší pro uživatele</h1>
         <div class="tiles">
-          <div class="tile t-cyan"><div class="tile-ico">▦</div>Konzistentní se zbytkem aplikace</div>
-          <div class="tile t-yellow"><div class="tile-ico">☺</div>Lepší UX</div>
-          <div class="tile t-lavender"><div class="tile-ico">✎</div>Inline edit</div>
-          <div class="tile t-coral"><div class="tile-ico">☑</div>Bulk delete</div>
+          <div class="tile t-cyan"><div class="tile-ico">${icon("layout-grid", { size: 64 })}</div>Konzistentní se zbytkem aplikace</div>
+          <div class="tile t-yellow"><div class="tile-ico">${icon("smile", { size: 64 })}</div>Lepší UX</div>
+          <div class="tile t-lavender"><div class="tile-ico">${icon("pencil", { size: 64 })}</div>Inline edit</div>
+          <div class="tile t-coral"><div class="tile-ico">${icon("square-check-big", { size: 64 })}</div>Bulk delete</div>
         </div>
         <div class="sticky" data-from="1">
           <b>Side projekt.</b><br>Vedení se to líbilo.<br>Čas na to nikdo nevyhradil.

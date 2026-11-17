@@ -4,7 +4,8 @@
   "description": "Jeden řádek: talk deck (static HTML/CSS/JS, no build step)",
   "scripts": {
     "verify": "node verify.mjs",
-    "notes": "node scripts/gen-presentation.cjs"
+    "notes": "node scripts/gen-presentation.cjs",
+    "icons": "node scripts/build-icons.cjs"
   },
   "devDependencies": {
     "@playwright/test": "1.60.0"

@@ -122,7 +122,10 @@ Tohle je zdroj pravdy. Co tu není, se nesmí prezentovat jako fakt.
 
 - Firma: **Mews**, dělá software pro hotely, existuje 14 let. Autor tam pracoval
   (už ne). Jméno firmy smí na slajd, logo a firemní barvy ne.
-- Talk otevírá „Věřte nevěřte“: příběh se opravdu stal.
+- Talk otevírá „Věřte nevěřte“: příběh se opravdu stal. Vizuálně odkaz na
+  pořad Věřte nevěřte (Beyond Belief): tma, mlha, světelný kužel, zářící patkové
+  písmo. Jen nálada, žádné logo pořadu.
+- Mews PMS je hlavní produkt.
 - Většina obrazovek byla React + REST API. Ty starší renderoval backend pomocí
   Razor šablon; interně se jim říkalo **backend rendered pages**. Jiná technologie,
   takže vypadaly trochu jinak a nedaly se snadno rozvíjet.

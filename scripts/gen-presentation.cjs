@@ -4,7 +4,7 @@ const vm = require("vm");
 const fs = require("fs");
 const path = require("path");
 const root = path.join(__dirname, "..");
-const ctx = { bug: () => "", appWindow: () => "" };
+const ctx = { bug: () => "", appWindow: () => "", icon: () => "" };
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(root, "scenes.js"), "utf8") + ";this.scenes=scenes;", ctx);
 const rows = ctx.scenes

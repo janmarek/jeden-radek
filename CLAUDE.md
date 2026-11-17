@@ -108,6 +108,12 @@ bug({ size: 144, pose: "walk", facing: "left", className: "bug--stealth" })
 - Style is loosely inspired by classic platformers (Prehistorik, Prince of Persia,
   Mario) but must stay original: no existing characters, tiles or icons.
 
+Icons: `icon("pencil", { size, stroke })` inlines a Lucide icon (ISC) with a
+thick default stroke (2.75) so it reads on a projector. Never use thin unicode
+glyphs (✎ ☑) as icons. To add one: download
+`unpkg.com/lucide-static@0.460.0/icons/<name>.svg` into `icons/`, then
+`npm run icons` (regenerates `icons.js`, loaded before scenes.js).
+
 Other building blocks (same as bdd): `appWindow()` with themes `chat | terminal |
 editor | browser`, `.window-enter-*` / `.window-exit-*`, `.typewriter` + `.cursor`,
 `.stagger-fill > .stagger-item`, `.pixel-ground`.

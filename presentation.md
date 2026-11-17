@@ -23,9 +23,9 @@ závorkách jsou zástupné texty nebo návrhy k potvrzení.
 | # | id | svět | kroky | Poznámky |
 |---|----|------|-------|----------|
 | 1 | `title` | game | 1 | Ahoj, jsem Jan. Tohle je příběh o jednom řádku. |
-| 2 | `true-story` | game | 2 | Věřte nevěřte, tohle se opravdu stalo. Pracoval jsem v Mews, firma dělá software pro hotely. Systém byl krásný, ale firma existuje 14 let, takže některé obrazovky jsou poněkud staršího data. |
-| 3 | `brp` | game | 3 | Většina obrazovek byla v Reactu nad REST API. Ty starší renderoval backend pomocí Razor šablon, říkali jsme jim backend rendered pages. Jiná technologie, takže vypadaly trochu jinak a nedaly se snadno rozvíjet. |
-| 4 | `dilemma` | game | 1 | A teď potřebuješ na takové stránce něco malého doplnit. Dilema: doplnit to po staru, nebo celou stránku přepsat? |
+| 2 | `true-story` | serious | 2 | Věřte nevěřte, tohle se opravdu stalo. Pracoval jsem v Mews, firma dělá software pro hotely. |
+| 3 | `mews-pms` | game | 3 | Mews PMS je hlavní produkt. Firma existuje 14 let. Většina obrazovek je v Reactu nad REST API. Ale jsou tam i starší části: ty renderuje backend pomocí Razor šablon. Říkali jsme jim backend rendered pages. |
+| 4 | `whats-wrong` | game | 4 | Co je na tom špatně? Jiná technologie, takže stránky vypadají jinak než zbytek aplikace a špatně se rozvíjejí. A pak přijde dilema: potřebuju na takové stránce doplnit něco malého. Doplním to po staru, nebo přepíšu celou stránku? |
 | 5 | `named-problem` | game | 2 | Byl to pojmenovaný problém už několik let a docela dost lidí se s tím snažilo něco udělat. Jenže stránek byly nižší stovky. Hodně práce, která neměla prioritu: co z toho bude mít zákazník oproti jiným věcem? |
 | 6 | `why` | game | 2 | Proč to stojí za to: nové UI je konzistentní se zbytkem aplikace, lepší pro uživatele, a šlo přidat inline edit a bulk delete. Háček: dělal jsem to jako side projekt. Vedení se to líbilo, ale nikdo mi na to nedal čas. |
 | 7 | `agent` | game | 2 | Tak jsem si vyrobil agenta. Dal jsem mu dokumentaci, jak to lidé dělali dřív. Pro juniory: je to jako onboarding nového kolegy. Pak postup v osmi krocích. (Technické detaily jdou zkrátit, když nezbyde čas.) |
