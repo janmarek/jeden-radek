@@ -140,26 +140,60 @@ const scenes = [
   },
 
   // ============================================================ Věřte nevěřte
-  // Mood borrowed from the "Věřte nevěřte" TV show (Beyond Belief): dark,
-  // fog, spotlight, glowing serif. Evoked with original CSS only, no logo.
+  // The bug comes "home" and a big retro TV pops in; on its screen the mood
+  // of the "Věřte nevěřte" TV show (Beyond Belief): dark, fog, spotlight,
+  // glowing serif, plus CRT grain, scanlines and flicker. Original CSS only.
+  // step 0: bug walks in → TV pops in → screen turns on → title resolves
+  // step 1: "…tohle se opravdu stalo."
+  // step 2: Mews (outside the TV) · step 3: "software pro hotely"
   {
     id: "true-story",
-    world: "serious",
-    background: "#07060f",
-    steps: 2,
-    verifyWait: [1600, 1200],
+    world: "game",
+    steps: 4,
+    verifyWait: [5200, 1200, 1000, 1000],
     notes:
-      "Věřte nevěřte, tohle se opravdu stalo. Pracoval jsem v Mews, firma dělá software pro hotely.",
+      "Bug přijde domů a pustí si televizi: Věřte nevěřte. (→) …tohle se opravdu stalo. (→) Pracoval jsem v Mews, (→) firma dělá software pro hotely.",
     render: () => `
-      <div class="scene slide truestory">
-        <div class="bb-spot"></div>
-        <div class="bb-fog bb-fog-1"></div>
-        <div class="bb-fog bb-fog-2"></div>
-        <h1 class="bb-title">Věřte nevěřte</h1>
-        <p class="bb-sub">…tohle se opravdu stalo.</p>
-        <div class="bb-caption" data-from="1">Mews <span>·</span> software pro hotely</div>
+      <div class="scene truestory">
+        <div class="ts-rug"></div>
+        <div class="ts-bug">${bug({ size: 144, pose: "walk" })}</div>
+        <div class="tv">
+          <div class="tv-antenna"><i></i><i></i></div>
+          <div class="tv-body">
+            <div class="tv-screen">
+              <div class="tv-on">
+                <div class="bb-spot"></div>
+                <div class="bb-fog bb-fog-1"></div>
+                <div class="bb-fog bb-fog-2"></div>
+                <div class="bb-glitch">
+                  <h1 class="bb-title">Věřte nevěřte</h1>
+                  <p class="bb-sub" data-from="1">…tohle se opravdu stalo.</p>
+                </div>
+                <div class="tv-grain"></div>
+                <div class="tv-static"></div>
+                <div class="tv-roll"></div>
+                <div class="tv-flash"></div>
+              </div>
+              <div class="tv-scan"></div>
+              <div class="tv-glass"></div>
+            </div>
+            <div class="tv-panel">
+              <span class="tv-knob"></span>
+              <span class="tv-knob"></span>
+              <span class="tv-grill"></span>
+              <span class="tv-led"></span>
+            </div>
+          </div>
+          <div class="tv-legs"><i></i><i></i></div>
+        </div>
+        <div class="ts-mews" data-from="2">Mews</div>
+        <div class="ts-what" data-from="3">software pro hotely</div>
+        <div class="pixel-ground"></div>
       </div>
     `,
+    onStep: (root, step, prev) => {
+      if (prev === -1) walkThenIdle(root, 1900);
+    },
   },
 
   // ============================================================ Mews PMS
