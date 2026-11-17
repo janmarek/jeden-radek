@@ -640,35 +640,36 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
 .zoom-tag::before { content: "← "; }
 
 /* =====================================================================
- * true-story: the bug comes "home", a big retro TV pops in and shows the
- * "Věřte nevěřte" mood (dark, fog, spotlight, glowing serif) through CRT
- * grain, scanlines, a rolling bar, flicker and the odd glitch.
- * Timeline on entrance (all keyed off [data-step], so ← doesn't replay it):
- *   0–1.9s bug walks in · 1.9s TV pops · 2.6s screen switches on
- *   (line → full, static) · 3.3s title resolves. Mews sits outside the TV.
+ * true-story: the bug picks up where the title left it (left 700px),
+ * turns, walks to the left edge and turns back to face a black 90s TV that
+ * shows the original "Věřte nevěřte" mood (fog, spotlight, glowing serif).
+ * Jan wants the subtle original effect, no extra grain/scanlines/flicker.
+ * Timeline on entrance (keyed off [data-step], so ← doesn't replay it):
+ *   0.35s turn · 0.45–1.95s walk · 2.15s turn back · 2.2s TV pops ·
+ *   2.9s screen switches on (line, brief snow) · 3.6s title resolves.
  * ===================================================================== */
 .truestory { overflow: hidden; }
 .ts-bug {
   position: absolute;
-  bottom: 126px;
-  left: -260px;
+  bottom: 120px;
+  left: 700px;
   z-index: 2;
-  transition: left 1.9s linear;
+  transition: left 1.5s linear 0.45s;
 }
-.truestory[data-step] .ts-bug { left: 696px; }
+.truestory[data-step] .ts-bug { left: 150px; }
 
-/* --- the TV: plain black 90s CRT, centred above the bug, no brand --- */
+/* --- the TV: plain black 90s CRT, no brand --- */
 .tv {
   --tv-plastic: #1f1e24;
   --tv-plastic-hi: #34333b;
   position: absolute;
-  left: 420px;
+  left: 270px;
   top: 40px;
   width: 760px;
   transform-origin: 50% 100%;
   transform: scale(0.15);
   opacity: 0;
-  transition: transform 0.6s cubic-bezier(0.3, 1.5, 0.5, 1) 1.9s, opacity 0.15s linear 1.9s;
+  transition: transform 0.6s cubic-bezier(0.3, 1.5, 0.5, 1) 2.2s, opacity 0.15s linear 2.2s;
 }
 .truestory[data-step] .tv { transform: none; opacity: 1; }
 .tv-body {
@@ -708,7 +709,7 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
   height: 12px;
   background: #4a1d1a;
   border-radius: 50%;
-  transition: background 0.1s 2.6s, box-shadow 0.1s 2.6s;
+  transition: background 0.1s 2.9s, box-shadow 0.1s 2.9s;
 }
 .truestory[data-step] .tv-led { background: #6dff7a; box-shadow: 0 0 10px #6dff7a; }
 
@@ -731,8 +732,7 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
 }
 .truestory[data-step] .tv-on {
   animation:
-    tv-switch-on 0.7s ease-out 2.6s both,
-    tv-flicker 3.7s steps(1) 3.4s infinite;
+    tv-switch-on 0.7s ease-out 2.9s both;
 }
 @keyframes tv-switch-on {
   0%   { transform: scale(0, 0.004); filter: brightness(4); }
@@ -740,44 +740,27 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
   70%  { transform: scale(1, 1); filter: brightness(2); }
   100% { transform: scale(1, 1); filter: none; }
 }
-@keyframes tv-flicker {
-  0%   { opacity: 1; }
-  9%   { opacity: 0.9; }
-  10%  { opacity: 1; }
-  31%  { opacity: 0.93; }
-  32%  { opacity: 1; }
-  54%  { opacity: 0.82; }
-  55%  { opacity: 0.97; }
-  56%  { opacity: 0.88; }
-  57%  { opacity: 1; }
-  79%  { opacity: 0.95; }
-  80%  { opacity: 1; }
-}
 .tv-flash {
   position: absolute;
   inset: 0;
   background: #fff;
   opacity: 0;
 }
-.truestory[data-step] .tv-flash { animation: tv-flash 0.9s ease-out 2.6s both; }
+.truestory[data-step] .tv-flash { animation: tv-flash 0.9s ease-out 2.9s both; }
 @keyframes tv-flash { 0%, 40% { opacity: 0.9; } 100% { opacity: 0; } }
 
-/* Grain: SVG fractal noise, jumped around every frame-ish (steps). The
-   persistent layer is subtle; .tv-static is the heavy snow on switch-on. */
-.tv-grain,
+/* Snow only while the screen switches on, then it fades out for good. */
 .tv-static {
   position: absolute;
   inset: -60%;
   pointer-events: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  animation: tv-grain 0.6s steps(1) infinite;
+  animation: tv-grain 0.3s steps(1) infinite;
 }
-.tv-grain { opacity: 0.12; mix-blend-mode: screen; }
-.tv-static { opacity: 1; }
 .truestory[data-step] .tv-static {
   animation:
     tv-grain 0.3s steps(1) infinite,
-    tv-static-fade 1.3s ease-in 3.0s both;
+    tv-static-fade 1.3s ease-in 3.3s both;
 }
 @keyframes tv-static-fade { from { opacity: 1; } to { opacity: 0; } }
 @keyframes tv-grain {
@@ -787,23 +770,6 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
   50%  { transform: translate(-11%, -3%); }
   67%  { transform: translate(9%, 7%); }
   83%  { transform: translate(-3%, 11%); }
-}
-.tv-roll {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 140px;
-  background: linear-gradient(to bottom, transparent, rgba(200, 210, 255, 0.05) 45%, rgba(255, 255, 255, 0.08) 50%, rgba(200, 210, 255, 0.05) 55%, transparent);
-  animation: tv-roll 5.5s linear infinite;
-  pointer-events: none;
-}
-@keyframes tv-roll { from { transform: translateY(-160px); } to { transform: translateY(480px); } }
-.tv-scan {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.16) 0 2px, transparent 2px 5px);
 }
 .tv-glass {
   position: absolute;
@@ -837,17 +803,7 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
 .bb-fog-2 { bottom: 50px; opacity: 0.7; animation: bb-drift 19s ease-in-out -6s infinite alternate-reverse; }
 @keyframes bb-drift { from { transform: translateX(-8%); } to { transform: translateX(8%); } }
 @keyframes bb-pulse { from { opacity: 0.6; } to { opacity: 1; } }
-/* Occasional horizontal tear, like a bad signal. */
-.bb-glitch { position: absolute; inset: 0; animation: bb-glitch 4.3s steps(1) 4.5s infinite; }
-@keyframes bb-glitch {
-  0%   { transform: none; }
-  47%  { transform: translateX(9px) skewX(-7deg); }
-  48%  { transform: translateX(-5px); }
-  49%  { transform: none; }
-  86%  { transform: translateX(-12px); filter: hue-rotate(60deg); }
-  87%  { transform: translate(6px, 2px) skewX(5deg); filter: none; }
-  88%  { transform: none; }
-}
+.bb-text { position: absolute; inset: 0; }
 .bb-title {
   position: absolute;
   left: 0;
@@ -863,7 +819,7 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
   white-space: nowrap;
   opacity: 0;
   filter: blur(10px);
-  transition: opacity 1.4s ease-out 3.3s, letter-spacing 1.8s ease-out 3.3s, filter 1.4s ease-out 3.3s;
+  transition: opacity 1.4s ease-out 3.6s, letter-spacing 1.8s ease-out 3.6s, filter 1.4s ease-out 3.6s;
   animation: bb-glow 3.5s ease-in-out infinite alternate;
 }
 .truestory[data-step] .bb-title { opacity: 1; letter-spacing: 0.03em; filter: none; }
@@ -895,7 +851,7 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
   white-space: nowrap;
 }
 .ts-mews {
-  left: 1215px;
+  left: 1110px;
   top: 150px;
   padding: 4px 36px 0;
   background: var(--paper);
@@ -906,13 +862,13 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
   transform: rotate(-4deg);
 }
 .ts-what {
-  left: 1210px;
-  top: 320px;
+  left: 1105px;
+  top: 330px;
   padding: 10px 24px;
   background: var(--yellow);
   border-radius: 14px;
   box-shadow: 6px 6px 0 var(--ink);
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 700;
   transform: rotate(2deg);
 }

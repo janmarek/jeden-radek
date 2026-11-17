@@ -140,22 +140,23 @@ const scenes = [
   },
 
   // ============================================================ Věřte nevěřte
-  // The bug comes "home" and a big 90s black TV pops in above it; on its screen the mood
-  // of the "Věřte nevěřte" TV show (Beyond Belief): dark, fog, spotlight,
-  // glowing serif, plus CRT grain, scanlines and flicker. Original CSS only.
-  // step 0: bug walks in → TV pops in → screen turns on → title resolves
+  // The bug (where the title slide left it) turns, walks to the left edge
+  // and turns back; a black 90s TV pops in and shows the mood of the
+  // "Věřte nevěřte" TV show (Beyond Belief): dark, fog, spotlight, glowing
+  // serif. Original CSS only.
+  // step 0: bug turn/walk/turn → TV pops in → screen turns on → title
   // step 1: "…tohle se opravdu stalo."
   // step 2: Mews (outside the TV) · step 3: "software pro hotely"
   {
     id: "true-story",
     world: "game",
     steps: 4,
-    verifyWait: [5200, 1200, 1000, 1000],
+    verifyWait: [5600, 1200, 1000, 1000],
     notes:
       "Bug přijde domů a pustí si televizi: Věřte nevěřte. (→) …tohle se opravdu stalo. (→) Pracoval jsem v Mews, (→) firma dělá software pro hotely.",
     render: () => `
       <div class="scene truestory">
-        <div class="ts-bug">${bug({ size: 144, pose: "walk" })}</div>
+        <div class="ts-bug">${bug({ size: 144, pose: "idle" })}</div>
         <div class="tv">
           <div class="tv-body">
             <div class="tv-screen">
@@ -163,16 +164,13 @@ const scenes = [
                 <div class="bb-spot"></div>
                 <div class="bb-fog bb-fog-1"></div>
                 <div class="bb-fog bb-fog-2"></div>
-                <div class="bb-glitch">
+                <div class="bb-text">
                   <h1 class="bb-title">Věřte nevěřte</h1>
                   <p class="bb-sub" data-from="1">…tohle se opravdu stalo.</p>
                 </div>
-                <div class="tv-grain"></div>
                 <div class="tv-static"></div>
-                <div class="tv-roll"></div>
                 <div class="tv-flash"></div>
               </div>
-              <div class="tv-scan"></div>
               <div class="tv-glass"></div>
             </div>
             <div class="tv-bottom">
@@ -187,8 +185,15 @@ const scenes = [
         <div class="pixel-ground"></div>
       </div>
     `,
+    // Turn + walk timing must match .ts-bug in styles.css.
     onStep: (root, step, prev) => {
-      if (prev === -1) walkThenIdle(root, 1900);
+      if (prev !== -1) return;
+      const b = root.querySelector(".bug");
+      const at = (ms, fn) => setTimeout(() => b.isConnected && fn(), ms);
+      at(350, () => b.classList.add("bug--left"));
+      at(450, () => (b.dataset.pose = "walk"));
+      at(1950, () => (b.dataset.pose = "idle"));
+      at(2150, () => b.classList.remove("bug--left"));
     },
   },
 
