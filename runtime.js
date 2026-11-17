@@ -20,7 +20,7 @@ const STAGE_H = 900;
 // Palette keys → CSS custom properties (override per instance via
 // `style="--bug-shell: …"` or a modifier class, see styles.css):
 //   K outline   --bug-ink
-//   k limbs     --bug-limb (legs + antennae; lighter so they read on the night bg)
+//   k limbs     --bug-limb (legs + antennae; separate so they can differ from the outline on dark backgrounds)
 //   G shell     --bug-shell
 //   g stripe    --bug-shell-dark
 //   L highlight --bug-shell-light

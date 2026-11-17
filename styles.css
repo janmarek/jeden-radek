@@ -1,36 +1,57 @@
-/* Press Start 2P (OFL, see fonts/OFL-PressStart2P.txt). Local copy so the
-   deck works offline at the venue. */
+/* Poppins (OFL, see fonts/OFL-Poppins.txt), local so the deck works offline. */
 @font-face {
-  font-family: "Press Start 2P";
-  src: url("fonts/PressStart2P-Regular.ttf") format("truetype");
+  font-family: "Poppins";
+  src: url("fonts/Poppins-Regular.ttf") format("truetype");
   font-weight: 400;
+  font-display: block;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("fonts/Poppins-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-display: block;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("fonts/Poppins-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-display: block;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("fonts/Poppins-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: block;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("fonts/Poppins-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
   font-display: block;
 }
 
 :root {
-  /* Game world palette */
-  --night: #140d26;        /* default stage background */
-  --night-2: #23173f;
-  --ground: #3b2a63;
-  --paper: #fffef5;
-  --ink: #1b1325;
-  --pixel-yellow: #ffd23f;
-  --pixel-red: #ff4b5c;
-  --pixel-cyan: #5ee6e6;
-  --pixel-green: #5ccf5a;
-  --muted: #9a8fb8;
+  /* Palette: the meetup's "crazy" scheme. Cream paper + four loud accents. */
+  --cream: #f7ede1;        /* default stage background */
+  --cream-2: #efe1d0;      /* slightly deeper cream for panels */
+  --coral: #fe7160;
+  --cyan: #06ccdd;
+  --lavender: #ddd4ff;
+  --yellow: #feda3c;
+  --ink: #23212a;          /* text + outlines */
+  --ink-soft: #5d5866;     /* secondary text */
+  --paper: #fffaf3;
 
   /* Bug sprite palette (override per instance or via modifier class) */
-  --bug-ink: #1b1325;
-  --bug-shell: #5ccf5a;
-  --bug-shell-dark: #2f8f3a;
-  --bug-shell-light: #b4f59a;
-  --bug-eye: #fffef5;
-  --bug-band: #ff4b5c;
-  --bug-limb: #8fe07e;
+  --bug-ink: var(--ink);
+  --bug-limb: var(--ink);
+  --bug-shell: var(--cyan);
+  --bug-shell-dark: #0592a0;
+  --bug-shell-light: #8ff0f8;
+  --bug-eye: #ffffff;
+  --bug-band: var(--coral);
 
-  --font-pixel: "Press Start 2P", ui-monospace, monospace;
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-sans: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-mono: "SF Mono", "JetBrains Mono", Menlo, monospace;
 
   --stage-w: 1600;
@@ -44,8 +65,8 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: var(--night);
-  color: var(--paper);
+  background: var(--cream);
+  color: var(--ink);
   font-family: var(--font-sans);
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
@@ -53,17 +74,15 @@ body {
 }
 
 /* Two visual worlds (runtime sets body[data-world] from scene.world):
-   "game"    8-bit: pixel font, night palette (default)
-   "serious" incident part: plain sans, calmer */
-body[data-world="game"] #stage { font-family: var(--font-pixel); }
-body[data-world="serious"] #stage { font-family: var(--font-sans); }
+   "game"    the bug's adventure: loud accents, pixel sprites (default)
+   "serious" incident part: calmer. Hook only for now; style per scene. */
 
 #app {
   position: fixed;
   inset: 0;
   display: grid;
   place-items: center;
-  background: var(--night);
+  background: var(--cream);
   /* Runtime sets #app.style.backgroundColor from scene.background. */
   transition: background-color 0.8s ease-in-out;
 }
@@ -107,11 +126,11 @@ body[data-world="serious"] #stage { font-family: var(--font-sans); }
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(35, 33, 42, 0.4);
   z-index: 100;
   pointer-events: none;
 }
-#counter { font-weight: 600; color: rgba(255, 255, 255, 0.65); }
+#counter { font-weight: 600; color: rgba(35, 33, 42, 0.6); }
 
 /* --- Scene root --- */
 .scene {
@@ -121,7 +140,7 @@ body[data-world="serious"] #stage { font-family: var(--font-sans); }
   align-items: center;
   justify-content: center;
 }
-.scene-fallback { color: var(--pixel-red); font-size: 24px; }
+.scene-fallback { color: var(--coral); font-size: 24px; }
 
 /* =====================================================================
  * bug(): the hero sprite
@@ -176,11 +195,10 @@ body[data-world="serious"] #stage { font-family: var(--font-sans); }
 }
 
 .bug--clone {
-  --bug-shell: #8fbf6a;
-  --bug-shell-dark: #5f8a47;
-  --bug-shell-light: #c9e6a8;
-  --bug-band: #b07a86;
-  --bug-limb: #b5d19a;
+  --bug-shell: var(--lavender);
+  --bug-shell-dark: #a99ae6;
+  --bug-shell-light: #f1edff;
+  --bug-band: #c9a3c0;
 }
 
 /* =====================================================================
@@ -197,7 +215,7 @@ body[data-world="serious"] #stage { font-family: var(--font-sans); }
   display: flex;
   flex-direction: column;
   font-family: var(--font-sans);
-  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 10px 22px rgba(35, 33, 42, 0.18));
   transition: transform 0.6s cubic-bezier(.34, 1.4, .64, 1),
               opacity 0.4s ease-out,
               filter 0.4s ease-out;
@@ -244,7 +262,7 @@ body[data-world="serious"] #stage { font-family: var(--font-sans); }
 .window-traffic span:nth-child(3) { background: #28c840; }
 .window-title { flex: 1; text-align: center; }
 
-.window-theme--chat     > .window-header { background: #2b2440; color: #fff; }
+.window-theme--chat     > .window-header { background: var(--ink); color: #fff; }
 .window-theme--chat     > .window-body   { background: var(--paper); color: #1d1c1d; }
 .window-theme--terminal > .window-body   { background: #0a0a0a; color: #e6e6e6; font-family: var(--font-mono); }
 .window-theme--editor   > .window-body   { background: #1e1e1e; color: #d4d4d4; font-family: var(--font-mono); }
@@ -319,7 +337,8 @@ body[data-world="serious"] #stage { font-family: var(--font-sans); }
 .stagger-item:nth-child(7) { transition-delay: 1.90s; }
 .stagger-item:nth-child(8) { transition-delay: 2.20s; }
 
-/* --- Pixel ground strip (reusable floor for game scenes) --- */
+/* --- Ground strip (reusable floor for game scenes): yellow grass edge
+   over chunky lavender bricks, ink outline like the meetup cards. --- */
 .pixel-ground {
   position: absolute;
   left: 0;
@@ -327,10 +346,9 @@ body[data-world="serious"] #stage { font-family: var(--font-sans); }
   bottom: 0;
   height: 120px;
   background:
-    repeating-linear-gradient(90deg, var(--ground) 0 48px, var(--night-2) 48px 54px),
-    var(--ground);
-  border-top: 12px solid var(--pixel-green);
-  box-shadow: 0 -6px 0 0 #2f8f3a inset;
+    repeating-linear-gradient(90deg, var(--lavender) 0 90px, var(--ink) 90px 96px);
+  border-top: 6px solid var(--ink);
+  box-shadow: inset 0 18px 0 0 var(--yellow), inset 0 24px 0 0 var(--ink);
 }
 
 /* =====================================================================
@@ -341,22 +359,28 @@ body[data-world="serious"] #stage { font-family: var(--font-sans); }
 .title .title-logo {
   position: absolute;
   left: 50%;
-  top: 220px;
+  top: 200px;
   transform: translateX(-50%);
-  font-size: 88px;
-  line-height: 1.2;
-  color: var(--pixel-yellow);
-  text-shadow: 8px 8px 0 var(--pixel-red);
+  font-size: 128px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-shadow: 8px 8px 0 var(--coral);
   white-space: nowrap;
-  letter-spacing: 0.04em;
 }
 .title .title-press {
   position: absolute;
   left: 50%;
   top: 420px;
   transform: translateX(-50%);
-  font-size: 22px;
-  color: var(--paper);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--ink);
+  background: var(--yellow);
+  padding: 10px 22px;
+  border-radius: 12px;
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -380,9 +404,9 @@ body[data-world="serious"] #stage { font-family: var(--font-sans); }
 .bug-sheet { flex-direction: column; gap: 48px; }
 .bug-sheet h2 {
   margin: 0;
-  font-size: 28px;
-  color: var(--pixel-yellow);
-  font-weight: 400;
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--ink);
 }
 .bug-sheet .sheet-big { display: flex; align-items: flex-end; gap: 80px; }
 .bug-sheet .sheet-row { display: flex; align-items: flex-end; gap: 56px; }
@@ -393,12 +417,12 @@ body[data-world="serious"] #stage { font-family: var(--font-sans); }
   align-items: center;
   gap: 18px;
 }
-.bug-sheet figcaption { font-size: 13px; color: var(--muted); }
+.bug-sheet figcaption { font-size: 16px; font-weight: 500; color: var(--ink-soft); }
 .bug-sheet .sheet-clones { display: flex; gap: 6px; }
 .bug-sheet .sheet-note {
   max-width: 520px;
-  font-size: 14px;
-  line-height: 2;
-  color: var(--muted);
+  font-size: 22px;
+  line-height: 1.6;
+  color: var(--ink-soft);
 }
-.bug-sheet .sheet-note b { color: var(--paper); font-weight: 400; }
+.bug-sheet .sheet-note b { color: var(--ink); font-weight: 700; }

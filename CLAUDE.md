@@ -1,6 +1,7 @@
 # CLAUDE.md
 
-Presentation **Jeden řádek** (Czech, 20 min, developer meetup with many juniors).
+Presentation **Jeden řádek** (Czech, 20 min) for the ReactGirls meetup,
+19. 11. 2026 at 18:00, Prague. Audience: many juniors.
 Static HTML/CSS/JS, no build step, **no slides framework** (Slidev, reveal.js,
 frontend-slides etc. were considered and rejected). Useful features get built into
 our own runtime instead (candidates: presenter view with notes, code diffs via
@@ -50,7 +51,7 @@ scenes have a `world`; verify waits live on the scene (`verifyWait`).
   id: "kebab-id",
   notes: "speaker note / intent",   // runtime ignores (for now)
   steps: 3,                         // default 1
-  world: "game",                    // "game" (pixel font) | "serious" (incident part, sans)
+  world: "game",                    // "game" | "serious" (incident part); body[data-world] hook
   background: "var(--night-2)",     // optional #app tint, fades between scenes
   backdrop: "art/cave.svg",         // optional full-screen image, crossfaded
   exitDuration: 500,                // optional exit animation via .is-exiting
@@ -87,7 +88,8 @@ bug({ size: 144, pose: "walk", facing: "left", className: "bug--stealth" })
 - Modifiers: `.bug--left`, `.bug--stealth` (flickering near-invisible),
   `.bug--clone` (duller palette, for the database level).
 - Palette: `--bug-ink --bug-limb --bug-shell --bug-shell-dark --bug-shell-light
-  --bug-eye --bug-band`; override per instance via `style`.
+  --bug-eye --bug-band`; override per instance via `style`. Default: cyan shell,
+  coral headband, ink outline. Clones are lavender.
 - Style is loosely inspired by classic platformers (Prehistorik, Prince of Persia,
   Mario) but must stay original: no existing characters, tiles or icons.
 
@@ -95,10 +97,16 @@ Other building blocks (same as bdd): `appWindow()` with themes `chat | terminal 
 editor | browser`, `.window-enter-*` / `.window-exit-*`, `.typewriter` + `.cursor`,
 `.stagger-fill > .stagger-item`, `.pixel-ground`.
 
-## Fonts
+## Look: palette and font
 
-`fonts/PressStart2P-Regular.ttf` (OFL, licence alongside) is local so the deck works
-offline. It covers Czech diacritics. The serious world uses the system sans.
+- Palette is the meetup's scheme (ReactGirls card): `--cream` background, accents
+  `--coral --cyan --lavender --yellow`, `--ink` for text and outlines. Use the
+  tokens, never hard-coded hex. Mews branding is gone for good (Jan left Mews).
+- Font: **Poppins** 400–800, bundled in `fonts/` (OFL) so the deck works offline.
+- No pixel fonts: Press Start 2P was tried and looked blurry, because a bitmap-style
+  font only stays crisp at exact multiples of its grid, and the stage is scaled by a
+  non-integer factor to fit the window. Pixel art stays in the sprites, where each
+  sprite pixel is large enough that edge smoothing doesn't show.
 
 ## Verification
 

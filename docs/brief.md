@@ -32,6 +32,7 @@ systém, který chybu zastaví dřív, než se dostane na produkci.
 - **Anotace (pevná):** Někdy stačí jeden špatný řádek, aby nastal produkční
   problém. Jak si zachovat chladnou hlavu při jeho řešení? A ještě lépe, jak
   zabránit tomu hloupému agentovi, který za nás píše kód, aby dělal chyby?
+- **Akce:** ReactGirls meetup, 19. 11. 2026 v 18:00, Praha.
 - **Publikum:** programátorský meetup, hodně juniorů. Každý pojem, který není
   samozřejmý, vysvětli jedním obrázkem, ne definicí.
 - **Délka:** 20 minut.
