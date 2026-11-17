@@ -230,6 +230,18 @@ function updateHud(scene) {
   counterEl.textContent = `${sceneIndex + 1} / ${scenes.length} · ${scene.id}${stepSuffix}`;
 }
 
+// Generic step reveals: any element with data-from="N" gets .is-on while
+// step >= N (and step <= data-to, if given). Lets slides reveal content
+// per step without per-scene CSS. Styling lives in styles.css.
+function syncReveals(root, step) {
+  if (!root) return;
+  root.querySelectorAll("[data-from], [data-to]").forEach((el) => {
+    const from = el.dataset.from != null ? Number(el.dataset.from) : 0;
+    const to = el.dataset.to != null ? Number(el.dataset.to) : Infinity;
+    el.classList.toggle("is-on", step >= from && step <= to);
+  });
+}
+
 function mountScene(i, step = 0) {
   sceneIndex = clamp(i, 0, scenes.length - 1);
   const scene = scenes[sceneIndex];
@@ -256,6 +268,7 @@ function mountScene(i, step = 0) {
   requestAnimationFrame(() => {
     if (!root || !root.isConnected) return;
     root.dataset.step = String(stepIndex);
+    syncReveals(root, stepIndex);
     if (typeof scene.onStep === "function") {
       try { scene.onStep(root, stepIndex, -1); } catch (e) { console.error(e); }
     }
@@ -270,6 +283,7 @@ function applyStep(step) {
   stepIndex = clamp(step, 0, stepsOf(scene) - 1);
   const root = stage.firstElementChild;
   if (root) root.dataset.step = String(stepIndex);
+  syncReveals(root, stepIndex);
   if (typeof scene.onStep === "function") {
     try { scene.onStep(root, stepIndex, prev); } catch (e) { console.error(e); }
   }

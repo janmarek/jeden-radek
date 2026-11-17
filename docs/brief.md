@@ -243,3 +243,9 @@ agent nerozhoduje sám.
 - Kterou závěrečnou větu použít? (slajd 24)
 - Vizuál titulky a přepnutí do 8bit stylu: kdy přesně (slajd 1 vs. 14)?
 - Vzorová věta pro komunikaci „nevím“ (slajd 13): potvrdit znění.
+- Přesné znění páteční zprávy od kolegů (slajd 8, callback na slajdu 22): na
+  slajdu je zatím zástupné „Hele, duplikují se nám řádky. Můžeš se mrknout?“.
+- Vyprávění bugu v první osobě (slajd 14, bublina): ponechat?
+- Patch notes (slajd 23): všech osm, nebo vybrat?
+- Vážný tmavý styl pro incident (slajdy 8–13) a přepnutí do hry na slajdu 14:
+  v nástřelu je použit, potvrdit.

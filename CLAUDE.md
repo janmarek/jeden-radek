@@ -67,6 +67,20 @@ set on the next animation frame after mount, so bare rules = "before" state and
 `[data-step="0"]` = entrance target. Use `transition` for anything that must
 rewind on `←`; `@keyframes` only for one-shot or looping effects.
 
+**Step reveals without CSS:** put `data-from="N"` (visible from step N) and
+optionally `data-to="M"` (hidden after step M) on any element; the runtime
+toggles `.is-on`. Uses the standalone `translate` property, so the element's own
+`transform` (e.g. centring) still works. Use `.swap` to stack alternatives in one
+spot (a value that changes per step).
+
+Slides use `.scene.slide` + `.kicker` / `.headline` / `.lede`; the game levels use
+the `level()` template in scenes.js (bug moves `--x0 → --x1 → --x2` over 3 steps).
+Anything calling `bug()` at definition time must be wrapped in a function, since
+scenes.js loads before runtime.js.
+
+`presentation.md`'s scene table is generated from scene `notes`: edit notes in
+scenes.js, then `npm run notes`.
+
 A continuous visual sequence is **one scene with N steps**, not N scenes (a new
 scene swaps the DOM, so nothing can animate across the cut).
 

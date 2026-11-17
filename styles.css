@@ -262,7 +262,7 @@ body {
 .window-traffic span:nth-child(3) { background: #28c840; }
 .window-title { flex: 1; text-align: center; }
 
-.window-theme--chat     > .window-header { background: var(--ink); color: #fff; }
+.window-theme--chat     > .window-header { background: var(--lavender); color: var(--ink); }
 .window-theme--chat     > .window-body   { background: var(--paper); color: #1d1c1d; }
 .window-theme--terminal > .window-body   { background: #0a0a0a; color: #e6e6e6; font-family: var(--font-mono); }
 .window-theme--editor   > .window-body   { background: #1e1e1e; color: #d4d4d4; font-family: var(--font-mono); }
@@ -352,6 +352,134 @@ body {
 }
 
 /* =====================================================================
+ * Generic step reveal (runtime syncReveals): [data-from] / [data-to]
+ * elements are hidden until .is-on. Uses the standalone `translate`
+ * property so an element's own `transform` (e.g. centring) still works.
+ * ===================================================================== */
+[data-from],
+[data-to] {
+  opacity: 0;
+  translate: 0 14px;
+  transition: opacity 0.45s ease-out, translate 0.45s ease-out;
+}
+[data-from].is-on,
+[data-to].is-on { opacity: 1; translate: 0 0; }
+
+/* Overlapping alternatives (e.g. a value that changes per step). */
+.swap { display: inline-grid; }
+.swap > * { grid-area: 1 / 1; }
+
+/* =====================================================================
+ * Generic slide typography
+ * ===================================================================== */
+.scene.slide { display: block; padding: 96px 120px; }
+.kicker {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--coral);
+}
+.headline {
+  margin: 14px 0 0;
+  font-size: 80px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+}
+.headline.huge { font-size: 200px; }
+.center { text-align: center; }
+.lede {
+  margin: 28px 0 0;
+  max-width: 1200px;
+  font-size: 34px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+.lede b, .lede.strong { color: var(--ink); font-weight: 700; }
+.lede.center { margin-left: auto; margin-right: auto; }
+
+/* Serious world (incident): dark ink stage, cream text. */
+body[data-world="serious"] #stage { color: var(--cream); }
+body[data-world="serious"] .lede { color: rgba(247, 237, 225, 0.72); }
+body[data-world="serious"] .lede b { color: var(--cream); }
+body[data-world="serious"] #hud,
+body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
+
+/* "Pro juniory" sticker: one picture instead of a definition. */
+.junior {
+  position: absolute;
+  width: 440px;
+  padding: 18px 22px 20px;
+  background: var(--lavender);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  box-shadow: 6px 6px 0 var(--ink);
+  rotate: -2deg;
+}
+.junior-tag {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.junior-pic {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 70px;
+  margin: 12px 0;
+}
+.junior-text { font-size: 20px; line-height: 1.4; font-weight: 500; }
+
+/* Shared "card" look from the meetup visuals: ink border + hard shadow. */
+.card-ink {
+  background: var(--paper);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  box-shadow: 8px 8px 0 var(--ink);
+}
+
+/* Abstract diff bars (diffBars() in scenes.js). */
+.dl {
+  height: 9px;
+  margin: 5px 0 5px calc(76px + var(--i) * 30px);
+  width: var(--w);
+  border-radius: 5px;
+}
+.dl-add { background: #9fe6ee; }
+.dl-del { background: #ffc2b9; }
+.dl-ctx { background: #e3d8c9; }
+.dl-gap { --i: 0; --w: 40%; border: 3px dashed transparent; background: transparent; }
+
+/* Chat bits (friday, boss callback). */
+.chat-day {
+  margin: 22px 0 10px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.chat-msg { display: flex; gap: 16px; padding: 10px 32px; }
+.chat-avatar {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--coral);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  font-weight: 700;
+}
+.chat-name { font-size: 20px; font-weight: 700; }
+.chat-text { margin-top: 4px; font-size: 26px; line-height: 1.35; }
+
+/* =====================================================================
  * Scene: title (retro title screen)
  *   0 bug walks in from the left, stops under the title (pose → idle
  *     via onStep), "stiskni →" blinks
@@ -389,6 +517,19 @@ body {
   transition-delay: 2.6s;
   animation: blink 1.1s steps(1) 2.6s infinite;
 }
+.title[data-step="1"] .title-press { opacity: 0; animation: none; transition-delay: 0s; }
+.title .title-abstract {
+  position: absolute;
+  left: 250px;
+  width: 1100px;
+  top: 360px;
+  text-align: center;
+  font-size: 30px;
+  line-height: 1.45;
+  font-weight: 500;
+}
+.title .title-abstract p { margin: 0 0 6px; }
+.title .title-author { margin-top: 22px; font-size: 24px; font-weight: 700; color: var(--coral); }
 .title .title-bug {
   position: absolute;
   bottom: 120px;
@@ -396,6 +537,844 @@ body {
   transition: left 2.4s linear;
 }
 .title[data-step="0"] .title-bug { left: 700px; }
+
+
+/* =====================================================================
+ * 2 teaser: diff + 10s countdown (step 1 scrolls the diff)
+ * ===================================================================== */
+.teaser .countdown {
+  position: absolute;
+  right: 120px;
+  top: 70px;
+  font-size: 150px;
+  font-weight: 800;
+  color: var(--coral);
+  line-height: 1;
+}
+.teaser .cd-unit { font-size: 48px; margin-left: 6px; }
+.diff-win {
+  position: absolute;
+  left: 120px;
+  top: 290px;
+  width: 1360px;
+  height: 520px;
+  overflow: hidden;
+}
+.diff-win, .zoom, .o-diff, .o-wall {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  box-shadow: 8px 8px 0 var(--ink);
+}
+.diff-head {
+  height: 56px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid var(--ink);
+  font-size: 20px;
+  font-weight: 600;
+}
+.diff-stat .add { color: #079aa8; }
+.diff-body {
+  position: relative;
+  height: calc(100% - 56px);
+  overflow: hidden;
+  padding-top: 14px;
+  background: linear-gradient(90deg, #f1e7da 0 56px, transparent 56px);
+}
+.diff-scroll { transition: transform 0.4s ease-out; }
+.teaser[data-step="1"] .diff-scroll {
+  transform: translateY(-2400px);
+  transition: transform 10s linear;
+}
+
+/* =====================================================================
+ * 3 reveal: zoom into the diff, the dashed slot is the missing line
+ * ===================================================================== */
+.zoom {
+  position: absolute;
+  left: 120px;
+  top: 400px;
+  width: 1360px;
+  height: 400px;
+  padding: 12px 0;
+  overflow: hidden;
+}
+.zoom-gutter {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  background: #f1e7da;
+  border-right: 3px solid var(--ink);
+}
+.zoom-gutter span { display: none; }
+.zoom .dl {
+  height: 18px;
+  margin: 13px 0 13px calc(120px + var(--i) * 50px);
+  border-radius: 8px;
+}
+.zoom .dl-gap { transition: border-color 0.4s, background 0.4s; }
+.reveal[data-step="1"] .zoom .dl-gap {
+  border-color: var(--coral);
+  background: rgba(254, 113, 96, 0.14);
+}
+.zoom-tag {
+  position: absolute;
+  left: 690px;
+  top: 134px;
+  padding: 6px 16px;
+  background: var(--coral);
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  font-size: 22px;
+  font-weight: 800;
+}
+.zoom-tag::before { content: "← "; }
+
+/* =====================================================================
+ * 4 world: old vs new screen
+ * ===================================================================== */
+.world .screens {
+  position: absolute;
+  left: 120px;
+  right: 120px;
+  top: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+}
+.world figure { margin: 0; width: 600px; }
+.world figcaption { margin-top: 20px; text-align: center; font-size: 22px; color: var(--ink-soft); }
+.world figcaption b { color: var(--ink); }
+.screens-arrow { font-size: 64px; font-weight: 800; color: var(--coral); }
+.mock-old {
+  height: 360px;
+  background: #e9e9e9;
+  border: 2px solid #9a9a9a;
+  font-family: "Times New Roman", serif;
+  color: #333;
+}
+.mo-head { height: 40px; padding: 8px 12px; background: #b9b9b9; font-size: 18px; font-weight: 700; }
+.mo-row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-bottom: 1px solid #c8c8c8; }
+.mo-row span { height: 12px; background: #bdbdbd; }
+.mo-row span:nth-child(1) { width: 140px; }
+.mo-row span:nth-child(2) { width: 200px; }
+.mock-old button {
+  margin-left: auto;
+  font: 14px "Times New Roman", serif;
+  background: #ddd;
+  border: 2px outset #eee;
+  padding: 2px 8px;
+}
+.mo-foot { display: flex; padding: 12px 14px; }
+.mock-new {
+  height: 360px;
+  background: #fff;
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  box-shadow: 8px 8px 0 var(--cyan);
+  overflow: hidden;
+}
+.mn-head {
+  height: 56px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--cyan);
+  border-bottom: 3px solid var(--ink);
+}
+.mn-head span { width: 160px; height: 12px; background: #fff; border-radius: 6px; }
+.mn-danger {
+  font: 600 15px var(--font-sans);
+  background: var(--coral);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  padding: 6px 12px;
+}
+.mn-row { display: flex; align-items: center; gap: 16px; padding: 14px 18px; border-bottom: 2px solid #f0e8de; }
+.mn-row span:not(.mn-edit) { width: 260px; height: 12px; background: #e3d8c9; border-radius: 6px; }
+.mn-check { width: 22px; height: 22px; border: 2.5px solid var(--ink); border-radius: 6px; }
+.mn-check.on { background: var(--coral); }
+.mn-edit { margin-left: auto; font-size: 22px; color: var(--ink-soft); }
+
+/* =====================================================================
+ * 5 why: four feature tiles + side-project sticky note
+ * ===================================================================== */
+.why .tiles {
+  position: absolute;
+  left: 120px;
+  top: 330px;
+  display: grid;
+  grid-template-columns: repeat(4, 300px);
+  gap: 28px;
+}
+.tile {
+  height: 280px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border: 3px solid var(--ink);
+  border-radius: 22px;
+  box-shadow: 6px 6px 0 var(--ink);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.tile-ico { margin-bottom: auto; font-size: 64px; line-height: 1; }
+.t-cyan { background: var(--cyan); }
+.t-yellow { background: var(--yellow); }
+.t-lavender { background: var(--lavender); }
+.t-coral { background: var(--coral); }
+.why .sticky {
+  position: absolute;
+  right: 130px;
+  top: 64px;
+  width: 380px;
+  padding: 22px 26px;
+  background: var(--yellow);
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  rotate: 3deg;
+  font-size: 24px;
+  line-height: 1.45;
+}
+
+/* =====================================================================
+ * 6 agent: onboarding sticker + 8-step pipeline
+ * ===================================================================== */
+.agent .agent-junior { left: 120px; top: 320px; width: 500px; }
+.doc-pic {
+  width: 64px;
+  height: 80px;
+  padding: 12px 10px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 6px;
+}
+.doc-pic i { display: block; height: 5px; margin-bottom: 8px; background: var(--ink-soft); border-radius: 3px; }
+.doc-pic i:nth-child(2) { width: 70%; }
+.junior .arrow { font-size: 40px; font-weight: 800; }
+.hello-pic {
+  padding: 10px 14px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 14px 14px 14px 2px;
+  font-size: 18px;
+  font-weight: 600;
+}
+.pipeline {
+  position: absolute;
+  left: 700px;
+  top: 300px;
+  width: 780px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(4, auto);
+  gap: 14px 18px;
+}
+.pipeline li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  font-size: 24px;
+  font-weight: 600;
+}
+.pipeline b {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--cream);
+  font-size: 18px;
+}
+.agent[data-step="1"] .pipeline .stagger-item { opacity: 1; transform: none; }
+
+/* =====================================================================
+ * 7 mostly: grid of consistent screens, then "…většinou…"
+ * ===================================================================== */
+.mostly .mini-grid {
+  position: absolute;
+  left: 120px;
+  top: 440px;
+  display: grid;
+  grid-template-columns: repeat(6, 200px);
+  gap: 24px;
+  transition: opacity 0.5s;
+}
+.mini {
+  position: relative;
+  height: 160px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.mini-head { height: 26px; background: var(--cyan); border-bottom: 3px solid var(--ink); }
+.mini i { display: block; width: 70%; height: 8px; margin: 14px; background: #e3d8c9; border-radius: 4px; }
+.mini-ok { position: absolute; right: 12px; bottom: 6px; font-size: 30px; font-weight: 800; color: #079aa8; }
+.mostly-big {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(247, 237, 225, 0.88);
+  font-size: 150px;
+  font-weight: 800;
+  font-style: italic;
+  color: var(--coral);
+}
+
+/* =====================================================================
+ * 8 friday (serious): chat mockup
+ * ===================================================================== */
+.friday .friday-win { top: 560px; }
+
+/* =====================================================================
+ * 9 what-happened (serious): join table before/after + UI
+ * ===================================================================== */
+.what .what-left { position: absolute; left: 120px; top: 300px; width: 620px; }
+.erd { display: flex; align-items: center; }
+.erd-box {
+  padding: 10px 18px;
+  border: 3px solid var(--cream);
+  border-radius: 12px;
+  font-size: 24px;
+  font-weight: 600;
+}
+.erd-link { width: 80px; height: 3px; background: var(--cream); }
+.erd-label {
+  margin-top: 30px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--coral);
+}
+.jt { margin-top: 12px; width: 420px; border-collapse: collapse; font-size: 30px; }
+.jt th {
+  padding: 12px 20px;
+  text-align: left;
+  background: rgba(247, 237, 225, 0.12);
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.jt td { padding: 14px 20px; border-top: 2px solid rgba(247, 237, 225, 0.2); }
+.jt td { transition: opacity 0.4s; }
+.jt-new td { background: rgba(254, 113, 96, 0.3); }
+.what[data-step="2"] .jt-old td { text-decoration: line-through; opacity: 0.5; }
+.what .what-right { position: absolute; left: 860px; top: 300px; width: 620px; }
+.ui-card {
+  padding: 28px 32px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 3px solid var(--cream);
+  border-radius: 18px;
+}
+.ui-title { font-size: 22px; font-weight: 700; color: var(--ink-soft); }
+.ui-field { margin-top: 10px; font-size: 34px; font-weight: 600; }
+.ui-field .pick { color: #079aa8; }
+.ui-save {
+  margin-top: 20px;
+  padding: 10px 22px;
+  font: 700 22px var(--font-sans);
+  background: var(--cyan);
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+}
+.ui-note { margin-top: 14px; font-size: 22px; font-weight: 600; color: var(--coral); }
+.what .what-caption { position: absolute; left: 120px; right: 120px; top: 700px; }
+.what .what-caption span { position: absolute; left: 0; top: 0; font-size: 34px; font-weight: 600; }
+.what .what-caption b { color: var(--coral); }
+
+/* =====================================================================
+ * 10 stop-bleeding (serious): the big switch
+ * ===================================================================== */
+.flag .switch {
+  position: absolute;
+  left: 120px;
+  top: 340px;
+  width: 360px;
+  height: 170px;
+  border: 4px solid var(--cream);
+  border-radius: 85px;
+  background: var(--cyan);
+  transition: background 0.4s;
+}
+.switch-knob {
+  position: absolute;
+  top: 11px;
+  left: 197px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: var(--cream);
+  transition: left 0.4s cubic-bezier(.5, 1.6, .5, 1);
+}
+.switch-on, .switch-off {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 34px;
+  font-weight: 800;
+  transition: opacity 0.3s;
+}
+.switch-on { left: 42px; color: var(--ink); }
+.switch-off { right: 42px; color: var(--cream); opacity: 0; }
+.flag:not([data-step="0"]) .switch { background: #4a4652; }
+.flag:not([data-step="0"]) .switch-knob { left: 11px; }
+.flag:not([data-step="0"]) .switch-on { opacity: 0; }
+.flag:not([data-step="0"]) .switch-off { opacity: 1; }
+.flag .switch-label { position: absolute; left: 120px; top: 532px; font-size: 26px; opacity: 0.7; }
+.scene.flag .flag-weekend { position: absolute; left: 120px; top: 600px; font-size: 44px; font-weight: 700; color: var(--cream); }
+.flag .flag-junior { right: 120px; top: 330px; }
+.mini-switch {
+  position: relative;
+  width: 90px;
+  height: 46px;
+  border-radius: 23px;
+  background: var(--cyan);
+  border: 3px solid var(--ink);
+}
+.mini-switch::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-sizing: border-box;
+}
+
+/* =====================================================================
+ * 11 access (serious): photo-friendly checklist
+ * ===================================================================== */
+.access .checklist { position: absolute; left: 120px; top: 330px; margin: 0; padding: 0; list-style: none; }
+.checklist li { display: flex; align-items: center; gap: 26px; margin-bottom: 30px; font-size: 46px; font-weight: 700; }
+.checklist i { width: 50px; height: 50px; border: 4px solid var(--cream); border-radius: 10px; }
+.access .access-me { position: absolute; left: 120px; top: 640px; font-size: 32px; line-height: 1.7; }
+.access .ok { color: var(--cyan); font-weight: 800; }
+.access .no { color: var(--coral); font-weight: 800; }
+
+/* =====================================================================
+ * 12 investigate (serious): one-off job + quote
+ * ===================================================================== */
+.investigate .job-win { left: 530px; top: 520px; }
+.term { padding: 26px 30px; font-size: 22px; line-height: 1.7; }
+.t-dim { color: #8a8594; }
+.t-gap { margin-top: 14px; }
+.t-box { color: var(--cyan); }
+.investigate .quote {
+  position: absolute;
+  left: 1020px;
+  top: 400px;
+  width: 460px;
+  margin: 0;
+  padding-left: 28px;
+  border-left: 8px solid var(--coral);
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* =====================================================================
+ * 13 dont-know (serious)
+ * ===================================================================== */
+.dontknow .template { position: absolute; left: 120px; top: 640px; display: flex; gap: 18px; }
+.dontknow .template span {
+  padding: 14px 26px;
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 999px;
+  font-size: 30px;
+  font-weight: 600;
+}
+.dontknow .template b { color: var(--coral); }
+
+/* =====================================================================
+ * 14 switch-to-game: the hero introduces itself
+ * ===================================================================== */
+.switchgame .headline { margin-top: 60px; }
+.switchgame .hero {
+  position: absolute;
+  left: 50%;
+  bottom: 120px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.bubble {
+  position: relative;
+  margin-bottom: 26px;
+  padding: 18px 26px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  box-shadow: 6px 6px 0 var(--ink);
+  font-size: 30px;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -18px;
+  width: 26px;
+  height: 26px;
+  background: var(--paper);
+  border-right: 3px solid var(--ink);
+  border-bottom: 3px solid var(--ink);
+  transform: translateX(-50%) rotate(45deg);
+}
+.switchgame .ground-rise { transform: translateY(100%); transition: transform 0.6s ease-out; }
+.switchgame[data-step="1"] .ground-rise { transform: none; }
+
+/* =====================================================================
+ * 15–21 levels (level() template in scenes.js)
+ * Bug moves --x0 → --x1 → --x2 across steps 0 → 1 → 2.
+ * ===================================================================== */
+.level .lvl-hud { position: absolute; left: 120px; top: 74px; display: flex; align-items: center; gap: 22px; }
+.lvl-chip {
+  padding: 10px 18px;
+  background: var(--ink);
+  color: var(--yellow);
+  border-radius: 10px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.lvl-chip.big { font-size: 40px; padding: 14px 28px; }
+.lvl-name { font-size: 56px; font-weight: 800; }
+.level .lvl-desc {
+  position: absolute;
+  left: 120px;
+  top: 164px;
+  max-width: 1360px;
+  font-size: 30px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+.level .lvl-why {
+  position: absolute;
+  left: 120px;
+  top: 226px;
+  max-width: 1360px;
+  padding: 12px 22px;
+  background: var(--yellow);
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: 5px 5px 0 var(--ink);
+  font-size: 28px;
+  font-weight: 700;
+  z-index: 6;
+}
+.lvl-why .todo { color: var(--coral); font-weight: 600; font-size: 22px; }
+.level .lvl-stage { position: absolute; inset: 0; }
+.level .lvl-bug { position: absolute; bottom: 120px; left: var(--x0); transition: left 1.6s linear; z-index: 5; }
+.level[data-step="1"] .lvl-bug { left: var(--x1); }
+.level[data-step="2"] .lvl-bug { left: var(--x2); }
+
+/* L1 spawn: diff panel the bug hides in */
+.o-diff { position: absolute; left: 200px; bottom: 120px; width: 520px; height: 380px; overflow: hidden; padding-top: 14px; border-bottom: none; border-radius: 18px 18px 0 0; }
+.o-diff .dl { height: 7px; margin: 5px 0 5px calc(20px + var(--i) * 22px); }
+
+/* L2 gates */
+.o-gates { position: absolute; left: 600px; bottom: 120px; display: flex; gap: 60px; }
+.gate {
+  position: relative;
+  width: 110px;
+  height: 320px;
+  border: 6px solid var(--ink);
+  border-bottom: none;
+  border-radius: 55px 55px 0 0;
+  background: rgba(221, 212, 255, 0.45);
+}
+.gate-top {
+  position: absolute;
+  left: 50%;
+  top: -48px;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.gate-ok { position: absolute; left: 0; right: 0; top: 40px; text-align: center; font-size: 48px; font-weight: 800; color: #079aa8; }
+.gate:nth-child(1) .gate-ok { transition-delay: 0.3s; }
+.gate:nth-child(2) .gate-ok { transition-delay: 0.6s; }
+.gate:nth-child(3) .gate-ok { transition-delay: 0.9s; }
+.gate:nth-child(4) .gate-ok { transition-delay: 1.2s; }
+
+/* L3 screenshot that passed */
+.o-shot {
+  position: absolute;
+  left: 680px;
+  bottom: 170px;
+  width: 460px;
+  height: 300px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: 8px 8px 0 var(--ink);
+}
+.shot-head { height: 40px; padding: 6px 16px; background: var(--cyan); border-bottom: 3px solid var(--ink); border-radius: 13px 13px 0 0; font-size: 18px; font-weight: 700; }
+.shot-body { padding: 28px 30px; font-size: 36px; font-weight: 600; line-height: 1.4; }
+.shot-pass {
+  position: absolute;
+  right: -34px;
+  top: -30px;
+  padding: 10px 18px;
+  background: var(--cyan);
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  rotate: 8deg;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+/* L4 wall of lines + sleepy reviewer; bug hops over at step 2 */
+.o-wall { position: absolute; left: 640px; bottom: 120px; width: 220px; height: 300px; overflow: hidden; padding-top: 10px; border-bottom: none; border-radius: 14px 14px 0 0; }
+.o-wall .dl { height: 7px; margin: 5px 0 5px calc(10px + var(--i) * 12px); }
+.o-boss {
+  position: absolute;
+  left: 650px;
+  bottom: 420px;
+  width: 200px;
+  height: 130px;
+  background: var(--lavender);
+  border: 4px solid var(--ink);
+  border-radius: 70px 70px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.boss-eyes { display: flex; gap: 22px; }
+.boss-eyes i {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  overflow: hidden;
+  background: #fff;
+  border: 4px solid var(--ink);
+  border-radius: 50%;
+}
+.boss-eyes i::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 55%;
+  background: var(--lavender);
+  border-bottom: 4px solid var(--ink);
+}
+.boss-label { font-size: 18px; font-weight: 800; }
+.lvl-jump[data-step="2"] .lvl-bug .bug { animation: bug-hop 1.6s ease-in-out; }
+@keyframes bug-hop {
+  0%, 100% { transform: translateY(0); }
+  45%, 55% { transform: translateY(-360px); }
+}
+
+/* L5 database cylinder, clones, the "?" lock */
+.o-db { position: absolute; left: 600px; bottom: 120px; width: 300px; height: 260px; }
+.db-top { position: absolute; left: 0; top: 0; width: 300px; height: 70px; background: var(--cyan); border: 4px solid var(--ink); border-radius: 50%; z-index: 1; }
+.db-body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 35px;
+  bottom: 0;
+  padding-top: 70px;
+  background: var(--cyan);
+  border: 4px solid var(--ink);
+  border-top: none;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+}
+.lvl-clones { position: absolute; left: 930px; bottom: 120px; display: flex; gap: 10px; }
+.o-lock { position: absolute; left: 708px; bottom: 400px; display: flex; flex-direction: column; align-items: center; }
+.lock-shackle { width: 50px; height: 40px; border: 8px solid var(--ink); border-bottom: none; border-radius: 25px 25px 0 0; }
+.lock-body {
+  width: 84px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  background: var(--yellow);
+  border: 4px solid var(--ink);
+  border-radius: 10px;
+  font-size: 36px;
+  font-weight: 800;
+}
+.lvl-db .db-junior { right: 120px; top: 310px; width: 400px; }
+.lock-mini { width: 46px; height: 40px; background: var(--yellow); border: 3px solid var(--ink); border-radius: 6px; position: relative; margin-top: 20px; }
+.lock-mini::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: -24px;
+  width: 24px;
+  height: 22px;
+  border: 5px solid var(--ink);
+  border-bottom: none;
+  border-radius: 14px 14px 0 0;
+}
+
+/* L6 cave + sign, bug sleeps at step 1 */
+.o-cave {
+  position: absolute;
+  left: 560px;
+  bottom: 120px;
+  width: 520px;
+  height: 330px;
+  background: #3a3546;
+  border: 4px solid var(--ink);
+  border-bottom: none;
+  border-radius: 260px 260px 0 0;
+}
+.cave-sign {
+  position: absolute;
+  left: 50%;
+  top: -66px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  font-size: 22px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.cave-sign .off { color: var(--coral); }
+.cave-sign .on { color: #079aa8; }
+.zzz { position: absolute; left: 880px; bottom: 300px; font-size: 40px; font-weight: 800; color: var(--lavender); z-index: 6; }
+.zzz span:nth-child(1) { position: relative; left: 14px; top: -30px; font-size: 32px; }
+.zzz span:nth-child(2) { position: relative; left: 22px; top: -60px; font-size: 26px; }
+
+/* L7 sync pipe into another world */
+.o-pipe {
+  position: absolute;
+  left: 420px;
+  bottom: 160px;
+  width: 760px;
+  height: 44px;
+  background: var(--lavender);
+  border: 4px solid var(--ink);
+  border-radius: 22px;
+}
+.o-world {
+  position: absolute;
+  right: 120px;
+  bottom: 120px;
+  width: 300px;
+  height: 420px;
+  background: var(--paper);
+  border: 4px solid var(--ink);
+  border-bottom: none;
+  border-radius: 24px 24px 0 0;
+}
+.world-label { margin-top: 18px; text-align: center; font-size: 24px; font-weight: 800; }
+.world-infect {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  top: 70px;
+  bottom: 20px;
+  border-radius: 12px;
+  background: radial-gradient(var(--coral) 32%, transparent 35%) 0 0 / 40px 40px;
+}
+
+/* =====================================================================
+ * 22 boss
+ * ===================================================================== */
+.boss .lvl-chip.big { position: absolute; left: 50%; top: 110px; transform: translateX(-50%); }
+.boss .headline { margin-top: 140px; }
+.boss .boss-callback {
+  position: absolute;
+  left: 50%;
+  top: 420px;
+  transform: translateX(-50%);
+  width: 680px;
+  padding: 6px 0 18px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  box-shadow: 8px 8px 0 var(--ink);
+}
+.boss .boss-callback .chat-day { margin-top: 12px; }
+.boss .boss-bug { position: absolute; left: 140px; bottom: 120px; }
+
+/* =====================================================================
+ * 23 patch notes
+ * ===================================================================== */
+.patch .headline { font-size: 64px; }
+.patch .changelog {
+  position: absolute;
+  left: 120px;
+  right: 120px;
+  top: 300px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+}
+.changelog ul { margin: 0; padding: 0; list-style: none; }
+.changelog li { display: flex; align-items: baseline; gap: 16px; margin-bottom: 24px; font-size: 25px; line-height: 1.35; }
+.changelog .ver {
+  flex: none;
+  padding: 4px 10px;
+  background: var(--ink);
+  color: var(--yellow);
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 800;
+}
+.patch[data-step="0"] .cl-a .stagger-item,
+.patch[data-step="1"] .stagger-item { opacity: 1; transform: none; }
+
+/* =====================================================================
+ * 24 punchline
+ * ===================================================================== */
+.punch .headline { margin-top: 50px; font-size: 96px; }
+.punch .hl { color: var(--coral); }
+.punch .lede { position: absolute; left: 120px; right: 120px; }
+.punch .lede[data-from="1"] { top: 370px; }
+.punch .lede[data-from="2"] { top: 500px; }
+.punch .finale { position: absolute; left: 0; right: 0; top: 380px; text-align: center; }
+.finale-line { font-size: 40px; font-weight: 700; line-height: 1.35; }
+.finale-line b { color: var(--coral); }
+.finale-thanks { margin-top: 28px; font-size: 80px; font-weight: 800; color: var(--coral); }
+.punch .punch-bug { position: absolute; right: 180px; bottom: 120px; }
 
 /* =====================================================================
  * Scene: bug-sheet (DEV ONLY: character sheet for reviewing the sprite;

@@ -3,7 +3,8 @@
   "private": true,
   "description": "Jeden řádek: talk deck (static HTML/CSS/JS, no build step)",
   "scripts": {
-    "verify": "node verify.mjs"
+    "verify": "node verify.mjs",
+    "notes": "node scripts/gen-presentation.cjs"
   },
   "devDependencies": {
     "@playwright/test": "1.60.0"
