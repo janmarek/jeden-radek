@@ -143,7 +143,7 @@ const scenes = [
   // The bug (where the title slide left it) turns, walks to the left edge
   // and turns back; a black 90s TV pops in and shows the mood of the
   // "Věřte nevěřte" TV show (Beyond Belief): dark, fog, spotlight, glowing
-  // serif. Original CSS only.
+  // text (Poppins, like the rest of the deck). Original CSS only.
   // step 0: bug turn/walk/turn → TV pops in (off, black) → screen
   // fades up from black → title
   // step 1: "…tohle se opravdu stalo."

@@ -642,7 +642,7 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
 /* =====================================================================
  * true-story: the bug picks up where the title left it (left 700px),
  * turns, walks to the left edge and turns back to face a black 90s TV that
- * shows the original "Věřte nevěřte" mood (fog, spotlight, glowing serif).
+ * shows the original "Věřte nevěřte" mood (fog, spotlight, glowing text).
  * Jan wants the subtle original effect, no extra grain/scanlines/flicker.
  * Timeline on entrance (keyed off [data-step], so ← doesn't replay it):
  *   0.35s turn · 0.45–1.95s walk · 2.15s turn back · 2.2s TV pops ·
@@ -663,7 +663,7 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
   --tv-plastic: #1f1e24;
   --tv-plastic-hi: #34333b;
   position: absolute;
-  left: 270px;
+  left: 420px;
   top: 40px;
   width: 760px;
   transform-origin: 50% 100%;
@@ -773,83 +773,62 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
 @keyframes bb-pulse { from { opacity: 0.6; } to { opacity: 1; } }
 .bb-text { position: absolute; inset: 0; }
 .bb-text[data-to] { translate: 0 0; transition: opacity 0.6s ease-in; }
-.bb-title {
+/* Title + Mews share one look: Poppins, glowing pale text that resolves
+   from blurred + wide-tracked. Sub-lines share the quieter look. */
+.bb-title,
+.ts-mews {
   position: absolute;
   left: 0;
   right: 0;
   top: 130px;
   margin: 0;
   text-align: center;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 72px;
-  font-weight: 700;
+  font-family: var(--font-sans);
+  font-size: 66px;
+  font-weight: 800;
+  line-height: 1.2;
   color: #eef0ff;
-  letter-spacing: 0.25em;
   white-space: nowrap;
-  opacity: 0;
-  filter: blur(10px);
-  transition: opacity 1.4s ease-out 3.6s, letter-spacing 1.8s ease-out 3.6s, filter 1.4s ease-out 3.6s;
   animation: bb-glow 3.5s ease-in-out infinite alternate;
 }
-.truestory[data-step] .bb-title { opacity: 1; letter-spacing: 0.03em; filter: none; }
+.bb-title {
+  opacity: 0;
+  letter-spacing: 0.25em;
+  filter: blur(10px);
+  transition: opacity 1.4s ease-out 3.6s, letter-spacing 1.8s ease-out 3.6s, filter 1.4s ease-out 3.6s;
+}
+.truestory[data-step] .bb-title { opacity: 1; letter-spacing: 0.02em; filter: none; }
 @keyframes bb-glow {
   from { text-shadow: 0 0 12px rgba(140, 160, 255, 0.8), 0 0 36px rgba(110, 90, 255, 0.5), 0 0 80px rgba(90, 60, 220, 0.4); }
   to   { text-shadow: 0 0 18px rgba(160, 180, 255, 1), 0 0 52px rgba(120, 100, 255, 0.7), 0 0 110px rgba(90, 60, 220, 0.55); }
 }
-.bb-sub {
+/* Mews comes in after Věřte nevěřte has faded (0.5s delay). */
+.ts-mews { top: 100px; font-size: 110px; }
+.ts-mews[data-from] {
+  translate: 0 0;
+  letter-spacing: 0.25em;
+  filter: blur(10px);
+  transition: opacity 1.2s ease-out 0.5s, letter-spacing 1.6s ease-out 0.5s, filter 1.2s ease-out 0.5s;
+}
+.ts-mews.is-on { letter-spacing: 0.02em; filter: none; }
+.bb-sub,
+.ts-what {
   position: absolute;
   left: 0;
   right: 0;
-  top: 250px;
+  top: 260px;
   margin: 0;
   text-align: center;
-  font-family: Georgia, "Times New Roman", serif;
-  font-style: italic;
+  font-family: var(--font-sans);
   font-size: 30px;
+  font-weight: 500;
   color: rgba(222, 226, 255, 0.85);
-}
-.bb-sub[data-from] { translate: 0 0; filter: blur(6px); transition: opacity 1s ease-out, filter 1s ease-out; }
-.bb-sub.is-on { filter: none; }
-
-/* --- Mews: on the TV after Věřte nevěřte fades, game-world stickers,
-   one per step, centred on the screen --- */
-.ts-mews,
-.ts-what {
-  position: absolute;
-  border: 5px solid var(--ink);
-  font-weight: 800;
   white-space: nowrap;
 }
-.ts-mews {
-  left: 50%;
-  top: 90px;
-  padding: 4px 36px 0;
-  background: var(--paper);
-  border-radius: 22px;
-  box-shadow: 10px 10px 0 var(--cyan);
-  font-size: 84px;
-  line-height: 1.25;
-  transform: translateX(-50%) rotate(-4deg);
-}
-.ts-what {
-  left: 50%;
-  top: 262px;
-  padding: 10px 24px;
-  background: var(--yellow);
-  border-radius: 14px;
-  box-shadow: 6px 6px 0 var(--ink);
-  font-size: 30px;
-  font-weight: 700;
-  transform: translateX(-50%) rotate(2deg);
-}
-.ts-mews[data-from],
-.ts-what[data-from] {
-  translate: 0 0;
-  scale: 0.3;
-  transition: opacity 0.15s linear, scale 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
-}
-.ts-mews.is-on,
-.ts-what.is-on { scale: 1; }
+.bb-sub[data-from],
+.ts-what[data-from] { translate: 0 0; filter: blur(6px); transition: opacity 1s ease-out, filter 1s ease-out; }
+.bb-sub.is-on,
+.ts-what.is-on { filter: none; }
 
 /* =====================================================================
  * mews-pms: modern screen (majority) vs older backend-rendered one.
