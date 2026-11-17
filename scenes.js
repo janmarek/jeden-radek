@@ -144,9 +144,11 @@ const scenes = [
   // and turns back; a black 90s TV pops in and shows the mood of the
   // "Věřte nevěřte" TV show (Beyond Belief): dark, fog, spotlight, glowing
   // serif. Original CSS only.
-  // step 0: bug turn/walk/turn → TV pops in → screen turns on → title
+  // step 0: bug turn/walk/turn → TV pops in (off, black) → screen
+  // fades up from black → title
   // step 1: "…tohle se opravdu stalo."
-  // step 2: Mews (outside the TV) · step 3: "software pro hotely"
+  // step 2: Věřte nevěřte fades out, Mews appears in the TV ·
+  // step 3: "software pro hotely"
   {
     id: "true-story",
     world: "game",
@@ -164,12 +166,12 @@ const scenes = [
                 <div class="bb-spot"></div>
                 <div class="bb-fog bb-fog-1"></div>
                 <div class="bb-fog bb-fog-2"></div>
-                <div class="bb-text">
+                <div class="bb-text" data-to="1">
                   <h1 class="bb-title">Věřte nevěřte</h1>
                   <p class="bb-sub" data-from="1">…tohle se opravdu stalo.</p>
                 </div>
-                <div class="tv-static"></div>
-                <div class="tv-flash"></div>
+                <div class="ts-mews" data-from="2">Mews</div>
+                <div class="ts-what" data-from="3">software pro hotely</div>
               </div>
               <div class="tv-glass"></div>
             </div>
@@ -180,8 +182,6 @@ const scenes = [
             </div>
           </div>
         </div>
-        <div class="ts-mews" data-from="2">Mews</div>
-        <div class="ts-what" data-from="3">software pro hotely</div>
         <div class="pixel-ground"></div>
       </div>
     `,
