@@ -108,6 +108,14 @@ bug({ size: 144, pose: "walk", facing: "left", className: "bug--stealth" })
 - Style is loosely inspired by classic platformers (Prehistorik, Prince of Persia,
   Mario) but must stay original: no existing characters, tiles or icons.
 
+## The agent: `agent()`
+
+Second original pixel sprite: a secret agent (front view, slicked hair, black
+shades with a periodic glint, earpiece, dark suit, coral tie). Generic trope,
+not a film character. Grid `AGENT_ROWS` in `runtime.js`, 20 × 28; use sizes in
+multiples of 28. Palette tokens `--agent-*`. It jumps in from the left on the
+agent scene (`ag-jump-in`). Jan explicitly did not want a robot.
+
 Icons: `icon("pencil", { size, stroke })` inlines a Lucide icon (ISC) with a
 thick default stroke (2.75) so it reads on a projector. Never use thin unicode
 glyphs (✎ ☑) as icons. To add one: download

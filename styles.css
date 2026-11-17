@@ -51,6 +51,17 @@
   --bug-eye: #ffffff;
   --bug-band: var(--coral);
 
+  /* Agent sprite palette (secret agent) */
+  --agent-ink: var(--ink);
+  --agent-hair: #3a2b2b;
+  --agent-skin: #f2c6a0;
+  --agent-shades: #111018;
+  --agent-glint: #ffffff;
+  --agent-wire: #b9b3c4;
+  --agent-suit: #34345a;
+  --agent-shirt: #ffffff;
+  --agent-tie: var(--coral);
+
   --font-sans: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-mono: "SF Mono", "JetBrains Mono", Menlo, monospace;
 
@@ -199,6 +210,18 @@ body {
   --bug-shell-dark: #a99ae6;
   --bug-shell-light: #f1edff;
   --bug-band: #c9a3c0;
+}
+
+/* =====================================================================
+ * agent(): the secret agent. The glint on the shades flickers now and
+ * then (one-shot shine every few seconds).
+ * ===================================================================== */
+.agent { position: relative; }
+.agent svg { display: block; width: 100%; height: 100%; }
+.agent .ag-glint { animation: ag-glint 3.2s steps(1) infinite; }
+@keyframes ag-glint {
+  0%, 80%, 92%, 100% { fill: var(--agent-shades); }
+  82%, 90% { fill: var(--agent-glint); }
 }
 
 /* =====================================================================
@@ -809,32 +832,7 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
 .named-list li::before { top: 0.36em; }
 .named-list b { color: var(--coral); }
 .named-list .named-me { font-weight: 800; }
-.named .tab {
-  position: absolute;
-  right: 120px;
-  top: 250px;
-  width: 340px;
-  padding: 18px 20px 26px;
-  background: #fffdf8;
-  border: 3px solid var(--ink);
-  box-shadow: 8px 8px 0 var(--ink);
-  rotate: 3deg;
-  /* torn top edge */
-  -webkit-mask: radial-gradient(circle 7px at 50% 0, transparent 98%, #000) 0 0 / 20px 100%;
-  mask: radial-gradient(circle 7px at 50% 0, transparent 98%, #000) 0 0 / 20px 100%;
-}
-.tab-head {
-  margin: 6px 0 10px;
-  text-align: center;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 26px;
-  font-style: italic;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  border-bottom: 2px dashed #c9c2b8;
-  padding-bottom: 10px;
-}
+.li-tally { position: absolute; left: calc(100% + 36px); top: -4px; width: 250px; }
 .tally { display: block; width: 100%; height: auto; }
 .tally line { stroke: var(--ink); stroke-width: 5; stroke-linecap: round; }
 .tally .tally-new {
@@ -847,18 +845,18 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
 .named[data-step="4"] .tally .tally-new { stroke-dashoffset: 0; }
 
 /* =====================================================================
- * 5 why: four feature tiles + side-project sticky note
+ * Feature tiles (mostly slide)
  * ===================================================================== */
-.why .tiles {
+.tiles {
   position: absolute;
   left: 120px;
-  top: 330px;
+  top: 360px;
   display: grid;
-  grid-template-columns: repeat(4, 300px);
-  gap: 28px;
+  grid-template-columns: repeat(4, 310px);
+  gap: 40px;
 }
 .tile {
-  height: 280px;
+  height: 300px;
   padding: 26px;
   display: flex;
   flex-direction: column;
@@ -866,7 +864,7 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
   border: 3px solid var(--ink);
   border-radius: 22px;
   box-shadow: 6px 6px 0 var(--ink);
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 700;
   line-height: 1.2;
 }
@@ -875,104 +873,52 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
 .t-yellow { background: var(--yellow); }
 .t-lavender { background: var(--lavender); }
 .t-coral { background: var(--coral); }
-.why .sticky {
-  position: absolute;
-  right: 130px;
-  top: 64px;
-  width: 380px;
-  padding: 22px 26px;
-  background: var(--yellow);
-  border: 3px solid var(--ink);
-  box-shadow: 6px 6px 0 var(--ink);
-  rotate: 3deg;
-  font-size: 24px;
-  line-height: 1.45;
-}
 
 /* =====================================================================
- * 6 agent: onboarding sticker + 8-step pipeline
+ * agent scene: secret agent jumps in from the left on mount and stays; content
+ * on the right swaps from "Nebylo to těžké" (steps 1–4) to the six
+ * steps of how the agent should work (5–11).
  * ===================================================================== */
-.agent .agent-junior { left: 120px; top: 320px; width: 500px; }
-.doc-pic {
-  width: 64px;
-  height: 80px;
-  padding: 12px 10px;
-  background: var(--paper);
-  border: 3px solid var(--ink);
-  border-radius: 6px;
+.agentscene .headline { font-size: 64px; }
+.agentscene .ag-fig { position: absolute; left: 150px; bottom: 120px; }
+.agentscene[data-step] .ag-fig { animation: ag-jump-in 0.9s cubic-bezier(.3, .7, .4, 1) both; }
+@keyframes ag-jump-in {
+  0%   { transform: translate(-480px, 0); }
+  55%  { transform: translate(-90px, -200px); }
+  85%  { transform: translate(0, 0) scale(1.08, 0.9); }
+  100% { transform: translate(0, 0) scale(1, 1); }
 }
-.doc-pic i { display: block; height: 5px; margin-bottom: 8px; background: var(--ink-soft); border-radius: 3px; }
-.doc-pic i:nth-child(2) { width: 70%; }
-.junior .arrow { font-size: 40px; font-weight: 800; }
-.hello-pic {
-  padding: 10px 14px;
-  background: var(--paper);
-  border: 3px solid var(--ink);
-  border-radius: 14px 14px 14px 2px;
-  font-size: 18px;
-  font-weight: 600;
-}
-.pipeline {
-  position: absolute;
-  left: 700px;
-  top: 300px;
-  width: 780px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-auto-flow: column;
-  grid-template-rows: repeat(4, auto);
-  gap: 14px 18px;
-}
-.pipeline li {
+.agentscene .ag-fig .agent { transform-origin: 50% 100%; }
+.ag-a, .ag-b { position: absolute; left: 560px; top: 250px; width: 920px; }
+.ag-lead { font-size: 44px; font-weight: 800; line-height: 1.25; }
+.ag-b .ag-lead { font-size: 34px; font-weight: 600; }
+.ag-list { margin-top: 30px; }
+.ag-list li { font-size: 34px; font-weight: 600; line-height: 1.3; }
+.ag-list li::before { top: 0.36em; }
+.ag-steps { margin: 26px 0 0; padding: 0; list-style: none; }
+.ag-steps li {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 16px;
-  background: var(--paper);
-  border: 3px solid var(--ink);
-  border-radius: 14px;
-  font-size: 24px;
+  gap: 18px;
+  margin-bottom: 14px;
+  font-size: 32px;
   font-weight: 600;
 }
-.pipeline b {
+.ag-steps b {
   flex: none;
-  width: 36px;
-  height: 36px;
+  width: 46px;
+  height: 46px;
   display: grid;
   place-items: center;
   border-radius: 50%;
   background: var(--ink);
-  color: var(--cream);
-  font-size: 18px;
+  color: var(--yellow);
+  font-size: 22px;
 }
-.agent[data-step="1"] .pipeline .stagger-item { opacity: 1; transform: none; }
 
 /* =====================================================================
- * 7 mostly: grid of consistent screens, then "…většinou…"
+ * mostly: "Fungovalo to." + benefit tiles, then "…většinou…"
  * ===================================================================== */
-.mostly .mini-grid {
-  position: absolute;
-  left: 120px;
-  top: 440px;
-  display: grid;
-  grid-template-columns: repeat(6, 200px);
-  gap: 24px;
-  transition: opacity 0.5s;
-}
-.mini {
-  position: relative;
-  height: 160px;
-  background: var(--paper);
-  border: 3px solid var(--ink);
-  border-radius: 14px;
-  overflow: hidden;
-}
-.mini-head { height: 26px; background: var(--cyan); border-bottom: 3px solid var(--ink); }
-.mini i { display: block; width: 70%; height: 8px; margin: 14px; background: #e3d8c9; border-radius: 4px; }
-.mini-ok { position: absolute; right: 12px; bottom: 6px; font-size: 30px; font-weight: 800; color: #079aa8; }
 .mostly-big {
   position: absolute;
   inset: 0;

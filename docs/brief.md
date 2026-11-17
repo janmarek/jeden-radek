@@ -135,6 +135,20 @@ Tohle je zdroj pravdy. Co tu není, se nesmí prezentovat jako fakt.
   bude mít zákazník oproti jiným věcem?
 - Pořadí: rozcvička (diff) a odhalení jsou až **po incidentu**, před přepnutím do
   hry. Titulka bez anotace a bez „stiskni“, se jménem autora.
+- Proč se s tím nic neudělalo: pojmenovaný problém už několik let; postaru nižší
+  stovky stránek; přepis zákazníkovi oproti novým funkcím moc nepřinese; přesto se
+  o to pokoušelo mnoho lidí a byl to jeden z cílů firmy v technických
+  vylepšeních. Autor se rozhodl to zkusit taky (čárka na účtu).
+- **Side projekt a chybějící čas od vedení na slajdy nedávat**, nestěžovat si
+  okatě na vedení. Platí i pro patch notes.
+- Výhody nového UI patří na slajd „Fungovalo to“.
+- Agent: „Vyrobil jsem refaktorovacího agenta.“ Nebylo to těžké: navázal na
+  práci ostatních lidí, kteří napsali dobrou dokumentaci a některé věci částečně
+  automatizovali; jejich práce taky poskytla příklady, jak se to má dělat. K tomu
+  autor dodal svou představu postupu: 1. analýza kódu, 2. napsání specifikace,
+  3. napsat API, 4. napsat frontendové komponenty, 5. propojit API a frontend,
+  6. udělat code review a opravit chyby. (Nahrazuje původní 8krokovou pipeline.)
+- Postava agenta: tajný agent s brýlemi, ne robot.
 - Aktuální pořadí slajdů je v `presentation.md`; tabulka níže je původní plán.
 
 ### Nevymýšlet (zatím neznámé)

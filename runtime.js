@@ -81,7 +81,7 @@ const BUG_FILL = {
 };
 
 // Grid → <rect>s, merging horizontal runs of the same colour.
-function pixelRects(rows, yOffset = 0) {
+function pixelRects(rows, yOffset = 0, fill = BUG_FILL, classes = {}) {
   let out = "";
   rows.forEach((row, y) => {
     let x = 0;
@@ -89,8 +89,9 @@ function pixelRects(rows, yOffset = 0) {
       const ch = row[x];
       let end = x + 1;
       while (end < row.length && row[end] === ch) end++;
-      if (BUG_FILL[ch]) {
-        out += `<rect x="${x}" y="${y + yOffset}" width="${end - x}" height="1" fill="${BUG_FILL[ch]}"/>`;
+      if (fill[ch]) {
+        const cls = classes[ch] ? ` class="${classes[ch]}"` : "";
+        out += `<rect${cls} x="${x}" y="${y + yOffset}" width="${end - x}" height="1" fill="${fill[ch]}"/>`;
       }
       x = end;
     }
@@ -126,6 +127,71 @@ const bug = (opts = {}) => {
         <g class="bug-legs bug-legs-a">${pixelRects(BUG_LEGS.a, legsY)}</g>
         <g class="bug-legs bug-legs-b">${pixelRects(BUG_LEGS.b, legsY)}</g>
         <g class="bug-legs bug-legs-tuck">${pixelRects(BUG_LEGS.tuck, legsY)}</g>
+      </svg>
+    </div>
+  `;
+};
+
+// ---------------------- agent(): the refactoring agent ----------------------
+//
+// Original pixel-art secret agent, front view: slicked hair, black shades
+// with a glint, earpiece wire, dark suit, white shirt, coral tie. A generic
+// trope, not any specific film character. Every row must be AGENT_W chars.
+//   K ink · H hair · F skin · G shades · W glint (.ag-glint) · E earpiece ·
+//   S suit · T shirt · R tie
+const AGENT_W = 20;
+const AGENT_H = 28;
+const AGENT_ROWS = [
+  "......KKKKKKK.......",
+  ".....KHHHHHHHK......",
+  "....KHHHHHHHHHK.....",
+  "....KHHHHHHHHHK.....",
+  "....KFFFFFFFFFK.....",
+  "...KKGGGGKGGGGKK....",
+  "....KGWGGKGWGGK.....",
+  "....KFFFFFFFFFKE....",
+  "....KFFFKKKFFFKE....",
+  ".....KFFFFFFFK.E....",
+  "......KKFFFKK..E....",
+  "...KSSSTTRRTTSSSK...",
+  "..KSSSSSTRRTSSSSSK..",
+  "..KSSSSSSRRSSSSSSK..",
+  "..KSSSSSSRRSSSSSSK..",
+  ".KSKSSSSSRRSSSSSKSK.",
+  ".KSKSSSSSSSSSSSSKSK.",
+  ".KSKSSSSSSSSSSSSKSK.",
+  ".KFKSSSSSSSSSSSSKFK.",
+  ".KKKKKKKKKKKKKKKKKK.",
+  "...KSSSSSKSSSSSK....",
+  "...KSSSSSKSSSSSK....",
+  "...KSSSSSKSSSSSK....",
+  "...KSSSSSKSSSSSK....",
+  "...KSSSSKKKSSSSK....",
+  "...KSSSSK.KSSSSK....",
+  "..KKKKKKK.KKKKKKK...",
+  "..KKKKKKK.KKKKKKK...",
+];
+const AGENT_FILL = {
+  K: "var(--agent-ink)",
+  H: "var(--agent-hair)",
+  F: "var(--agent-skin)",
+  G: "var(--agent-shades)",
+  W: "var(--agent-glint)",
+  E: "var(--agent-wire)",
+  S: "var(--agent-suit)",
+  T: "var(--agent-shirt)",
+  R: "var(--agent-tie)",
+};
+
+// agent({ size, className, style }): size = height in px (multiples of 28).
+const agent = (opts = {}) => {
+  const size = opts.size || 308;
+  const extra = opts.className ? ` ${opts.className}` : "";
+  return `
+    <div class="agent${extra}" style="width:${(size * AGENT_W) / AGENT_H}px;height:${size}px;${opts.style || ""}">
+      <svg viewBox="0 0 ${AGENT_W} ${AGENT_H}" shape-rendering="crispEdges"
+           xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        ${pixelRects(AGENT_ROWS, 0, AGENT_FILL, { W: "ag-glint" })}
       </svg>
     </div>
   `;

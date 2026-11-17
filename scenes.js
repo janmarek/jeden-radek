@@ -73,7 +73,8 @@ function tallySvg(count) {
   const p = pos(n);
   const x = p.gx + p.inGroup * 20;
   out += line(x, p.y, x, p.y + 56, "tally-new");
-  return `<svg class="tally" viewBox="0 0 300 262" aria-hidden="true">${out}</svg>`;
+  const rows = Math.floor(Math.floor(count / 5) / 2) + 1;
+  return `<svg class="tally" viewBox="0 0 300 ${rows * 82 + 4}" aria-hidden="true">${out}</svg>`;
 }
 
 // Small "for juniors" sticker: one picture instead of a definition.
@@ -225,7 +226,7 @@ const scenes = [
     steps: 5,
     verifyWait: [900, 900, 900, 1200, 1600],
     notes:
-      "Proč se s tím něco neudělá? Ve firmě to byl problém pojmenovaný už několik let. Jenže postaru bylo napsaných nižší stovky stránek. A co zákazníkovi přinese přepis? Oproti novým funkcím nic moc. Přesto se o to pokoušelo mnoho lidí a byl to jeden z cílů firmy v oblasti technických vylepšení. Tak jsem se rozhodl, že to zkusím taky. (Počet čárek na účtu je ilustrační.)",
+      "Proč se s tím něco neudělá? Ve firmě to byl problém pojmenovaný už několik let. Jenže postaru bylo napsaných nižší stovky stránek. A co zákazníkovi přinese přepis? Oproti novým funkcím nic moc. Přesto se o to pokoušelo mnoho lidí a byl to jeden z cílů firmy v oblasti technických vylepšení. Tak jsem se rozhodl, že to zkusím taky. (Počet čárek je ilustrační.)",
     render: () => `
       <div class="scene slide named">
         <h1 class="headline">Proč se s tím něco neudělá?</h1>
@@ -233,73 +234,52 @@ const scenes = [
           <li>Ve firmě to byl problém pojmenovaný už několik let.</li>
           <li data-from="1">Postaru bylo napsaných <b>nižší stovky</b> stránek.</li>
           <li data-from="2">Co zákazníkovi přinese přepis? Oproti novým funkcím nic moc.</li>
-          <li data-from="3">Přesto se o to pokoušelo mnoho lidí. Jeden z cílů firmy v technických vylepšeních.</li>
+          <li data-from="3">Přesto se o to pokoušelo mnoho lidí. Jeden z cílů firmy v technických vylepšeních.<span class="li-tally">${tallySvg(7)}</span></li>
           <li data-from="4" class="named-me">Rozhodl jsem se, že to zkusím taky.</li>
         </ul>
-        <div class="tab" data-from="3">
-          <div class="tab-head">účet</div>
-          ${tallySvg(27)}
-        </div>
-      </div>
-    `,
-  },
-
-  // ============================================================ Proč
-  {
-    id: "why",
-    world: "game",
-    steps: 2,
-    notes:
-      "Proč to stojí za to: nové UI je konzistentní se zbytkem aplikace, lepší pro uživatele, a šlo přidat inline edit a bulk delete. Háček: dělal jsem to jako side projekt. Vedení se to líbilo, ale nikdo mi na to nedal čas.",
-    render: () => `
-      <div class="scene slide why">
-        <div class="kicker">Proč to stojí za to</div>
-        <h1 class="headline">Lepší pro uživatele</h1>
-        <div class="tiles">
-          <div class="tile t-cyan"><div class="tile-ico">${icon("layout-grid", { size: 64 })}</div>Konzistentní se zbytkem aplikace</div>
-          <div class="tile t-yellow"><div class="tile-ico">${icon("smile", { size: 64 })}</div>Lepší UX</div>
-          <div class="tile t-lavender"><div class="tile-ico">${icon("pencil", { size: 64 })}</div>Inline edit</div>
-          <div class="tile t-coral"><div class="tile-ico">${icon("square-check-big", { size: 64 })}</div>Bulk delete</div>
-        </div>
-        <div class="sticky" data-from="1">
-          <b>Side projekt.</b><br>Vedení se to líbilo.<br>Čas na to nikdo nevyhradil.
-        </div>
       </div>
     `,
   },
 
   // ============================================================ Agent
+  // One scene so the agent stays on stage while the content swaps:
+  // 0 agent jumps in · 1 "Nebylo to těžké" · 2–4 bullets ·
+  // 5 swap to "how the agent should work" · 6–11 the six steps one by one
   {
     id: "agent",
     world: "game",
-    steps: 2,
-    verifyWait: [900, 2800],
+    steps: 12,
+    verifyWait: [1400, 900, 900, 900, 900, 1000, 900, 900, 900, 900, 900, 900],
     notes:
-      "Tak jsem si vyrobil agenta. Dal jsem mu dokumentaci, jak to lidé dělali dřív. Pro juniory: je to jako onboarding nového kolegy. Pak postup v osmi krocích. (Technické detaily jdou zkrátit, když nezbyde čas.)",
+      "Vyrobil jsem refaktorovacího agenta. Nebylo to těžké: navázal jsem na práci ostatních lidí, kteří napsali dobrou dokumentaci a některé věci částečně automatizovali. Jejich práce taky poskytla příklady, jak se to má dělat. K tomu jsem dodal svou představu, jak má agent postupovat: analýza kódu, specifikace, API, frontendové komponenty, propojit API a frontend, a samozřejmě code review a opravit chyby.",
     render: () => `
-      <div class="scene slide agent">
-        <div class="kicker">Agent</div>
-        <h1 class="headline">Tak jsem si vyrobil agenta</h1>
-        ${junior(
-          `<div class="doc-pic"><i></i><i></i><i></i><i></i></div><div class="arrow">=</div><div class="hello-pic">Ahoj, já jsem nový</div>`,
-          "Dokumentace pro agenta = onboarding nového kolegy: jak se to tu dělalo dřív.",
-          0,
-          "agent-junior"
-        )}
-        <ol class="pipeline" data-from="1">
-          ${[
-            "analýza kódu",
-            "specifikace",
-            "napsat API",
-            "spustit backend",
-            "vygenerovat API klienta",
-            "napsat frontend",
-            "feature flag",
-            "code review",
-          ]
-            .map((t, i) => `<li class="stagger-item"><b>${i + 1}</b>${t}</li>`)
-            .join("")}
-        </ol>
+      <div class="scene slide agentscene">
+        <h1 class="headline">Vyrobil jsem refaktorovacího agenta</h1>
+        <div class="ag-fig">${agent({ size: 336 })}</div>
+        <div class="ag-a" data-from="1" data-to="4">
+          <div class="ag-lead">Nebylo to těžké.</div>
+          <ul class="plain-list ag-list">
+            <li data-from="2">Navázal jsem na práci ostatních lidí,</li>
+            <li data-from="3">kteří napsali dobrou dokumentaci a některé věci částečně automatizovali.</li>
+            <li data-from="4">Jejich práce taky poskytla příklady, jak se to má dělat.</li>
+          </ul>
+        </div>
+        <div class="ag-b" data-from="5">
+          <div class="ag-lead">K tomu jsem dodal svou představu, jak má agent postupovat:</div>
+          <ol class="ag-steps">
+            ${[
+              "analýza kódu",
+              "napsání specifikace",
+              "napsat API",
+              "napsat frontendové komponenty",
+              "propojit API a frontend",
+              "samozřejmě udělat code review a opravit chyby",
+            ]
+              .map((t, k) => `<li data-from="${6 + k}"><b>${k + 1}</b>${t}</li>`)
+              .join("")}
+          </ol>
+        </div>
+        <div class="pixel-ground"></div>
       </div>
     `,
   },
@@ -310,14 +290,16 @@ const scenes = [
     world: "game",
     steps: 2,
     notes:
-      "A fungovalo to. Obrazovky byly konzistentní, UX šlo iterovat. ...většinou... (pauza, nechat dojít)",
+      "A fungovalo to. Nové obrazovky byly konzistentní se zbytkem aplikace, lepší pro uživatele, a šlo přidat inline edit a bulk delete. UX se dalo iterovat. ...většinou... (pauza, nechat dojít)",
     render: () => `
       <div class="scene slide mostly">
-        <div class="kicker">Výsledek</div>
         <h1 class="headline">Fungovalo to.</h1>
-        <p class="lede">Konzistentní obrazovky. UX se dalo iterovat.</p>
-        <div class="mini-grid">
-          ${Array.from({ length: 6 }, () => `<div class="mini"><div class="mini-head"></div><i></i><i></i><i></i><span class="mini-ok">✓</span></div>`).join("")}
+        <p class="lede">Lepší pro uživatele. UX se dalo iterovat.</p>
+        <div class="tiles">
+          <div class="tile t-cyan"><div class="tile-ico">${icon("layout-grid", { size: 64 })}</div>Konzistentní se zbytkem aplikace</div>
+          <div class="tile t-yellow"><div class="tile-ico">${icon("smile", { size: 64 })}</div>Lepší UX</div>
+          <div class="tile t-lavender"><div class="tile-ico">${icon("pencil", { size: 64 })}</div>Inline edit</div>
+          <div class="tile t-coral"><div class="tile-ico">${icon("square-check-big", { size: 64 })}</div>Bulk delete</div>
         </div>
         <div class="mostly-big" data-from="1">…většinou…</div>
       </div>
@@ -735,7 +717,7 @@ const scenes = [
           </ul>
           <ul class="stagger-fill cl-b">
             <li class="stagger-item"><span class="ver">v1.5</span>Testy a review dělá agent s jiným kontextem: „Co tu chybí?“</li>
-            <li class="stagger-item"><span class="ver">v1.6</span>Menší PR, kontext vlastníkům domény předem, vyhrazený čas.</li>
+            <li class="stagger-item"><span class="ver">v1.6</span>Menší PR, kontext vlastníkům domény předem.</li>
             <li class="stagger-item"><span class="ver">v1.7</span>Flag nejdřív zapnutý na stagingu, pak na produkci.</li>
             <li class="stagger-item"><span class="ver">v1.8</span>Kontrola konzistence dat mezi systémy + alert na rostoucí nesoulad.</li>
           </ul>
