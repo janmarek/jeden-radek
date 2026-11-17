@@ -134,50 +134,51 @@ const bug = (opts = {}) => {
 
 // ---------------------- agent(): the refactoring agent ----------------------
 //
-// Original pixel-art secret agent, front view: slicked hair, black shades
-// with a glint, earpiece wire, dark suit, white shirt, coral tie. A generic
-// trope, not any specific film character. Every row must be AGENT_W chars.
-//   K ink · H hair · F skin · G shades · W glint (.ag-glint) · E earpiece ·
-//   S suit · T shirt · R tie
-const AGENT_W = 20;
+// Original pixel-art secret agent, front view, slim: slicked hair, dark
+// glasses as two separate lenses with a bridge (face visible around them,
+// glint in each lens), dark suit, white shirt, coral tie. A generic trope,
+// not any specific film character. Every row must be AGENT_W chars.
+//   K ink · H hair · F skin · M mouth · G lenses · W glint (.ag-glint) · S suit ·
+//   T shirt · R tie
+const AGENT_W = 16;
 const AGENT_H = 28;
 const AGENT_ROWS = [
-  "......KKKKKKK.......",
-  ".....KHHHHHHHK......",
-  "....KHHHHHHHHHK.....",
-  "....KHHHHHHHHHK.....",
-  "....KFFFFFFFFFK.....",
-  "...KKGGGGKGGGGKK....",
-  "....KGWGGKGWGGK.....",
-  "....KFFFFFFFFFKE....",
-  "....KFFFKKKFFFKE....",
-  ".....KFFFFFFFK.E....",
-  "......KKFFFKK..E....",
-  "...KSSSTTRRTTSSSK...",
-  "..KSSSSSTRRTSSSSSK..",
-  "..KSSSSSSRRSSSSSSK..",
-  "..KSSSSSSRRSSSSSSK..",
-  ".KSKSSSSSRRSSSSSKSK.",
-  ".KSKSSSSSSSSSSSSKSK.",
-  ".KSKSSSSSSSSSSSSKSK.",
-  ".KFKSSSSSSSSSSSSKFK.",
-  ".KKKKKKKKKKKKKKKKKK.",
-  "...KSSSSSKSSSSSK....",
-  "...KSSSSSKSSSSSK....",
-  "...KSSSSSKSSSSSK....",
-  "...KSSSSSKSSSSSK....",
-  "...KSSSSKKKSSSSK....",
-  "...KSSSSK.KSSSSK....",
-  "..KKKKKKK.KKKKKKK...",
-  "..KKKKKKK.KKKKKKK...",
+  ".....KKKKK......",
+  "...KKHHHHHKK....",
+  "..KHHHHHHHHHK...",
+  "..KHFFFFFFFHK...",
+  "..KFFFFFFFFFK...",
+  "..KKGGGKGGGKK...",
+  "..KFGWGFGWGFK...",
+  "..KFFFFFFFFFK...",
+  "..KFFFMMMFFFK...",
+  "...KFFFFFFFK....",
+  "....KKFFFKK.....",
+  "..KSSTTRTTSSK...",
+  "..KSSSTRTSSSK...",
+  "..KSSSSRSSSSK...",
+  "..KSSSSRSSSSK...",
+  ".KSKSSSRSSSKSK..",
+  ".KSKSSSSSSSKSK..",
+  ".KSKSSSSSSSKSK..",
+  ".KFKSSSSSSSKFK..",
+  "..KKKKKKKKKKK...",
+  "...KSSSKSSSK....",
+  "...KSSSKSSSK....",
+  "...KSSSKSSSK....",
+  "...KSSSKSSSK....",
+  "...KSSSKSSSK....",
+  "...KSSSKSSSK....",
+  "..KKKKK.KKKKK...",
+  "..KKKKK.KKKKK...",
 ];
 const AGENT_FILL = {
   K: "var(--agent-ink)",
   H: "var(--agent-hair)",
   F: "var(--agent-skin)",
+  M: "var(--agent-mouth)",
   G: "var(--agent-shades)",
   W: "var(--agent-glint)",
-  E: "var(--agent-wire)",
   S: "var(--agent-suit)",
   T: "var(--agent-shirt)",
   R: "var(--agent-tie)",

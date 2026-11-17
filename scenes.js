@@ -186,7 +186,7 @@ const scenes = [
           <figure class="screen-old" data-from="1">
             <div class="mock mock-old">
               <div class="mk-head"><span></span></div>
-              ${[180, 120, 220, 150, 200].map((w) => `<div class="mk-row"><span class="mk-text" style="width:${w}px"></span><a class="mo-edit">Upravit</a></div>`).join("")}
+              ${[180, 120, 220, 150, 200].map((w) => `<div class="mk-row"><span class="mk-text" style="width:${w}px"></span><a class="mo-edit">Upravit</a><a class="mo-edit">Smazat</a></div>`).join("")}
             </div>
             <figcaption><b>Starší části</b> · Razor, HTML z backendu</figcaption>
             <div class="brp-label" data-from="2">Backend rendered pages</div>

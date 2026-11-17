@@ -110,10 +110,11 @@ bug({ size: 144, pose: "walk", facing: "left", className: "bug--stealth" })
 
 ## The agent: `agent()`
 
-Second original pixel sprite: a secret agent (front view, slicked hair, black
-shades with a periodic glint, earpiece, dark suit, coral tie). Generic trope,
-not a film character. Grid `AGENT_ROWS` in `runtime.js`, 20 × 28; use sizes in
-multiples of 28. Palette tokens `--agent-*`. It jumps in from the left on the
+Second original pixel sprite: a slim secret agent (front view, slicked hair,
+glasses as two separate dark lenses with a bridge and a periodic glint, dark
+suit, coral tie). No earpiece wire (read as "something behind his back"); the
+lenses must not merge into a band. Generic trope, not a film character. Grid
+`AGENT_ROWS` in `runtime.js`, 16 × 28; use sizes in multiples of 28. Palette tokens `--agent-*`. It jumps in from the left on the
 agent scene (`ag-jump-in`). Jan explicitly did not want a robot.
 
 Icons: `icon("pencil", { size, stroke })` inlines a Lucide icon (ISC) with a
