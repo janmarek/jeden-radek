@@ -140,7 +140,7 @@ const scenes = [
   },
 
   // ============================================================ Věřte nevěřte
-  // The bug comes "home" and a big retro TV pops in; on its screen the mood
+  // The bug comes "home" and a big 90s black TV pops in above it; on its screen the mood
   // of the "Věřte nevěřte" TV show (Beyond Belief): dark, fog, spotlight,
   // glowing serif, plus CRT grain, scanlines and flicker. Original CSS only.
   // step 0: bug walks in → TV pops in → screen turns on → title resolves
@@ -155,10 +155,8 @@ const scenes = [
       "Bug přijde domů a pustí si televizi: Věřte nevěřte. (→) …tohle se opravdu stalo. (→) Pracoval jsem v Mews, (→) firma dělá software pro hotely.",
     render: () => `
       <div class="scene truestory">
-        <div class="ts-rug"></div>
         <div class="ts-bug">${bug({ size: 144, pose: "walk" })}</div>
         <div class="tv">
-          <div class="tv-antenna"><i></i><i></i></div>
           <div class="tv-body">
             <div class="tv-screen">
               <div class="tv-on">
@@ -177,14 +175,12 @@ const scenes = [
               <div class="tv-scan"></div>
               <div class="tv-glass"></div>
             </div>
-            <div class="tv-panel">
-              <span class="tv-knob"></span>
-              <span class="tv-knob"></span>
+            <div class="tv-bottom">
               <span class="tv-grill"></span>
+              <span class="tv-btns"><i></i><i></i><i></i></span>
               <span class="tv-led"></span>
             </div>
           </div>
-          <div class="tv-legs"><i></i><i></i></div>
         </div>
         <div class="ts-mews" data-from="2">Mews</div>
         <div class="ts-what" data-from="3">software pro hotely</div>
