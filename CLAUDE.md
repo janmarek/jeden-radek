@@ -16,7 +16,8 @@ Run: open `index.html` in a browser, or `python3 -m http.server`.
   his newer instructions win over the brief.
 - Never invent numbers, names, company/product names or technical details that are
   not in the brief's "Fakta" section. Use a placeholder and add the question to
-  "Otevřené otázky" instead. No company branding anywhere in the deck.
+  "Otevřené otázky" instead. Mews (Jan's former employer, hotel software) may be
+  named as part of the story, but no Mews logo, colours or other branding.
 - Items marked *(návrh)* need Jan's confirmation before they go into the deck.
 - `presentation.md` is the scene spec: scene ids, step lists, speaker notes. Step
   numbers there must match the `data-step` values in CSS.

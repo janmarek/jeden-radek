@@ -118,9 +118,25 @@ Tohle je zdroj pravdy. Co tu není, se nesmí prezentovat jako fakt.
   kontext než agent, který píše kód. Autor velká PR potřeboval: deset menších
   místo dvou by nezvládl. Velké PR se ale rozumně reviewovat nedá.
 
+### Doplněno autorem (17. 11.)
+
+- Firma: **Mews**, dělá software pro hotely, existuje 14 let. Autor tam pracoval
+  (už ne). Jméno firmy smí na slajd, logo a firemní barvy ne.
+- Talk otevírá „Věřte nevěřte“: příběh se opravdu stal.
+- Většina obrazovek byla React + REST API. Ty starší renderoval backend pomocí
+  Razor šablon; interně se jim říkalo **backend rendered pages**. Jiná technologie,
+  takže vypadaly trochu jinak a nedaly se snadno rozvíjet.
+- Dilema: na staré stránce něco malého doplnit, nebo celou stránku přepsat?
+- Pojmenovaný problém už několik let, docela dost lidí se s tím snažilo něco
+  udělat. Stránek byly nižší stovky, takže hodně práce bez priority: co z toho
+  bude mít zákazník oproti jiným věcem?
+- Pořadí: rozcvička (diff) a odhalení jsou až **po incidentu**, před přepnutím do
+  hry. Titulka bez anotace a bez „stiskni“, se jménem autora.
+- Aktuální pořadí slajdů je v `presentation.md`; tabulka níže je původní plán.
+
 ### Nevymýšlet (zatím neznámé)
 
-- Název firmy, produktu a druhého systému, se kterým se synchronizovalo.
+- Název produktu a druhého systému, se kterým se synchronizovalo.
 - Počet duplicit, počet zasažených záznamů, přesná délka incidentu a dopad na
   zákazníky.
 - Jak přesně se na produkci poznalo, že druhý systém selhává.
@@ -229,7 +245,8 @@ agent nerozhoduje sám.
   mluvčího.
 - Žádné existující postavy, maskoti, loga ani herní ikony. Všechny vizuály jsou
   originální.
-- Žádné názvy firem ani konkrétní čísla, která nejsou v sekci Fakta.
+- Žádné názvy firem ani konkrétní čísla, která nejsou v sekci Fakta (Mews
+  jmenovat smí, viz Doplněno autorem).
 - Pojmy pro juniory vysvětluj obrázkem: propojovací tabulka, feature flag,
   unique constraint, review a PR.
 - Hlasování a hrátky z *(návrhů)* jen po potvrzení autorem. Do té doby připrav

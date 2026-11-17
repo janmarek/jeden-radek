@@ -88,126 +88,126 @@ const level = (o) => ({
 // ---------------------------------------------------------------- scenes
 
 const scenes = [
-  // ============================================================ 1 Titulka
+  // ============================================================ Titulka
   {
     id: "title",
     world: "game",
-    steps: 2,
-    verifyWait: [3200, 900],
-    notes:
-      "Ahoj, jsem Jan. Tohle je příběh o jednom řádku. (krok 2: anotace, přečíst nebo nechat chvíli viset)",
+    verifyWait: 3200,
+    notes: "Ahoj, jsem Jan. Tohle je příběh o jednom řádku.",
     render: () => `
       <div class="scene title">
         <div class="title-logo">JEDEN ŘÁDEK</div>
-        <div class="title-press">STISKNI →</div>
-        <div class="title-abstract" data-from="1">
-          <p>Někdy stačí jeden špatný řádek, aby nastal produkční problém.</p>
-          <p>Jak si zachovat chladnou hlavu při jeho řešení?</p>
-          <p>A ještě lépe, jak zabránit tomu hloupému agentovi, který za nás píše kód, aby dělal chyby?</p>
-          <div class="title-author">Jan Marek</div>
-        </div>
+        <div class="title-name">Jan Marek</div>
         <div class="title-bug">${bug({ size: 144, pose: "walk" })}</div>
         <div class="pixel-ground"></div>
       </div>
     `,
     onStep: (root, step, prev) => {
-      if (prev === -1 && step === 0) walkThenIdle(root, 2400);
+      if (prev === -1) walkThenIdle(root, 2400);
     },
   },
 
-  // ============================================================ 2 Teaser
+  // ============================================================ Věřte nevěřte
   {
-    id: "teaser",
-    world: "game",
-    steps: 2,
-    verifyWait: [900, 4000],
-    notes:
-      "Rozcvička. Tady je pull request, asi 800 řádků. Máte 10 sekund, najděte chybu. Klidně hádejte nahlas. (→ spustí odpočet)",
-    render: () => `
-      <div class="scene slide teaser">
-        <div class="kicker">Rozcvička</div>
-        <h1 class="headline">Najdi chybu.</h1>
-        <div class="countdown" data-from="1"><span class="cd-num">10</span><span class="cd-unit">s</span></div>
-        <div class="diff-win">
-          <div class="diff-head">
-            <span class="diff-title">Pull request</span>
-            <span class="diff-stat"><b class="add">+ ~800</b> řádků změn</span>
-          </div>
-          <div class="diff-body"><div class="diff-scroll">${diffBars(220, 11)}</div></div>
-        </div>
-      </div>
-    `,
-    onStep: (root, step) => {
-      clearInterval(root._cd);
-      const num = root.querySelector(".cd-num");
-      if (!num) return;
-      let t = 10;
-      num.textContent = String(t);
-      if (step !== 1) return;
-      root._cd = setInterval(() => {
-        if (!num.isConnected) return clearInterval(root._cd);
-        t = Math.max(0, t - 1);
-        num.textContent = String(t);
-        if (t === 0) clearInterval(root._cd);
-      }, 1000);
-    },
-  },
-
-  // ============================================================ 3 Odhalení
-  {
-    id: "reveal",
+    id: "true-story",
     world: "game",
     steps: 2,
     notes:
-      "Nikdo ji nenašel. A nemohl: chyba není v řádku, který tam je. Chyběl jeden řádek. Co dělal, se dozvíte za chvíli.",
+      "Věřte nevěřte, tohle se opravdu stalo. Pracoval jsem v Mews, firma dělá software pro hotely. Systém byl krásný, ale firma existuje 14 let, takže některé obrazovky jsou poněkud staršího data.",
     render: () => `
-      <div class="scene slide reveal">
-        <div class="kicker">Odhalení</div>
-        <h1 class="headline">Nikdo ji nenašel.</h1>
-        <p class="lede" data-from="1">Protože tam není. <b>Chyběl jeden řádek.</b></p>
-        <div class="zoom">
-          <div class="zoom-gutter">${Array.from({ length: 8 }, () => "<span></span>").join("")}</div>
-          <div class="zoom-lines">${diffBars(7, 3, 4)}</div>
-          <div class="zoom-tag" data-from="1">tady</div>
+      <div class="scene slide truestory">
+        <h1 class="headline center">Věřte nevěřte…</h1>
+        <p class="lede center">…tohle se opravdu stalo.</p>
+        <div class="facts" data-from="1">
+          <span class="fact f-cyan">Mews</span>
+          <span class="fact f-yellow">software pro hotely</span>
+          <span class="fact f-lavender">firma existuje 14 let</span>
         </div>
       </div>
     `,
   },
 
-  // ============================================================ 4 Svět
+  // ============================================================ Backend rendered pages
   {
-    id: "world",
+    id: "brp",
     world: "game",
-    steps: 2,
+    steps: 3,
     notes:
-      "Svět: staré obrazovky na backendových Razor šablonách. Firma je léta přepisuje, je to hodně práce. Nové jsou v Reactu nad REST API.",
+      "Většina obrazovek byla v Reactu nad REST API. Ty starší renderoval backend pomocí Razor šablon, říkali jsme jim backend rendered pages. Jiná technologie, takže vypadaly trochu jinak a nedaly se snadno rozvíjet.",
     render: () => `
-      <div class="scene slide world">
+      <div class="scene slide brp">
         <div class="kicker">Svět</div>
-        <h1 class="headline">Obrazovky, které se léta přepisují</h1>
+        <h1 class="headline">Backend rendered pages</h1>
+        <p class="lede" data-from="2">Jiná technologie: vypadají jinak a špatně se rozvíjejí.</p>
         <div class="screens">
-          <figure class="screen-old">
+          <figure class="screen-new">
+            <div class="mock-new">
+              <div class="mn-head"><span></span><button class="mn-danger">Smazat vybrané</button></div>
+              ${Array.from({ length: 5 }, (_, i) => `<div class="mn-row"><i class="mn-check${i === 1 || i === 2 ? " on" : ""}"></i><span></span><span class="mn-edit">✎</span></div>`).join("")}
+            </div>
+            <figcaption><b>Většina</b> · React + REST API</figcaption>
+          </figure>
+          <figure class="screen-old" data-from="1">
             <div class="mock-old">
               <div class="mo-head">Nastavení</div>
               ${Array.from({ length: 5 }, () => `<div class="mo-row"><span></span><span></span><button>Upravit</button></div>`).join("")}
               <div class="mo-foot"><button>Uložit</button></div>
             </div>
-            <figcaption><b>Staré</b> · Razor šablony, HTML z backendu</figcaption>
-          </figure>
-          <div class="screens-arrow" data-from="1">→</div>
-          <figure class="screen-new" data-from="1">
-            <div class="mock-new">
-              <div class="mn-head"><span></span><button class="mn-danger">Smazat vybrané</button></div>
-              ${Array.from({ length: 5 }, (_, i) => `<div class="mn-row"><i class="mn-check${i === 1 || i === 2 ? " on" : ""}"></i><span></span><span class="mn-edit">✎</span></div>`).join("")}
-            </div>
-            <figcaption><b>Nové</b> · React + REST API</figcaption>
+            <figcaption><b>Starší</b> · Razor šablony, HTML renderuje backend</figcaption>
           </figure>
         </div>
       </div>
     `,
   },
 
-  // ============================================================ 5 Proč
+  // ============================================================ Dilema
+  {
+    id: "dilemma",
+    world: "game",
+    notes:
+      "A teď potřebuješ na takové stránce něco malého doplnit. Dilema: doplnit to po staru, nebo celou stránku přepsat?",
+    render: () => `
+      <div class="scene slide dilemma">
+        <div class="kicker">Dilema</div>
+        <h1 class="headline">Potřebuju doplnit něco malého.</h1>
+        <div class="choice card-ink">
+          <div class="choice-q">Co uděláš?</div>
+          <div class="choice-opt opt-a">Doplnit to po staru</div>
+          <div class="choice-opt opt-b">Přepsat celou stránku</div>
+        </div>
+      </div>
+    `,
+  },
+
+  // ============================================================ Pojmenovaný problém
+  {
+    id: "named-problem",
+    world: "game",
+    steps: 2,
+    verifyWait: [900, 1400],
+    notes:
+      "Byl to pojmenovaný problém už několik let a docela dost lidí se s tím snažilo něco udělat. Jenže stránek byly nižší stovky. Hodně práce, která neměla prioritu: co z toho bude mít zákazník oproti jiným věcem?",
+    render: () => `
+      <div class="scene slide named">
+        <div class="kicker">Známý problém</div>
+        <h1 class="headline">Pojmenovaný už několik let</h1>
+        <p class="lede">Hodně lidí se s tím snažilo něco udělat.</p>
+        <div class="pages">
+          <div class="pages-grid">${Array.from({ length: 160 }, () => "<i></i>").join("")}</div>
+          <div class="pages-label">nižší stovky stránek</div>
+        </div>
+        <div class="backlog">
+          <div class="bl-card bl-ours">Přepsat staré stránky</div>
+          <div class="bl-card bl-2">Funkce pro zákazníky</div>
+          <div class="bl-card bl-3">Funkce pro zákazníky</div>
+          <div class="bl-card bl-4">Funkce pro zákazníky</div>
+          <div class="bl-q" data-from="1">Co z toho bude mít zákazník?</div>
+        </div>
+      </div>
+    `,
+  },
+
+  // ============================================================ Proč
   {
     id: "why",
     world: "game",
@@ -231,7 +231,7 @@ const scenes = [
     `,
   },
 
-  // ============================================================ 6 Agent
+  // ============================================================ Agent
   {
     id: "agent",
     world: "game",
@@ -267,7 +267,7 @@ const scenes = [
     `,
   },
 
-  // ============================================================ 7 …většinou…
+  // ============================================================ …většinou…
   {
     id: "mostly",
     world: "game",
@@ -287,7 +287,7 @@ const scenes = [
     `,
   },
 
-  // ============================================================ 8 Páteční odpoledne (serious)
+  // ============================================================ Páteční odpoledne (serious)
   {
     id: "friday",
     world: "serious",
@@ -320,7 +320,7 @@ const scenes = [
     `,
   },
 
-  // ============================================================ 9 Co se stalo (serious, key visual)
+  // ============================================================ Co se stalo (serious, key visual)
   {
     id: "what-happened",
     world: "serious",
@@ -365,7 +365,7 @@ const scenes = [
     `,
   },
 
-  // ============================================================ 10 Krok 1: flag
+  // ============================================================ Krok 1: flag
   {
     id: "stop-bleeding",
     world: "serious",
@@ -390,7 +390,7 @@ const scenes = [
     `,
   },
 
-  // ============================================================ 11 Krok 2: bojová sada
+  // ============================================================ Krok 2: bojová sada
   {
     id: "access",
     world: "serious",
@@ -415,7 +415,7 @@ const scenes = [
     `,
   },
 
-  // ============================================================ 12 Krok 3: zjistit, pak opravit
+  // ============================================================ Krok 3: zjistit, pak opravit
   {
     id: "investigate",
     world: "serious",
@@ -449,7 +449,7 @@ const scenes = [
     `,
   },
 
-  // ============================================================ 13 Krok 4: nevím
+  // ============================================================ Krok 4: nevím
   {
     id: "dont-know",
     world: "serious",
@@ -471,7 +471,66 @@ const scenes = [
     `,
   },
 
-  // ============================================================ 14 Přepnutí do hry
+  // ============================================================ Rozcvička (po incidentu)
+  {
+    id: "teaser",
+    world: "game",
+    steps: 2,
+    verifyWait: [900, 4000],
+    notes:
+      "Rozcvička. Tady je pull request, asi 800 řádků. Máte 10 sekund, najděte chybu. Klidně hádejte nahlas. (→ spustí odpočet)",
+    render: () => `
+      <div class="scene slide teaser">
+        <div class="kicker">Rozcvička</div>
+        <h1 class="headline">Najdi chybu.</h1>
+        <div class="countdown" data-from="1"><span class="cd-num">10</span><span class="cd-unit">s</span></div>
+        <div class="diff-win">
+          <div class="diff-head">
+            <span class="diff-title">Pull request</span>
+            <span class="diff-stat"><b class="add">+ ~800</b> řádků změn</span>
+          </div>
+          <div class="diff-body"><div class="diff-scroll">${diffBars(220, 11)}</div></div>
+        </div>
+      </div>
+    `,
+    onStep: (root, step) => {
+      clearInterval(root._cd);
+      const num = root.querySelector(".cd-num");
+      if (!num) return;
+      let t = 10;
+      num.textContent = String(t);
+      if (step !== 1) return;
+      root._cd = setInterval(() => {
+        if (!num.isConnected) return clearInterval(root._cd);
+        t = Math.max(0, t - 1);
+        num.textContent = String(t);
+        if (t === 0) clearInterval(root._cd);
+      }, 1000);
+    },
+  },
+
+  // ============================================================ Odhalení
+  {
+    id: "reveal",
+    world: "game",
+    steps: 2,
+    notes:
+      "Nikdo ji nenašel. A nemohl: chyba není v řádku, který tam je. Chyběl jeden řádek, ten, který měl starou vazbu pokoj–kategorie načíst a smazat.",
+    render: () => `
+      <div class="scene slide reveal">
+        <div class="kicker">Odhalení</div>
+        <h1 class="headline">Nikdo ji nenašel.</h1>
+        <p class="lede" data-from="1">Protože tam není. <b>Chyběl jeden řádek.</b></p>
+        <div class="zoom">
+          <div class="zoom-gutter">${Array.from({ length: 8 }, () => "<span></span>").join("")}</div>
+          <div class="zoom-lines">${diffBars(7, 3, 4)}</div>
+          <div class="zoom-tag" data-from="1">tady</div>
+        </div>
+      </div>
+    `,
+  },
+
+  // ============================================================ Přepnutí do hry
   {
     id: "switch-to-game",
     world: "game",
@@ -491,7 +550,7 @@ const scenes = [
     `,
   },
 
-  // ============================================================ 15–21 Levels
+  // ============================================================ Levels
   level({
     id: "level-1",
     n: 1,
@@ -598,7 +657,7 @@ const scenes = [
       "Level 7: pozdní projev. Nic nespadlo hned. Problém vznikal až při synchronizaci s druhým systémem. [Název druhého systému a jak se selhání poznalo: zatím neznámé, nevymýšlet.]",
   }),
 
-  // ============================================================ 22 Boss fight
+  // ============================================================ Boss fight
   {
     id: "boss",
     world: "game",
@@ -618,7 +677,7 @@ const scenes = [
     `,
   },
 
-  // ============================================================ 23 Patch notes
+  // ============================================================ Patch notes
   {
     id: "patch-notes",
     world: "game",
@@ -648,7 +707,7 @@ const scenes = [
     `,
   },
 
-  // ============================================================ 24 Pointa
+  // ============================================================ Pointa
   {
     id: "punchline",
     world: "game",
