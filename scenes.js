@@ -85,6 +85,23 @@ const junior = (pic, text, from = 0, extra = "") => `
     <div class="junior-text">${text}</div>
   </div>`;
 
+// Slack-like notification, restyled into the deck's ink-border cards (no
+// Slack logo: generic chat icon). Used on friday and as the boss callback.
+const INCIDENT_MSG = "Řešíme incident, pojď nám pomoct.";
+const notif = ({ from = "Kolega", text = INCIDENT_MSG, when = "teď", extra = "", attrs = "" } = {}) => `
+  <div class="notif ${extra}" ${attrs}>
+    <div class="notif-ico">${icon("message-square-text", { size: 34 })}</div>
+    <div class="notif-body">
+      <div class="notif-head"><span>Slack</span><span>${when}</span></div>
+      <div class="notif-from">${from}</div>
+      <div class="notif-text">${text}</div>
+    </div>
+  </div>`;
+
+// DEV ONLY: quiet link on the title slide that jumps straight to the
+// incident (runtime handles [data-goto]). Set to false before the talk.
+const DEV_JUMP = true;
+
 // Level template for the game part (slides 15–21).
 //   step 0: level card + bug at x0, obstacle visible, fact line
 //   step 1: bug moves to x1 (meets the obstacle)
@@ -132,6 +149,7 @@ const scenes = [
         <div class="title-name">Jan Marek</div>
         <div class="title-bug">${bug({ size: 144, pose: "walk" })}</div>
         <div class="pixel-ground"></div>
+        ${DEV_JUMP ? `<span class="dev-jump" data-goto="friday">incident →</span>` : ""}
       </div>
     `,
     onStep: (root, step, prev) => {
@@ -319,57 +337,57 @@ const scenes = [
     `,
   },
 
-  // ============================================================ …většinou…
+  // ============================================================ Fungovalo to
+  // 0 headline · 1 "dobrý základ" · 2–5 benefit cards pop in one by one
   {
-    id: "mostly",
+    id: "worked",
     world: "game",
-    steps: 2,
+    steps: 6,
+    verifyWait: [900, 900, 900, 900, 900, 1200],
     notes:
-      "A fungovalo to. Nové obrazovky byly konzistentní se zbytkem aplikace, lepší pro uživatele, a šlo přidat inline edit a bulk delete. UX se dalo iterovat. ...většinou... (pauza, nechat dojít)",
+      "A fungovalo to. (→) Agent vytvořil dobrý základ v produkční kvalitě. (→) Lepší UX, (→) UI konzistentní se zbytkem aplikace, (→) dalo se to dál vylepšovat (→) a přibyly nové funkce: inline edit a bulk delete.",
     render: () => `
-      <div class="scene slide mostly">
+      <div class="scene slide worked">
         <h1 class="headline">Fungovalo to.</h1>
-        <p class="lede">Lepší pro uživatele. UX se dalo iterovat.</p>
+        <p class="lede" data-from="1">Agent vytvořil <b>dobrý základ v produkční kvalitě</b>.</p>
         <div class="tiles">
-          <div class="tile t-cyan"><div class="tile-ico">${icon("layout-grid", { size: 64 })}</div>Konzistentní se zbytkem aplikace</div>
-          <div class="tile t-yellow"><div class="tile-ico">${icon("smile", { size: 64 })}</div>Lepší UX</div>
-          <div class="tile t-lavender"><div class="tile-ico">${icon("pencil", { size: 64 })}</div>Inline edit</div>
-          <div class="tile t-coral"><div class="tile-ico">${icon("square-check-big", { size: 64 })}</div>Bulk delete</div>
+          <div class="tile t-yellow" data-from="2"><div class="tile-ico">${icon("smile", { size: 64 })}</div>Lepší UX</div>
+          <div class="tile t-cyan" data-from="3"><div class="tile-ico">${icon("layout-grid", { size: 64 })}</div>Konzistentní UI</div>
+          <div class="tile t-lavender" data-from="4"><div class="tile-ico">${icon("trending-up", { size: 64 })}</div>Dá se dál vylepšovat</div>
+          <div class="tile t-coral" data-from="5"><div class="tile-ico">${icon("pencil", { size: 56 })}${icon("trash-2", { size: 56 })}</div>Nové funkce<small>inline edit, bulk delete</small></div>
         </div>
-        <div class="mostly-big" data-from="1">…většinou…</div>
       </div>
     `,
   },
 
-  // ============================================================ Páteční odpoledne (serious)
+  // ============================================================ …většinou…
+  {
+    id: "mostly",
+    world: "game",
+    notes: "…většinou… (pauza, nechat dojít)",
+    render: () => `
+      <div class="scene slide mostly">
+        <div class="mostly-big">…většinou…</div>
+      </div>
+    `,
+  },
+
+  // ============================================================ Pátek 16:00 (serious)
+  // 0 lock-screen style "Pátek 16:00" · 1 Slack-like notification drops in
   {
     id: "friday",
     world: "serious",
     background: "var(--ink)",
     steps: 2,
-    verifyWait: [1200, 1200],
-    notes:
-      "Pátek odpoledne. Přijde zpráva od kolegů: duplikují se řádky. [Znění zprávy je zástupné, doplnit skutečné.]",
+    verifyWait: [1200, 1400],
+    notes: "Pátek, 16:00. (→) Přijde zpráva na Slacku: Řešíme incident, pojď nám pomoct.",
     render: () => `
       <div class="scene slide friday">
-        <div class="kicker">Incident</div>
-        <h1 class="headline">Pátek, odpoledne</h1>
-        ${appWindow({
-          theme: "chat",
-          header: `<span># tým</span>`,
-          width: 900,
-          height: 440,
-          className: "friday-win",
-          body: `
-            <div class="chat-day">pátek</div>
-            <div class="chat-msg" data-from="1">
-              <div class="chat-avatar">K</div>
-              <div>
-                <div class="chat-name">Kolega</div>
-                <div class="chat-text">Hele, duplikují se nám řádky. Můžeš se mrknout?</div>
-              </div>
-            </div>`,
-        })}
+        <div class="fr-clock">
+          <div class="fr-day">Pátek</div>
+          <div class="fr-time">16:00</div>
+        </div>
+        ${notif({ extra: "fr-notif", attrs: 'data-from="1"' })}
       </div>
     `,
   },
@@ -721,10 +739,7 @@ const scenes = [
       <div class="scene slide boss">
         <div class="lvl-chip big">BOSS FIGHT</div>
         <h1 class="headline center">Ten už jste viděli.</h1>
-        <div class="boss-callback" data-from="1">
-          <div class="chat-day">pátek odpoledne</div>
-          <div class="chat-msg is-on"><div class="chat-avatar">K</div><div class="chat-text">Hele, duplikují se nám řádky…</div></div>
-        </div>
+        ${notif({ when: "pátek 16:00", extra: "boss-callback", attrs: 'data-from="1"' })}
         <div class="boss-bug">${bug({ size: 144, pose: "idle" })}</div>
         <div class="pixel-ground"></div>
       </div>

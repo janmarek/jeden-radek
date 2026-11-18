@@ -151,6 +151,15 @@ Tohle je zdroj pravdy. Co tu není, se nesmí prezentovat jako fakt.
 - Postava agenta: tajný agent s brýlemi, ne robot.
 - Aktuální pořadí slajdů je v `presentation.md`; tabulka níže je původní plán.
 
+### Doplněno autorem (18. 11.)
+
+- „Fungovalo to“: agent vytvořil **dobrý základ v produkční kvalitě**. Výhody
+  (karty postupně): lepší UX, konzistentní UI, dá se dál vylepšovat, nové funkce
+  (inline edit, bulk delete). „…většinou…“ je samostatný slajd, ne překryv.
+- Incident začal v **pátek v 16:00** zprávou na Slacku od kolegů:
+  **„Řešíme incident, pojď nám pomoct.“** (Notifikace je stylizovaná do karet
+  decku, bez loga Slacku.)
+
 ### Nevymýšlet (zatím neznámé)
 
 - Název produktu a druhého systému, se kterým se synchronizovalo.
@@ -277,8 +286,6 @@ agent nerozhoduje sám.
 - Kterou závěrečnou větu použít? (slajd 24)
 - Vizuál titulky a přepnutí do 8bit stylu: kdy přesně (slajd 1 vs. 14)?
 - Vzorová věta pro komunikaci „nevím“ (slajd 13): potvrdit znění.
-- Přesné znění páteční zprávy od kolegů (slajd 8, callback na slajdu 22): na
-  slajdu je zatím zástupné „Hele, duplikují se nám řádky. Můžeš se mrknout?“.
 - Vyprávění bugu v první osobě (slajd 14, bublina): ponechat?
 - Patch notes (slajd 23): všech osm, nebo vybrat?
 - Vážný tmavý styl pro incident (slajdy 8–13) a přepnutí do hry na slajdu 14:

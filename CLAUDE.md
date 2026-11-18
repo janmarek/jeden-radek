@@ -36,6 +36,9 @@ scenes have a `world`; verify waits live on the scene (`verifyWait`).
 - `→` `↓` `Space` `PageDown` next step/scene; `←` `↑` `PageUp` back; `Home` / `End`.
 - **Keyboard only.** No click-to-advance, no URL hash sync. Don't add them back.
 - Scene render is wrapped in try/catch with a visible fallback. Never bypass it.
+- **DEV only exception:** the faint "incident →" link on the title (`data-goto`,
+  gated by `DEV_JUMP` in scenes.js) jumps to the `friday` scene for rehearsing
+  later parts. Set `DEV_JUMP = false` before the talk.
 
 ## Architecture
 
@@ -44,6 +47,9 @@ scenes have a `world`; verify waits live on the scene (`verifyWait`).
 - `scenes.js`: the `scenes` array. This is where slides are edited.
 - `styles.css`: tokens, reusable blocks, then per-scene sections.
 - Stage is **1600 × 900**, scaled uniformly. Author in stage pixels.
+  `#stage` is absolutely centred and `fit()` sets `translate(-50%,-50%) scale()`.
+  Don't make it a grid/flex item again: in a window narrower than 1600 px the
+  auto track grows to 1600 and the scaled deck ends up shifted right.
 
 ### Scene shape
 
