@@ -344,14 +344,14 @@ const scenes = [
     steps: 6,
     verifyWait: [900, 900, 900, 900, 900, 1200],
     notes:
-      "A fungovalo to. (→) Agent vytvořil dobrý základ v produkční kvalitě. (→) Lepší UX, (→) UI konzistentní se zbytkem aplikace, (→) dalo se to dál vylepšovat (→) a přibyly nové funkce: inline edit a bulk delete.",
+      "A fungovalo to. (→) Agent vytvořil dobrý základ v produkční kvalitě. (→) Lepší UX, (→) vzhled konzistentní se zbytkem aplikace, (→) dalo se to dál vylepšovat (→) a přibyly nové funkce: inline edit a bulk delete.",
     render: () => `
       <div class="scene slide worked">
         <h1 class="headline">Fungovalo to.</h1>
         <p class="lede" data-from="1">Agent vytvořil <b>dobrý základ v produkční kvalitě</b>.</p>
         <div class="tiles">
           <div class="tile t-yellow" data-from="2"><div class="tile-ico">${icon("smile", { size: 64 })}</div>Lepší UX</div>
-          <div class="tile t-cyan" data-from="3"><div class="tile-ico">${icon("layout-grid", { size: 64 })}</div>Konzistentní UI</div>
+          <div class="tile t-cyan" data-from="3"><div class="tile-ico">${icon("layout-grid", { size: 64 })}</div>Konzistentní vzhled</div>
           <div class="tile t-lavender" data-from="4"><div class="tile-ico">${icon("trending-up", { size: 64 })}</div>Dá se dál vylepšovat</div>
           <div class="tile t-coral" data-from="5"><div class="tile-ico">${icon("pencil", { size: 56 })}${icon("trash-2", { size: 56 })}</div>Nové funkce<small>inline edit, bulk delete</small></div>
         </div>

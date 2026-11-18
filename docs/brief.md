@@ -154,7 +154,7 @@ Tohle je zdroj pravdy. Co tu není, se nesmí prezentovat jako fakt.
 ### Doplněno autorem (18. 11.)
 
 - „Fungovalo to“: agent vytvořil **dobrý základ v produkční kvalitě**. Výhody
-  (karty postupně): lepší UX, konzistentní UI, dá se dál vylepšovat, nové funkce
+  (karty postupně): lepší UX, konzistentní vzhled, dá se dál vylepšovat, nové funkce
   (inline edit, bulk delete). „…většinou…“ je samostatný slajd, ne překryv.
 - Incident začal v **pátek v 16:00** zprávou na Slacku od kolegů:
   **„Řešíme incident, pojď nám pomoct.“** Notifikace jako v bdd decku: ikona
