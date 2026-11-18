@@ -957,9 +957,16 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
   stroke-width: 7;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  transition: stroke-dashoffset 0.6s ease-out 0.3s;
+  /* Round caps paint a dot even on a zero-length dash, so the stroke stays
+     invisible until it starts drawing (and vanishes at once on ←). */
+  opacity: 0;
+  transition: stroke-dashoffset 0.6s ease-out, opacity 0s;
 }
-.named[data-step="4"] .tally .tally-new { stroke-dashoffset: 0; }
+.named[data-step="4"] .tally .tally-new {
+  stroke-dashoffset: 0;
+  opacity: 1;
+  transition: stroke-dashoffset 0.6s ease-out 0.3s, opacity 0s 0.3s;
+}
 
 /* =====================================================================
  * Feature tiles (mostly slide)
