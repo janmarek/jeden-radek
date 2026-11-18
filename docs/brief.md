@@ -159,7 +159,7 @@ Tohle je zdroj pravdy. Co tu není, se nesmí prezentovat jako fakt.
 - Incident začal v **pátek v 16:00** zprávou na Slacku od kolegů:
   **„Řešíme incident, pojď nám pomoct.“** Notifikace jako v bdd decku: ikona
   Slacku (výjimka z pravidla o logách, schválil autor), datum přímo v kartě,
-  vyjíždí shora přes „…většinou…“. Datum **13. 8.** je jen pro zábavu
+  vyjíždí zprava do pravého horního rohu přes „…většinou…“. Datum **13. 8.** je jen pro zábavu
   (pátek třináctého), ne skutečné datum incidentu.
 
 ### Nevymýšlet (zatím neznámé)

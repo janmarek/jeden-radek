@@ -360,8 +360,8 @@ const scenes = [
   },
 
   // ============================================================ …většinou… + Pátek 16:00
-  // 0 "…většinou…" · 1 Slack notification slides down from above the top
-  // edge, over the word (the incident starts here)
+  // 0 "…většinou…" · 1 Slack notification slides in from the right into the
+  // top-right corner, over the word (the incident starts here)
   {
     id: "mostly",
     world: "game",
