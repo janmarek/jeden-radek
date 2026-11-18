@@ -138,6 +138,9 @@ editor | browser`, `.window-enter-*` / `.window-exit-*`, `.typewriter` + `.curso
 - Palette is the meetup's scheme (ReactGirls card): `--cream` background, accents
   `--coral --cyan --lavender --yellow`, `--ink` for text and outlines. Use the
   tokens, never hard-coded hex. Mews branding is gone for good (Jan left Mews).
+  Only logo allowed: the Slack mark (`img/slack-mark.svg`, from bdd) in the
+  `notif()` card, at Jan's request. Keep non-Lucide images in `img/`, not
+  `icons/` (the icon build inlines everything there as stroke icons).
 - Font: **Poppins** 400–800, bundled in `fonts/` (OFL) so the deck works offline.
 - No pixel fonts: Press Start 2P was tried and looked blurry, because a bitmap-style
   font only stays crisp at exact multiples of its grid, and the stage is scaled by a

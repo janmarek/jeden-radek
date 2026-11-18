@@ -85,15 +85,14 @@ const junior = (pic, text, from = 0, extra = "") => `
     <div class="junior-text">${text}</div>
   </div>`;
 
-// Slack-like notification, restyled into the deck's ink-border cards (no
-// Slack logo: generic chat icon). Used on friday and as the boss callback.
+// Slack notification like in the bdd deck (Slack mark on the left), in the
+// deck's ink-border card style. The date sits right in the card, prominent.
 const INCIDENT_MSG = "Řešíme incident, pojď nám pomoct.";
-const notif = ({ from = "Kolega", text = INCIDENT_MSG, when = "teď", extra = "", attrs = "" } = {}) => `
+const notif = ({ when = "Pátek 16:00", text = INCIDENT_MSG, extra = "", attrs = "" } = {}) => `
   <div class="notif ${extra}" ${attrs}>
-    <div class="notif-ico">${icon("message-square-text", { size: 34 })}</div>
+    <div class="notif-ico"><img src="img/slack-mark.svg" alt="Slack"></div>
     <div class="notif-body">
-      <div class="notif-head"><span>Slack</span><span>${when}</span></div>
-      <div class="notif-from">${from}</div>
+      <div class="notif-when">${when}</div>
       <div class="notif-text">${text}</div>
     </div>
   </div>`;
@@ -373,20 +372,17 @@ const scenes = [
   },
 
   // ============================================================ Pátek 16:00 (serious)
-  // 0 lock-screen style "Pátek 16:00" · 1 Slack-like notification drops in
+  // 0 dark, empty (a beat after "…většinou…") · 1 Slack notification slides
+  // down from above the top edge, over the stage
   {
     id: "friday",
     world: "serious",
     background: "var(--ink)",
     steps: 2,
     verifyWait: [1200, 1400],
-    notes: "Pátek, 16:00. (→) Přijde zpráva na Slacku: Řešíme incident, pojď nám pomoct.",
+    notes: "(tma, pauza) (→) Pátek, 16:00. Přijde zpráva na Slacku: Řešíme incident, pojď nám pomoct.",
     render: () => `
       <div class="scene slide friday">
-        <div class="fr-clock">
-          <div class="fr-day">Pátek</div>
-          <div class="fr-time">16:00</div>
-        </div>
         ${notif({ extra: "fr-notif", attrs: 'data-from="1"' })}
       </div>
     `,
@@ -739,7 +735,7 @@ const scenes = [
       <div class="scene slide boss">
         <div class="lvl-chip big">BOSS FIGHT</div>
         <h1 class="headline center">Ten už jste viděli.</h1>
-        ${notif({ when: "pátek 16:00", extra: "boss-callback", attrs: 'data-from="1"' })}
+        ${notif({ extra: "boss-callback", attrs: 'data-from="1"' })}
         <div class="boss-bug">${bug({ size: 144, pose: "idle" })}</div>
         <div class="pixel-ground"></div>
       </div>

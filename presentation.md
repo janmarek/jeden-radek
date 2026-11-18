@@ -30,7 +30,7 @@ závorkách jsou zástupné texty nebo návrhy k potvrzení.
 | 6 | `agent` | game | 12 | Vyrobil jsem refaktorovacího agenta. Nebylo to těžké: navázal jsem na práci ostatních lidí, kteří napsali dobrou dokumentaci a některé věci částečně automatizovali. Jejich práce taky poskytla příklady, jak se to má dělat. K tomu jsem dodal svou představu, jak má agent postupovat: analýza kódu, specifikace, API, frontendové komponenty, propojit API a frontend, a samozřejmě code review a opravit chyby. |
 | 7 | `worked` | game | 6 | A fungovalo to. (→) Agent vytvořil dobrý základ v produkční kvalitě. (→) Lepší UX, (→) UI konzistentní se zbytkem aplikace, (→) dalo se to dál vylepšovat (→) a přibyly nové funkce: inline edit a bulk delete. |
 | 8 | `mostly` | game | 1 | …většinou… (pauza, nechat dojít) |
-| 9 | `friday` | serious | 2 | Pátek, 16:00. (→) Přijde zpráva na Slacku: Řešíme incident, pojď nám pomoct. |
+| 9 | `friday` | serious | 2 | (tma, pauza) (→) Pátek, 16:00. Přijde zpráva na Slacku: Řešíme incident, pojď nám pomoct. |
 | 10 | `what-happened` | serious | 5 | Klíčový obrázek. Pokoj má kategorii; vztah je v propojovací tabulce, jeden řádek. Změním kategorii v UI. Mělo se stát: starý řádek smazat, nový vložit. Stalo se: nový přibyl, starý zůstal. A UI ukazuje ten nejstarší, takže to vypadá, že se nic nezměnilo. |
 | 11 | `stop-bleeding` | serious | 3 | Krok 1: zastavit krvácení. Vypnul jsem feature flag. Pro juniory: flag je vypínač funkce. A pak: víkend se neřešilo. |
 | 12 | `access` | serious | 2 | Krok 2: bojová sada. Přístupy si ověř předem: produkce, observability, databáze. Kolega přístup do produkční databáze měl, já ne. Tenhle slajd si klidně vyfoťte. |

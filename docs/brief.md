@@ -157,8 +157,9 @@ Tohle je zdroj pravdy. Co tu není, se nesmí prezentovat jako fakt.
   (karty postupně): lepší UX, konzistentní UI, dá se dál vylepšovat, nové funkce
   (inline edit, bulk delete). „…většinou…“ je samostatný slajd, ne překryv.
 - Incident začal v **pátek v 16:00** zprávou na Slacku od kolegů:
-  **„Řešíme incident, pojď nám pomoct.“** (Notifikace je stylizovaná do karet
-  decku, bez loga Slacku.)
+  **„Řešíme incident, pojď nám pomoct.“** Notifikace jako v bdd decku: ikona
+  Slacku (výjimka z pravidla o logách, schválil autor), datum přímo v kartě,
+  vyjíždí shora.
 
 ### Nevymýšlet (zatím neznámé)
 

@@ -1068,74 +1068,52 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
 }
 
 /* =====================================================================
- * Slack-like notification in the deck's card style (notif() in scenes.js)
+ * Slack notification (notif() in scenes.js): bdd's card layout (icon
+ * tile left, text right) in the deck's ink border + hard shadow.
  * ===================================================================== */
 .notif {
   display: flex;
-  align-items: flex-start;
-  gap: 22px;
-  padding: 22px 28px 24px;
+  align-items: center;
+  gap: 28px;
+  padding: 26px 34px 28px 28px;
   background: var(--paper);
   color: var(--ink);
   border: 3px solid var(--ink);
-  border-radius: 22px;
+  border-radius: 24px;
   box-shadow: 8px 8px 0 var(--coral);
   text-align: left;
 }
 .notif-ico {
   flex: none;
-  width: 64px;
-  height: 64px;
+  width: 96px;
+  height: 96px;
   display: grid;
   place-items: center;
-  background: var(--yellow);
+  background: var(--cream);
   border: 3px solid var(--ink);
-  border-radius: 14px;
+  border-radius: 20px;
 }
+.notif-ico img { width: 60px; height: 60px; }
 .notif-body { flex: 1; min-width: 0; }
-.notif-head {
-  display: flex;
-  justify-content: space-between;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-.notif-from { margin-top: 4px; font-size: 22px; font-weight: 700; }
-.notif-text { margin-top: 4px; font-size: 36px; font-weight: 600; line-height: 1.3; }
+.notif-when { font-size: 30px; font-weight: 800; line-height: 1.1; color: var(--coral); }
+.notif-text { margin-top: 6px; font-size: 44px; font-weight: 700; line-height: 1.2; }
 
 /* =====================================================================
- * 8 friday (serious): lock-screen "Pátek 16:00", notification drops in
+ * 9 friday (serious): dark beat, then the notification slides down from
+ * above the top edge with a little overshoot (like a phone banner)
  * ===================================================================== */
-.friday .fr-clock {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 120px;
-  text-align: center;
-  color: var(--cream);
-}
-.fr-day { font-size: 56px; font-weight: 600; letter-spacing: 0.04em; }
-.fr-time {
-  margin-top: -10px;
-  font-size: 220px;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  color: var(--yellow);
-  text-shadow: 10px 10px 0 var(--coral);
-}
 .friday .fr-notif {
   position: absolute;
   left: 50%;
-  top: 560px;
-  width: 960px;
+  top: 70px;
+  width: 1100px;
   transform: translateX(-50%);
+  z-index: 5;
 }
 .friday .fr-notif[data-from] {
-  translate: 0 -60px;
-  transition: opacity 0.3s ease-out, translate 0.5s cubic-bezier(.34, 1.5, .64, 1);
+  opacity: 1;
+  translate: 0 -360px;
+  transition: translate 0.6s cubic-bezier(.34, 1.4, .64, 1);
 }
 .friday .fr-notif.is-on { translate: 0 0; }
 
@@ -1631,7 +1609,7 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
   left: 50%;
   top: 420px;
   transform: translateX(-50%);
-  width: 820px;
+  width: 1000px;
 }
 .boss .boss-bug { position: absolute; left: 140px; bottom: 120px; }
 
