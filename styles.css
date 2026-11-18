@@ -483,30 +483,6 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
 .dl-ctx { background: #e3d8c9; }
 .dl-gap { --i: 0; --w: 40%; border: 3px dashed transparent; background: transparent; }
 
-/* Chat bits (friday, boss callback). */
-.chat-day {
-  margin: 22px 0 10px;
-  text-align: center;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--ink-soft);
-}
-.chat-msg { display: flex; gap: 16px; padding: 10px 32px; }
-.chat-avatar {
-  flex: none;
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  background: var(--coral);
-  color: var(--ink);
-  display: grid;
-  place-items: center;
-  font-size: 24px;
-  font-weight: 700;
-}
-.chat-name { font-size: 20px; font-weight: 700; }
-.chat-text { margin-top: 4px; font-size: 26px; line-height: 1.35; }
-
 /* =====================================================================
  * Scene: title (retro title screen)
  *   bug walks in from the left and stops (pose → idle via onStep);
@@ -1099,10 +1075,10 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
 .notif-text { margin-top: 6px; font-size: 44px; font-weight: 700; line-height: 1.2; }
 
 /* =====================================================================
- * 9 friday (serious): dark beat, then the notification slides down from
- * above the top edge with a little overshoot (like a phone banner)
+ * mostly step 1: the notification slides down from above the top edge,
+ * over "…většinou…", with a little overshoot (like a phone banner)
  * ===================================================================== */
-.friday .fr-notif {
+.mostly .ms-notif {
   position: absolute;
   left: 50%;
   top: 70px;
@@ -1110,12 +1086,12 @@ body[data-world="serious"] #counter { color: rgba(247, 237, 225, 0.45); }
   transform: translateX(-50%);
   z-index: 5;
 }
-.friday .fr-notif[data-from] {
+.mostly .ms-notif[data-from] {
   opacity: 1;
   translate: 0 -360px;
   transition: translate 0.6s cubic-bezier(.34, 1.4, .64, 1);
 }
-.friday .fr-notif.is-on { translate: 0 0; }
+.mostly .ms-notif.is-on { translate: 0 0; }
 
 /* DEV ONLY: quiet jump link on the title (DEV_JUMP in scenes.js). */
 .dev-jump {

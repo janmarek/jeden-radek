@@ -148,7 +148,7 @@ const scenes = [
         <div class="title-name">Jan Marek</div>
         <div class="title-bug">${bug({ size: 144, pose: "walk" })}</div>
         <div class="pixel-ground"></div>
-        ${DEV_JUMP ? `<span class="dev-jump" data-goto="friday">incident →</span>` : ""}
+        ${DEV_JUMP ? `<span class="dev-jump" data-goto="mostly">incident →</span>` : ""}
       </div>
     `,
     onStep: (root, step, prev) => {
@@ -359,31 +359,20 @@ const scenes = [
     `,
   },
 
-  // ============================================================ …většinou…
+  // ============================================================ …většinou… + Pátek 16:00
+  // 0 "…většinou…" · 1 Slack notification slides down from above the top
+  // edge, over the word (the incident starts here)
   {
     id: "mostly",
     world: "game",
-    notes: "…většinou… (pauza, nechat dojít)",
+    steps: 2,
+    verifyWait: [900, 1400],
+    notes:
+      "…většinou… (pauza, nechat dojít) (→) Pátek, 16:00. Přijde zpráva na Slacku: Řešíme incident, pojď nám pomoct.",
     render: () => `
       <div class="scene slide mostly">
         <div class="mostly-big">…většinou…</div>
-      </div>
-    `,
-  },
-
-  // ============================================================ Pátek 16:00 (serious)
-  // 0 dark, empty (a beat after "…většinou…") · 1 Slack notification slides
-  // down from above the top edge, over the stage
-  {
-    id: "friday",
-    world: "serious",
-    background: "var(--ink)",
-    steps: 2,
-    verifyWait: [1200, 1400],
-    notes: "(tma, pauza) (→) Pátek, 16:00. Přijde zpráva na Slacku: Řešíme incident, pojď nám pomoct.",
-    render: () => `
-      <div class="scene slide friday">
-        ${notif({ extra: "fr-notif", attrs: 'data-from="1"' })}
+        ${notif({ extra: "ms-notif", attrs: 'data-from="1"' })}
       </div>
     `,
   },
