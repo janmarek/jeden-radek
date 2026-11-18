@@ -377,11 +377,148 @@ const scenes = [
     `,
   },
 
-  // ============================================================ Co se stalo (serious, key visual)
+  // ============================================================ Slack: incident thread
+  // Slack window in the deck's card style; messages arrive one per step.
+  // 0 Astrid (sync) · 1 Astrid (categories) · 2 Janse (140 duplicates) ·
+  // 3 E'Tore (turns it off)
+  {
+    id: "slack",
+    world: "serious",
+    steps: 4,
+    verifyWait: [1200, 900, 900, 1200],
+    notes:
+      "Astrid: Nefunguje mi synchronizace do našeho systému. (→) Padá to, hotelové pokoje se objevují ve více kategoriích. (→) Janse: Potvrzuji, v databázi vidím 140 duplicit. (→) E'Tore: To bude naše nová stránka, vypnu to.",
+    render: () => {
+      const msg = (who, initial, color, text, from, cont = false) => `
+        <div class="sl-msg${cont ? " sl-cont" : ""}" data-from="${from}">
+          <div class="sl-avatar" style="background:var(--${color})">${cont ? "" : initial}</div>
+          <div class="sl-body">
+            ${cont ? "" : `<div class="sl-name">${who}</div>`}
+            <div class="sl-text">${text}</div>
+          </div>
+        </div>`;
+      return `
+      <div class="scene slide slackscene">
+        <div class="sl-win">
+          <div class="sl-head"><img src="img/slack-mark.svg" alt=""><span># incident</span></div>
+          <div class="sl-feed">
+            ${msg("Astrid", "A", "coral", "Nefunguje mi synchronizace do našeho systému.", 0)}
+            ${msg("Astrid", "A", "coral", "Padá to, hotelové pokoje se objevují ve více kategoriích.", 1, true)}
+            ${msg("Janse", "J", "cyan", "Potvrzuji, v databázi vidím <b>140 duplicit</b>.", 2)}
+            ${msg("E'Tore", "E", "lavender", "To bude naše nová stránka, vypnu to.", 3)}
+          </div>
+        </div>
+      </div>`;
+    },
+  },
+
+  // ============================================================ Co se to děje? + checklist
+  // 0 headline + panic emoji · 1–5 checklist questions one by one ·
+  // 6 my own answers (✓ ✓ ✗ ✗ ✓) · 7 takeaway
+  {
+    id: "panic",
+    world: "serious",
+    steps: 8,
+    verifyWait: [900, 700, 700, 700, 700, 700, 1600, 900],
+    notes:
+      "Co se to děje? (→) Máš přístup do produkční aplikace? (→) K logům a metrikám? (→) Umíš zjistit, co je v produkční databázi? (→) Máme dost informací? (→) Víš, jak pracovat se systémem na správu incidentů? (→) Jak jsem na tom byl já: produkce ano, logy ano, produkční databáze ne, informace ne, incidenty ano. (→) Příprava je důležitá. Ale když něco nebude optimální, příště to zvládneš líp.",
+    render: () => {
+      const items = [
+        ["Máš přístup do produkční aplikace?", true],
+        ["Máš přístup k logům a metrikám?", true],
+        ["Umíš zjistit, co je v produkční databázi?", false],
+        ["Máme dost informací?", false],
+        ["Víš, jak pracovat se systémem na správu incidentů?", true],
+      ];
+      return `
+      <div class="scene slide panic">
+        <h1 class="headline">Co se to děje?</h1>
+        <div class="pn-emoji" aria-hidden="true">😱</div>
+        <div class="pn-me" data-from="6">já</div>
+        <ul class="pn-list">
+          ${items
+            .map(
+              ([t, ok], k) => `
+            <li data-from="${k + 1}" style="--k:${k}">
+              <span class="pn-box ${ok ? "ok" : "no"}">${icon(ok ? "check" : "x", { size: 34, stroke: 3.5 })}</span>${t}
+            </li>`
+            )
+            .join("")}
+        </ul>
+        <div class="pn-takeaway" data-from="7">
+          Příprava je důležitá. Ale když něco nebude optimální, <b>příště to zvládneš líp.</b>
+        </div>
+      </div>`;
+    },
+  },
+
+  // ============================================================ Jak reagovat
+  // 0 headline · 1–3 cards: feature flag, chladná hlava, informovat
+  {
+    id: "react",
+    world: "serious",
+    steps: 4,
+    verifyWait: [900, 900, 900, 1200],
+    notes:
+      "Jak reagovat na incident? (→) Feature flag: vypnout. Pro juniory: flag je vypínač funkce, kód zůstane nasazený. (→) Chladná hlava: když nevím, co se děje, první krok je zjistit, co se děje. (→) Informovat. A to je těžké.",
+    render: () => `
+      <div class="scene slide react">
+        <h1 class="headline">Jak reagovat na incident</h1>
+        <div class="tiles tiles-3">
+          <div class="tile t-cyan" data-from="1"><div class="tile-ico">${icon("toggle-right", { size: 64 })}</div>Feature flag<small>Vypínač funkce. Kód zůstane nasazený, funkce jde vypnout.</small></div>
+          <div class="tile t-lavender" data-from="2"><div class="tile-ico">${icon("snowflake", { size: 64 })}</div>Chladná hlava<small>Když nevím, co se děje, první krok je zjistit, co se děje.</small></div>
+          <div class="tile t-yellow" data-from="3"><div class="tile-ico">${icon("megaphone", { size: 64 })}</div>Informovat<small>A to je těžké.</small></div>
+        </div>
+      </div>
+    `,
+  },
+
+  // ============================================================ Jednorázový job (UI)
+  // 0 the job's UI lists the real DB state · 1 a human ticks what to delete ·
+  // 2 quote about deploy
+  {
+    id: "job",
+    world: "serious",
+    steps: 3,
+    verifyWait: [900, 1000, 1000],
+    notes:
+      "Zjistit, co se děje: UI aplikace skutečný stav neukazovalo. Napsal jsem jednorázový job s jednoduchým UI: vypíše, co v databázi opravdu je, (→) a umí smazat vybrané řádky. Co smazat, rozhoduje člověk. (→) Deploy trvá, ale rychleji to stejně nezvládnu.",
+    render: () => {
+      const rows = [
+        ["A", "X", true],
+        ["A", "Y", false],
+        ["B", "X", true],
+        ["B", "Z", false],
+      ];
+      return `
+      <div class="scene slide job">
+        <h1 class="headline">Napsal jsem jednorázový job</h1>
+        <p class="lede">Ukáže, co je v databázi doopravdy.</p>
+        <div class="jb-win">
+          <div class="jb-head"><span>Vazby pokoj–kategorie</span><button class="jb-del" data-from="1">${icon("trash-2", { size: 22, stroke: 2.75 })} Smazat vybrané</button></div>
+          <div class="jb-row jb-th"><span></span><span>pokoj</span><span>kategorie</span><span></span></div>
+          ${rows
+            .map(
+              ([p, c, old]) => `
+            <div class="jb-row${old ? " jb-pick" : ""}">
+              <span class="jb-check">${icon("check", { size: 26, stroke: 3.5 })}</span>
+              <span>${p}</span><span>${c}</span>
+              <span class="jb-tag">${old ? "nejstarší" : ""}</span>
+            </div>`
+            )
+            .join("")}
+          <div class="jb-more">…</div>
+        </div>
+        <div class="jb-human" data-from="1">Co smazat, rozhoduje <b>člověk</b>.</div>
+        <blockquote class="quote jb-quote" data-from="2">Deploy trvá.<br>Rychleji to stejně nezvládnu.</blockquote>
+      </div>`;
+    },
+  },
+
+  // ============================================================ Co se stalo (key visual, after the job showed the data)
   {
     id: "what-happened",
     world: "serious",
-    background: "var(--ink)",
     steps: 5,
     notes:
       "Klíčový obrázek. Pokoj má kategorii; vztah je v propojovací tabulce, jeden řádek. Změním kategorii v UI. Mělo se stát: starý řádek smazat, nový vložit. Stalo se: nový přibyl, starý zůstal. A UI ukazuje ten nejstarší, takže to vypadá, že se nic nezměnilo.",
@@ -417,112 +554,6 @@ const scenes = [
           <span data-from="2" data-to="2">Mělo se stát: starý řádek smazat, nový vložit.</span>
           <span data-from="3" data-to="3">Stalo se: nový řádek přibyl, <b>starý zůstal</b>.</span>
           <span data-from="4">…a v databázi z něj vznikly dva. Navenek se nic nezměnilo.</span>
-        </div>
-      </div>
-    `,
-  },
-
-  // ============================================================ Krok 1: flag
-  {
-    id: "stop-bleeding",
-    world: "serious",
-    background: "var(--ink)",
-    steps: 3,
-    notes:
-      "Krok 1: zastavit krvácení. Vypnul jsem feature flag. Pro juniory: flag je vypínač funkce. A pak: víkend se neřešilo.",
-    render: () => `
-      <div class="scene slide flag">
-        <div class="kicker">Krok 1</div>
-        <h1 class="headline">Zastavit krvácení</h1>
-        <div class="switch"><div class="switch-knob"></div><span class="switch-on">ZAP</span><span class="switch-off">VYP</span></div>
-        <div class="switch-label">nové UI</div>
-        <p class="lede flag-weekend" data-from="2">Víkend se neřešilo.</p>
-        ${junior(
-          `<div class="mini-switch"></div>`,
-          "Feature flag = vypínač funkce. Kód zůstane nasazený, funkce jde vypnout.",
-          0,
-          "flag-junior"
-        )}
-      </div>
-    `,
-  },
-
-  // ============================================================ Krok 2: bojová sada
-  {
-    id: "access",
-    world: "serious",
-    background: "var(--ink)",
-    steps: 2,
-    notes:
-      "Krok 2: bojová sada. Přístupy si ověř předem: produkce, observability, databáze. Kolega přístup do produkční databáze měl, já ne. Tenhle slajd si klidně vyfoťte.",
-    render: () => `
-      <div class="scene slide access">
-        <div class="kicker">Krok 2 · vyfoť si</div>
-        <h1 class="headline">Přístupy si ověř předem</h1>
-        <ul class="checklist">
-          <li><i></i>Produkce</li>
-          <li><i></i>Observability: logy, metriky</li>
-          <li><i></i>Databáze</li>
-        </ul>
-        <div class="access-me" data-from="1">
-          <div><span class="ok">✓</span> Kolega přístup do produkční databáze měl.</div>
-          <div><span class="no">✗</span> Já ne.</div>
-        </div>
-      </div>
-    `,
-  },
-
-  // ============================================================ Krok 3: zjistit, pak opravit
-  {
-    id: "investigate",
-    world: "serious",
-    background: "var(--ink)",
-    steps: 3,
-    notes:
-      "Krok 3: nejdřív zjistit, pak opravit. UI skutečný stav neukazovalo. Napsal jsem jednorázový job: vypíše, co v databázi opravdu je, a umí smazat vybrané řádky. Co smazat, rozhoduje člověk. Deploy trvá, ale rychleji to stejně nezvládnu.",
-    render: () => `
-      <div class="scene slide investigate">
-        <div class="kicker">Krok 3</div>
-        <h1 class="headline">Nejdřív zjistit, pak opravit</h1>
-        ${appWindow({
-          variant: "frame",
-          theme: "terminal",
-          title: "jednorázový job",
-          width: 820,
-          height: 380,
-          className: "job-win",
-          body: `
-            <div class="term">
-              <div class="t-dim">1 · výpis skutečného stavu</div>
-              <div data-from="1">pokoj A → X <span class="t-dim">(nejstarší)</span></div>
-              <div data-from="1">pokoj A → Y</div>
-              <div data-from="1" class="t-dim">[…]</div>
-              <div class="t-dim t-gap" data-from="1">2 · smazat vybrané (rozhoduje člověk)</div>
-              <div data-from="1"><span class="t-box">[x]</span> pokoj A → …</div>
-            </div>`,
-        })}
-        <blockquote class="quote" data-from="2">Deploy trvá.<br>Rychleji to stejně nezvládnu.</blockquote>
-      </div>
-    `,
-  },
-
-  // ============================================================ Krok 4: nevím
-  {
-    id: "dont-know",
-    world: "serious",
-    background: "var(--ink)",
-    steps: 3,
-    notes:
-      "Krok 4: komunikace. Nejtěžší věta incidentu je ‚nevím‘. Pomáhá vzorová věta: co nevím, co zjišťuju a kdy dám vědět. [Vzorová věta je návrh, potvrdit znění.]",
-    render: () => `
-      <div class="scene slide dontknow">
-        <div class="kicker">Krok 4</div>
-        <h1 class="headline huge">„Nevím.“</h1>
-        <p class="lede" data-from="1">Nejtěžší věta celého incidentu.</p>
-        <div class="template" data-from="2">
-          <span>Zatím nevím.</span>
-          <span>Zjišťuju <b>X</b>.</span>
-          <span>Další update v <b>15:00</b>.</span>
         </div>
       </div>
     `,

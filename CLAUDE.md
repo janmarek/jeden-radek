@@ -59,7 +59,8 @@ scenes have a `world`; verify waits live on the scene (`verifyWait`).
   id: "kebab-id",
   notes: "speaker note / intent",   // runtime ignores (for now)
   steps: 3,                         // default 1
-  world: "game",                    // "game" | "serious" (incident part); body[data-world] hook
+  world: "game",                    // "game" | "serious" (incident part); body[data-world] hook.
+                                    // Both use the cream look: Jan rejected the black incident background.
   background: "var(--night-2)",     // optional #app tint, fades between scenes
   backdrop: "art/cave.svg",         // optional full-screen image, crossfaded
   exitDuration: 500,                // optional exit animation via .is-exiting

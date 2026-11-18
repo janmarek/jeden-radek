@@ -161,6 +161,20 @@ Tohle je zdroj pravdy. Co tu není, se nesmí prezentovat jako fakt.
   Slacku (výjimka z pravidla o logách, schválil autor), datum přímo v kartě,
   vyjíždí zprava do pravého horního rohu přes „…většinou…“. Datum **13. 8.** je jen pro zábavu
   (pátek třináctého), ne skutečné datum incidentu.
+- **Černé pozadí incidentu se nehodí**, incident je ve stejném krémovém stylu.
+- Incident nejdřív jako Slack okno, zprávy přicházejí postupně:
+  - Astrid: „Nefunguje mi synchronizace do našeho systému.“ / „Padá to, hotelové
+    pokoje se objevují ve více kategoriích.“
+  - Janse: „Potvrzuji, v databázi vidím 140 duplicit.“ (**140 duplicit** je fakt)
+  - E'Tore: „To bude naše nová stránka, vypnu to.“ (flag vypnul kolega)
+- „Co se to děje?“ (panika) + checklist: přístup do produkční aplikace, k logům
+  a metrikám, zjistit co je v produkční DB, dost informací, systém na správu
+  incidentů. Autor: produkce ✓, logy ✓, produkční DB ✗, informace ✗,
+  incidenty ✓. Závěr: příprava je důležitá, ale když něco nebude optimální,
+  příště to zvládneš líp.
+- Jak reagovat na incident: feature flag; chladná hlava (když nevím, co se děje,
+  první krok je zjistit, co se děje); informovat (těžké).
+- Jednorázový job měl **UI, ne konzoli**.
 
 ### Nevymýšlet (zatím neznámé)
 
@@ -287,8 +301,7 @@ agent nerozhoduje sám.
 - Hlasování publika: ano/ne, ruce nebo Slido?
 - Kterou závěrečnou větu použít? (slajd 24)
 - Vizuál titulky a přepnutí do 8bit stylu: kdy přesně (slajd 1 vs. 14)?
-- Vzorová věta pro komunikaci „nevím“ (slajd 13): potvrdit znění.
 - Vyprávění bugu v první osobě (slajd 14, bublina): ponechat?
 - Patch notes (slajd 23): všech osm, nebo vybrat?
-- Vážný tmavý styl pro incident (slajdy 8–13) a přepnutí do hry na slajdu 14:
-  v nástřelu je použit, potvrdit.
+- Kde má být klíčový obrázek „Co se stalo“ (propojovací tabulka)? Teď je po
+  slajdu s jobem.
