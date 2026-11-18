@@ -88,7 +88,7 @@ const junior = (pic, text, from = 0, extra = "") => `
 // Slack notification like in the bdd deck (Slack mark on the left), in the
 // deck's ink-border card style. The date sits right in the card, prominent.
 const INCIDENT_MSG = "Řešíme incident, pojď nám pomoct.";
-const notif = ({ when = "Pátek 16:00", text = INCIDENT_MSG, extra = "", attrs = "" } = {}) => `
+const notif = ({ when = "Pátek 13.&nbsp;8. 16:00", text = INCIDENT_MSG, extra = "", attrs = "" } = {}) => `
   <div class="notif ${extra}" ${attrs}>
     <div class="notif-ico"><img src="img/slack-mark.svg" alt="Slack"></div>
     <div class="notif-body">
@@ -368,7 +368,7 @@ const scenes = [
     steps: 2,
     verifyWait: [900, 1400],
     notes:
-      "…většinou… (pauza, nechat dojít) (→) Pátek, 16:00. Přijde zpráva na Slacku: Řešíme incident, pojď nám pomoct.",
+      "…většinou… (pauza, nechat dojít) (→) Pátek 13. srpna, 16:00. Přijde zpráva na Slacku: Řešíme incident, pojď nám pomoct.",
     render: () => `
       <div class="scene slide mostly">
         <div class="mostly-big">…většinou…</div>
