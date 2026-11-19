@@ -1355,16 +1355,12 @@ body {
 }
 .stamp.is-on { scale: 1; }
 .findbug .fb-stamp { left: 1000px; top: 690px; }
-/* Step 4 "Opraveno?": no swap blink. The green fades into yellow, the
-   check icon crossfades to a question mark, the "?" fades in. */
-.fb-ico { display: grid; }
-.fb-ico > svg { grid-area: 1 / 1; transition: opacity 0.8s ease; }
-.fb-ico > svg:last-child { opacity: 0; }
-.fb-q { display: inline-block; max-width: 0; opacity: 0; transition: max-width 0.5s ease, opacity 0.8s ease; vertical-align: top; }
+/* Step 4 "Opraveno?": no swap blink. The green fades into yellow and the
+   "?" fades in. Icon stays the check; the "?" always takes its space, so
+   both states have the same width (Jan asked). */
+.fb-q { opacity: 0; transition: opacity 0.8s ease; }
 .findbug[data-step="4"] .fb-stamp { background: var(--yellow); }
-.findbug[data-step="4"] .fb-ico > svg:first-child { opacity: 0; }
-.findbug[data-step="4"] .fb-ico > svg:last-child { opacity: 1; }
-.findbug[data-step="4"] .fb-q { max-width: 1em; opacity: 1; }
+.findbug[data-step="4"] .fb-q { opacity: 1; }
 
 /* =====================================================================
  * damage: "Napravení škod", three lines one per step
@@ -2099,11 +2095,20 @@ body {
 }
 
 /* =====================================================================
- * takeaways: "Co tedy s tím?" three points, then thanks; agent stays
+ * takeaways: "Co tedy s tím?" three points; agent stays
  * ===================================================================== */
 .takeaways .tk-list { max-width: 1160px; margin-top: 40px; }
-.takeaways .tk-list li { margin-bottom: 24px; font-size: 34px; font-weight: 600; line-height: 1.3; }
+.takeaways .tk-list li { margin-bottom: 30px; font-size: 44px; font-weight: 600; line-height: 1.3; }
 .takeaways .tk-list li::before { top: 0.36em; }
 .takeaways .tk-list b { font-weight: 800; color: var(--coral); }
-.takeaways .tk-thanks { position: absolute; right: 380px; bottom: 140px; font-size: 88px; font-weight: 800; color: var(--coral); }
 .takeaways .tk-agent { position: absolute; right: 150px; bottom: 120px; }
+
+/* =====================================================================
+ * closing: bug top centre, two lines, then thanks
+ * ===================================================================== */
+.closing { text-align: center; }
+.closing .cl-bug { display: flex; justify-content: center; margin-top: 10px; }
+.closing .cl-line { margin: 26px 0 0; font-size: 50px; font-weight: 700; line-height: 1.3; }
+.closing .cl-line:first-of-type { margin-top: 56px; }
+.closing .cl-line b { font-weight: 800; color: var(--coral); }
+.closing .cl-thanks { margin-top: 70px; font-size: 110px; font-weight: 800; color: var(--coral); }

@@ -424,19 +424,19 @@ const scenes = [
   {
     id: "whats-wrong",
     world: "game",
-    steps: 4,
+    steps: 5,
     notes:
-      "Co je na tom špatně? Vypadají trochu jinak než zbytek aplikace. (→) Je to legacy kód, vývojáři do toho neradi sahají. (→) Způsobuje technické problémy. (→) A pak přijde dilema: potřebuju na takové stránce doplnit něco malého. Doplním to postaru, nebo přepíšu celou stránku?",
+      "Co je na tom špatně? (→) Vypadají trochu jinak než zbytek aplikace. (→) Je to legacy kód, vývojáři do toho neradi sahají. (→) Způsobuje technické problémy. (→) A pak přijde dilema: potřebuju na takové stránce doplnit něco malého. Doplním to postaru, nebo přepíšu celou stránku?",
     render: () => `
       <div class="scene slide wrong">
         <div class="kicker">Backend rendered pages</div>
         <h1 class="headline">Co je na tom špatně?</h1>
         <ul class="plain-list">
-          <li>Vypadají trochu jinak než zbytek aplikace</li>
-          <li data-from="1">Legacy kód, vývojáři do toho neradi sahají</li>
-          <li data-from="2">Způsobuje technické problémy</li>
+          <li data-from="1">Vypadají trochu jinak než zbytek aplikace</li>
+          <li data-from="2">Legacy kód, vývojáři do toho neradi sahají</li>
+          <li data-from="3">Způsobuje technické problémy</li>
         </ul>
-        <div class="dilemma-line" data-from="3">
+        <div class="dilemma-line" data-from="4">
           Potřebuju doplnit něco malého:<br><b>postaru</b>, nebo <b>přepsat celou stránku</b>?
         </div>
       </div>
@@ -594,13 +594,13 @@ const scenes = [
     steps: 8,
     verifyWait: [900, 700, 700, 700, 700, 700, 1600, 900],
     notes:
-      "Co se děje? (→) Přístup do produkční aplikace. (→) Přístup k logům a metrikám. (→) Přístup do produkční databáze. (→) Dost informací. (→) Znalost systému na správu incidentů. (→) Jak jsem na tom byl já: produkce ano, logy ano, produkční databáze ne, informace ne, incidenty ano. (→) Příprava je důležitá. Ale buď v klidu, příště to zvládneš líp.",
+      "Co se děje? (→) Přístup do produkční aplikace. (→) Přístup k logům a metrikám. (→) Přístup do produkční databáze. (→) Dost informací o problému. (→) Znalost systému na správu incidentů. (→) Jak jsem na tom byl já: produkce ano, logy ano, produkční databáze ne, informace ne, incidenty ano. (→) Příprava je důležitá. Ale buď v klidu, příště to zvládneš líp.",
     render: () => {
       const items = [
         ["Přístup do produkční aplikace", true],
         ["Přístup k logům a metrikám", true],
         ["Přístup do produkční databáze", false],
-        ["Dost informací", false],
+        ["Dost informací o problému", false],
         ["Znalost systému na správu incidentů", true],
       ];
       return `
@@ -775,6 +775,7 @@ const scenes = [
   // ============================================================ Oprava kódu
   // 0 top of roomService.ts · 1 scrolls to updateRoom() · 2 the missing line
   // slides in · 3 green "Opraveno" stamp · 4 it fades to yellow "Opraveno?"
+  // (same icon, same width: the "?" always takes its space)
   {
     id: "find-bug",
     world: "serious",
@@ -837,7 +838,7 @@ const scenes = [
           <div class="diff-head"><span class="diff-title">roomService.ts</span></div>
           <div class="fb-body"><div class="fb-scroll" style="--scroll:${-target * 38}px">${body}</div></div>
         </div>
-        <div class="stamp fb-stamp" data-from="3"><span class="fb-ico">${icon("circle-check", { size: 56, stroke: 3 })}${icon("circle-help", { size: 56, stroke: 3 })}</span><span>Opraveno<span class="fb-q">?</span></span></div>
+        <div class="stamp fb-stamp" data-from="3">${icon("circle-check", { size: 56, stroke: 3 })}<span>Opraveno<span class="fb-q">?</span></span></div>
       </div>`;
     },
   },
@@ -870,7 +871,7 @@ const scenes = [
     world: "serious",
     steps: 8,
     notes:
-      "Anketa: jak byste to vyčistili? (→) A) naklikat v UI, (→) B) pustit SQL v databázi, (→) C) uklízecí job. Hlasujte rukama. (→) UI: možná by stačilo stávající UI. Jenže v něm není vidět ani chyba, ani která kategorie je správná. (→) SQL: oprava hned. Ale je to velmi nebezpečné a stejně jsem na to neměl práva. (→) Job: pomalé, musím napsat kód a čekat na deploy. Ale je bezpečný, ukáže rozsah problému a nechá mě rozhodnout. (→) Takže job.",
+      "Anketa: jak byste to vyčistili? (→) A) naklikat v UI, (→) B) pustit SQL v databázi, (→) C) uklízecí job. Hlasujte rukama. (→) UI: možná by stačilo stávající UI. Jenže v něm není vidět ani chyba, ani která kategorie je správná. (→) SQL: oprava hned. Ale je to velmi nebezpečné a stejně jsem na to neměl práva. (→) Job: je bezpečný, ukáže rozsah problému a nechá mě rozhodnout. Ale je to nový kód a musím čekat na deploy. (→) Takže job.",
     render: () => {
       const pro = (t, from) => `<li class="pl-pro" data-from="${from}"><span class="pl-sign">${icon("plus", { size: 22, stroke: 3.5 })}</span><span>${t}</span></li>`;
       const con = (t, from) => `<li class="pl-con" data-from="${from}"><span class="pl-sign">${icon("minus", { size: 22, stroke: 3.5 })}</span><span>${t}</span></li>`;
@@ -893,9 +894,10 @@ const scenes = [
             con("Velmi nebezpečné.", 5) +
             con("Nemám práva.", 5), 2)}
           ${card("C", "Uklízecí job",
-            con("Pomalé: kód a deploy.", 6) +
             pro("Bezpečné.", 6) +
-            pro("Ukáže rozsah, rozhodnu já.", 6), 3, "pl-pick")}
+            pro("Ukáže rozsah, rozhodnu já.", 6) +
+            con("Nový kód.", 6) +
+            con("Nutnost čekat na deploy.", 6), 3, "pl-pick")}
         </div>
       </div>`;
     },
@@ -1302,25 +1304,41 @@ const scenes = [
   },
 
   // ============================================================ Co tedy s tím
-  // 0 question · 1–4 the four points · 5 thanks
+  // 0 question · 1–3 the three points
   {
     id: "takeaways",
     world: "game",
-    steps: 6,
+    steps: 4,
     notes:
-      "Co tedy s tím? (→) Možná by nebylo od věci držet se best practices, třeba malých PR. (→) Refaktorovacího agenta jsme vylepšili, aby se přesně tohle příště už nestalo. (→) Nestačí skoro dobře, jeden řádek může všechno pokazit. (→) Jde o to zmenšit pravděpodobnost chyby. Na sto procent úspěšní nikdy nebudeme. (→) Díky!",
+      "Co tedy s tím? (→) Držet se best practices pomáhá, třeba malých PR. (→) Agenta jsme vylepšili, aby se problém neopakoval. (→) Nestačí skoro dobře, jeden řádek může všechno pokazit.",
     render: () => `
       <div class="scene slide takeaways">
         <h1 class="headline">Co tedy s tím?</h1>
         <ul class="plain-list tk-list">
-          <li data-from="1">Možná by nebylo od věci držet se best practices, třeba <b>malých&nbsp;PR</b>.</li>
-          <li data-from="2">Refaktorovacího agenta jsme <b>vylepšili</b>, aby se přesně tohle příště už nestalo.</li>
+          <li data-from="1">Držet se <b>best practices</b> pomáhá.</li>
+          <li data-from="2">Agenta jsme <b>vylepšili</b>, aby se problém neopakoval.</li>
           <li data-from="3">Nestačí <b>skoro dobře</b>, jeden řádek může vše pokazit.</li>
-          <li data-from="4">Jde o to <b>zmenšit pravděpodobnost</b> chyby. Na 100&nbsp;% úspěšní nikdy nebudeme.</li>
         </ul>
-        <div class="tk-thanks" data-from="5">Díky!</div>
         <div class="tk-agent">${agent({ size: 224 })}</div>
         ${ground()}
+      </div>
+    `,
+  },
+
+  // ============================================================ Závěr
+  // bug top centre · 0 first line · 1 second line · 2 thanks
+  {
+    id: "closing",
+    world: "game",
+    steps: 3,
+    notes:
+      "Snažíme se zmenšit pravděpodobnost chyby. (→) 100 % úspěšnosti se dosáhnout nedá. (→) Díky!",
+    render: () => `
+      <div class="scene slide closing">
+        <div class="cl-bug">${bug({ size: 216, pose: "idle" })}</div>
+        <p class="cl-line">Snažíme se <b>zmenšit pravděpodobnost</b> chyby.</p>
+        <p class="cl-line" data-from="1">100&nbsp;% úspěšnosti se dosáhnout nedá.</p>
+        <div class="cl-thanks" data-from="2">Díky!</div>
       </div>
     `,
   },
