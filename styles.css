@@ -1710,12 +1710,23 @@ body {
 }
 .l1 .l1-note b { font-weight: 800; }
 
-/* L2 tests: two gaps; bug jumps the first (step 2), the agent builds a
-   floating bridge over the second and the bug walks off (step 3). */
+/* L2 tests: two gaps; the first bug walks out over the unit-test gap,
+   hangs, falls in (step 2); the second jumps the first gap (step 3), the
+   agent builds a floating bridge over the second and the bug walks off
+   (step 4). */
 .l2-bug { left: 160px; }
-.l2.s2 .l2-bug { animation: l2-x 1.6s linear both; }
-.l2.s2 .l2-arc { animation: l2-y 1.6s both; }
-.l2.s3 .l2-bug { animation: l2-cross 2.6s linear 2s both; }
+.l2.s3 .l2-bug { animation: l2-x 1.6s linear both; }
+.l2.s3 .l2-arc { animation: l2-y 1.6s both; }
+.l2.s4 .l2-bug { animation: l2-cross 2.6s linear 2s both; }
+/* Gap 560–720, bug 156 wide: left 562 puts it fully over the gap. */
+.l2-faller { position: absolute; left: 340px; bottom: 120px; z-index: 5; }
+.l2.s2 .l2-faller { animation: l2-fall 1.9s both; }
+@keyframes l2-fall {
+  0%   { left: 340px; bottom: 120px; rotate: 0deg; animation-timing-function: linear; }
+  32%  { left: 562px; bottom: 120px; rotate: 0deg; }
+  53%  { left: 562px; bottom: 120px; rotate: 0deg; animation-timing-function: ease-in; }
+  100% { left: 562px; bottom: -260px; rotate: 20deg; }
+}
 @keyframes l2-x {
   0%    { left: 160px; }
   37.5% { left: 400px; }
@@ -1741,7 +1752,7 @@ body {
   border-radius: 6px;
   scale: 0;
 }
-.l2.s3 .l2-bridge i {
+.l2.s4 .l2-bridge i {
   animation:
     block-pop 0.35s cubic-bezier(.34, 1.56, .64, 1) calc(1s + var(--i) * 0.18s) both,
     block-float 1.4s ease-in-out calc(1.6s + var(--i) * 0.25s) infinite alternate;
@@ -1749,7 +1760,7 @@ body {
 @keyframes block-pop { from { scale: 0; } to { scale: 1; } }
 @keyframes block-float { from { translate: 0 0; } to { translate: 0 -5px; } }
 .l2-agent { position: absolute; left: 1380px; bottom: 120px; opacity: 0; transform-origin: 50% 100%; z-index: 4; }
-.l2.s3 .l2-agent { opacity: 1; animation: ag-jump-in-r 0.9s cubic-bezier(.3, .7, .4, 1) both; }
+.l2.s4 .l2-agent { opacity: 1; animation: ag-jump-in-r 0.9s cubic-bezier(.3, .7, .4, 1) both; }
 @keyframes ag-jump-in-r {
   0%   { transform: translate(480px, 0); }
   55%  { transform: translate(90px, -200px); }

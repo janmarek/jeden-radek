@@ -1055,34 +1055,37 @@ const scenes = [
   }),
 
   // L2 tests = two gaps (unit / integration).
-  // 0 gaps · 1 "dřív silné" · 2 bug jumps the first gap, stops at the
-  // second (too wide) · 3 "dnes menší hodnota" + the agent jumps in, builds
-  // a floating bridge, the bug walks across and away
+  // 0 gaps, two bugs · 1 "dřív silné" · 2 the first bug walks out over the
+  // unit-test gap, hangs a moment and falls in · 3 the second bug jumps the
+  // first gap, stops at the second (too wide) · 4 "dnes menší hodnota" +
+  // the agent jumps in, builds a floating bridge, the bug walks across and away
   levelScene({
     id: "level-2",
     n: 2,
     name: "Testy",
-    steps: 4,
-    verifyWait: [1200, 900, 2000, 5000],
+    steps: 5,
+    verifyWait: [1200, 900, 2200, 2000, 5000],
     className: "l2",
     holes: [[560, 720], [980, 1300]],
     points: [
       [1, "Dřív velmi silná ochrana."],
-      [3, "Dnes menší hodnota, pokud testy píše <b>stejný agent jako kód</b>."],
+      [4, "Dnes menší hodnota, pokud testy píše <b>stejný agent jako kód</b>."],
     ],
     notes:
-      "Level 2: testy. Unit testy a integrační testy, dvě díry, které musí bug přeskočit. (→) Dřív to byla velmi silná ochrana. (→) První díru bug přeskočí, druhá je moc široká. (→) Jenže dnes mají testy menší hodnotu, pokud je píše stejný agent jako kód. Agent přijde a bugovi postaví most.",
+      "Level 2: testy. Unit testy a integrační testy, dvě díry, které musí bug přeskočit. (→) Dřív to byla velmi silná ochrana. (→) První bug spadne rovnou do unit testů. (→) Druhý první díru přeskočí, ta druhá je moc široká. (→) Jenže dnes mají testy menší hodnotu, pokud je píše stejný agent jako kód. Agent přijde a bugovi postaví most.",
     art: () => `
       ${sign("unit testy", 470)}
       ${sign("integrační testy", 880)}
       <div class="l2-bridge">${[0, 1, 2, 3].map((i) => `<i style="--i:${i}"></i>`).join("")}</div>
       <div class="l2-agent">${agent({ size: 224 })}</div>
+      <div class="l2-faller">${bug({ size: 108 })}</div>
       <div class="l2-bug"><div class="l2-arc">${bug({ size: 108 })}</div></div>`,
     onStep: (root, step, prev) => {
-      if (step <= prev) return choreo(root, []), pose(root, ".l2-bug", "idle");
-      if (step === 2)
+      if (step <= prev) return choreo(root, []), pose(root, ".l2-bug, .l2-faller", "idle");
+      if (step === 2) poses(root, [[0, ".l2-faller", "walk"], [600, ".l2-faller", "idle"], [1000, ".l2-faller", "jump"]]);
+      if (step === 3)
         poses(root, [[0, ".l2-bug", "walk"], [600, ".l2-bug", "jump"], [1300, ".l2-bug", "walk"], [1600, ".l2-bug", "idle"]]);
-      if (step === 3) poses(root, [[2000, ".l2-bug", "walk"], [4600, ".l2-bug", "idle"]]);
+      if (step === 4) poses(root, [[2000, ".l2-bug", "walk"], [4600, ".l2-bug", "idle"]]);
     },
   }),
 
