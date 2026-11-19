@@ -174,3 +174,7 @@ reuse the browser already cached on this machine.
 - A flex container with `gap` turns every bare text run and inline element
   into its own flex item, so `Text <b>bold</b>.` gets gaps around the `<b>`.
   Wrap the text in one `<span>` (see `.dm-list` on the damage slide).
+- `data-step` is missing for the first frame after mount, so
+  `.x:not([data-step="0"])` matches then and the element animates back on
+  entry (find-bug's code scrolled down, then up). Guard with
+  `.x[data-step]:not([data-step="0"])`.

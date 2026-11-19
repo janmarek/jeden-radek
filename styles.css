@@ -1374,7 +1374,10 @@ body {
   white-space: pre;
 }
 .fb-scroll { transition: transform 1s cubic-bezier(.45, 0, .2, 1); }
-.findbug:not([data-step="0"]) .fb-scroll { transform: translateY(var(--scroll)); }
+/* [data-step] guard: before the runtime sets data-step on mount, a bare
+   :not([data-step="0"]) would match and the code would scroll back up. */
+.findbug[data-step]:not([data-step="0"]) .fb-scroll { transform: translateY(var(--scroll)); }
+.fb-bar { display: inline-block; height: 14px; vertical-align: middle; border-radius: 7px; }
 .fb-line { position: relative; display: flex; height: 38px; }
 .fb-no { flex: none; width: 76px; padding-right: 18px; text-align: right; color: var(--ink-soft); opacity: 0.6; }
 .fb-code { padding-left: 24px; }

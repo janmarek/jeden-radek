@@ -620,7 +620,7 @@ const scenes = [
     steps: 5,
     verifyWait: [900, 1300, 1000, 900, 900],
     notes:
-      "Oprava kódu. Tohle je zjednodušený soubor s logikou pokojů. (→) A tady je funkce updateRoom. Najdete chybu? (→) Chyba není v žádném řádku, který tam je. Chyběl jeden řádek: loadCategories. Funkce existovala, jen se nezavolala. Bez ní je room.categories prázdné, takže se stará vazba nikdy nesmaže a vždycky se jen přidá nová. (→) Opraveno. (→) …opraveno?",
+      "Oprava kódu. Soubor s logikou pokojů. (→) A tady je funkce updateRoom. Najdete chybu? (→) Chyba není v žádném řádku, který tam je. Chyběl jeden řádek: loadCategories. Bez něj je room.categories prázdné, takže se stará vazba nikdy nesmaže a vždycky se jen přidá nová. (→) Opraveno. (→) …opraveno?",
     render: () => {
       const KW = /("[^"]*")|\b(import|from|export|async|function|return|const|await|if)\b|\b([A-Za-z_]\w*)(?=\()/g;
       const hl = (l) =>
@@ -628,25 +628,19 @@ const scenes = [
           .replace(KW, (m, str, kw, fn) =>
             str ? `<span class="cs">${m}</span>` : kw ? `<span class="ck">${m}</span>` : `<span class="cf">${m}</span>`);
       const MISSING = "  await loadCategories(room);";
-      const file = [
-        `import { db } from "./db";`,
-        `import { Room, UpdateRoomInput } from "./types";`,
-        ``,
-        `export async function getRoom(id: string) {`,
-        `  return db.rooms.findById(id);`,
-        `}`,
-        ``,
-        `export async function loadCategories(room: Room) {`,
-        `  room.categories = await db.roomCategoryAssignments`,
-        `    .where({ roomId: room.id, deleted: false });`,
-        `}`,
-        ``,
-        `export async function createRoom(input: CreateRoomInput) {`,
-        `  const room = db.rooms.create(input);`,
-        `  await createCategoryAssignment(room, input.categoryId);`,
-        `  return saveRoom(room);`,
-        `}`,
-        ``,
+      // The rest of the file is abstract bars (like the old teaser diff);
+      // only updateRoom() is real code. Blank lines every few rows.
+      const bars = (n, seed) => {
+        const rnd = seeded(seed);
+        return Array.from({ length: n }, (_, i) => {
+          if (i % 5 === 4) return "";
+          const r = rnd();
+          const kind = r < 0.5 ? "add" : r < 0.75 ? "ctx" : "del";
+          const indent = i % 5 === 0 ? 0 : 1 + Math.floor(rnd() * 2);
+          return { kind, indent, w: 140 + Math.floor(rnd() * 520) };
+        });
+      };
+      const fn = [
         `export async function updateRoom(input: UpdateRoomInput) {`,
         `  const room = await getRoom(input.roomId);`,
         null,
@@ -660,17 +654,17 @@ const scenes = [
         ``,
         `  await saveRoom(room);`,
         `}`,
-        ``,
-        `export async function deleteRoom(id: string) {`,
-        `  await db.rooms.softDelete(id);`,
-        `}`,
       ];
-      const target = file.indexOf(`export async function updateRoom(input: UpdateRoomInput) {`);
+      const before = bars(20, 11);
+      const file = [...before, ...fn, "", ...bars(10, 23)];
+      const target = before.length;
       let n = 0;
       const body = file
         .map((l) =>
           l === null
             ? `<div class="fb-line fb-missing"><span class="fb-no">+</span><span class="fb-code">${hl(MISSING)}</span><span class="fb-tag">jeden řádek</span></div>`
+            : typeof l === "object"
+            ? `<div class="fb-line"><span class="fb-no">${++n}</span><span class="fb-code"><span class="fb-bar dl-${l.kind}" style="margin-left:${l.indent * 30}px;width:${l.w}px"></span></span></div>`
             : `<div class="fb-line"><span class="fb-no">${++n}</span><span class="fb-code">${hl(l)}</span></div>`
         )
         .join("");
