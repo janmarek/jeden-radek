@@ -965,8 +965,8 @@ body {
 }
 
 /* =====================================================================
- * Slack notification (notif() in scenes.js): bdd's card layout (icon
- * tile left, text right) in the deck's ink border + hard shadow.
+ * Slack notification (notif() in scenes.js): card layout (icon tile
+ * left, text right) in the deck's ink border + hard shadow.
  * ===================================================================== */
 .notif {
   display: flex;
@@ -988,8 +988,7 @@ body {
 
 /* =====================================================================
  * mostly step 1: the notification slides in from the right edge and stays
- * in the top-right corner over "…většinou…" (like the bdd Slack alerts),
- * with a little overshoot
+ * in the top-right corner over "…většinou…", with a little overshoot
  * ===================================================================== */
 .mostly .ms-notif {
   position: absolute;

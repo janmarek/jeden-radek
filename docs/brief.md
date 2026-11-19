@@ -12,8 +12,7 @@ hodně juniorů. Osnova příběhu, fakta a pointa jsou dané. Vizuální zpraco
 vychází z autorových nápadů v sekci [Moje nápady](#moje-nápady-ke-tvůrčímu-zpracování).
 
 - **Výstup:** sada slajdů s poznámkami pro mluvčího v češtině. Formát:
-  ručně psaný HTML/CSS/JS deck ve stylu předchozí prezentace
-  (`~/Documents/dev/bdd`), bez frameworku pro slajdy.
+  ručně psaný HTML/CSS/JS deck, bez frameworku pro slajdy.
 - **Pevné:** osnova dějství, fakta příběhu, pointa a hlavní hlášky.
 - **Volné:** přesné formulace slajdů a vizuální detaily, vždy v duchu autorových
   nápadů. Položky označené *(návrh)* je potřeba potvrdit, nejsou závazné.
@@ -157,7 +156,7 @@ Tohle je zdroj pravdy. Co tu není, se nesmí prezentovat jako fakt.
   (karty postupně): lepší UX, konzistentní vzhled, dá se dál vylepšovat, nové funkce
   (inline edit, bulk delete). „…většinou…“ je samostatný slajd, ne překryv.
 - Incident začal v **pátek v 16:00** zprávou na Slacku od kolegů:
-  **„Řešíme incident, pojď nám pomoct.“** Notifikace jako v bdd decku: ikona
+  **„Řešíme incident, pojď nám pomoct.“** Notifikace s ikonou
   Slacku (výjimka z pravidla o logách, schválil autor), datum přímo v kartě,
   vyjíždí zprava do pravého horního rohu přes „…většinou…“. Datum **13. 8.** je jen pro zábavu
   (pátek třináctého), ne skutečné datum incidentu.

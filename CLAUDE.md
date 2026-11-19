@@ -22,14 +22,10 @@ Run: open `index.html` in a browser, or `python3 -m http.server`.
 - `presentation.md` is the scene spec: scene ids, step lists, speaker notes. Step
   numbers there must match the `data-step` values in CSS.
 
-## Lineage
+## Runtime notes
 
-The runtime is a port of the previous talk at `~/Documents/dev/bdd`. Its
-`CLAUDE.md` has the long-form guidance that still applies here: the merged-scene
-pattern, authoring step-driven animation, coordinate math, common pitfalls. Read
-it when building a non-trivial scene. Differences from bdd: no Pac-Man/ghost
-helpers, the hero is `bug()`; the "XP wallpaper" is now a generic `backdrop`;
-scenes have a `world`; verify waits live on the scene (`verifyWait`).
+The hero is `bug()`; scene backgrounds use a generic `backdrop`; scenes have a
+`world`; verify waits live on the scene (`verifyWait`).
 
 ## Navigation contract
 
@@ -149,7 +145,7 @@ glyphs (✎ ☑) as icons. To add one: download
 `unpkg.com/lucide-static@0.460.0/icons/<name>.svg` into `icons/`, then
 `npm run icons` (regenerates `icons.js`, loaded before scenes.js).
 
-Other building blocks (same as bdd): `appWindow()` with themes `chat | terminal |
+Other building blocks: `appWindow()` with themes `chat | terminal |
 editor | browser`, `.window-enter-*` / `.window-exit-*`, `.typewriter` + `.cursor`,
 `.stagger-fill > .stagger-item`, `.pixel-ground`.
 
@@ -158,7 +154,7 @@ editor | browser`, `.window-enter-*` / `.window-exit-*`, `.typewriter` + `.curso
 - Palette is the meetup's scheme (ReactGirls card): `--cream` background, accents
   `--coral --cyan --lavender --yellow`, `--ink` for text and outlines. Use the
   tokens, never hard-coded hex. Mews branding is gone for good (Jan left Mews).
-  Only logo allowed: the Slack mark (`img/slack-mark.svg`, from bdd) in the
+  Only logo allowed: the Slack mark (`img/slack-mark.svg`) in the
   `notif()` card, at Jan's request. Keep non-Lucide images in `img/`, not
   `icons/` (the icon build inlines everything there as stroke icons).
 - Font: **Poppins** 400–800, bundled in `fonts/` (OFL) so the deck works offline.

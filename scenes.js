@@ -97,8 +97,8 @@ const junior = (pic, text, from = 0, extra = "") => `
     <div class="junior-text">${text}</div>
   </div>`;
 
-// Slack notification like in the bdd deck (Slack mark on the left), in the
-// deck's ink-border card style. The date sits right in the card, prominent.
+// Slack notification (Slack mark on the left) in the deck's ink-border card
+// style. The date sits right in the card, prominent.
 const INCIDENT_MSG = T("Řešíme incident, pojď nám pomoct.", "We have an incident, come help us.");
 const notif = ({ when = T("Pátek 13.&nbsp;8. 16:00", "Friday, Aug&nbsp;13, 4&nbsp;PM"), text = INCIDENT_MSG, extra = "", attrs = "" } = {}) => `
   <div class="notif ${extra}" ${attrs}>
