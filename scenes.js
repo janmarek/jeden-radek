@@ -101,37 +101,197 @@ const notif = ({ when = "Pátek 13.&nbsp;8. 16:00", text = INCIDENT_MSG, extra =
 // incident and to the game part (runtime handles [data-goto]). Set to false before the talk.
 const DEV_JUMP = true;
 
-// Level template for the game part (slides 15–21).
-//   step 0: level card + bug at x0, obstacle visible, fact line
-//   step 1: bug moves to x1 (meets the obstacle)
-//   step 2: bug at x2 (got through) + "why" line
-// Anything calling bug() must be a function (o.extra), because level() runs
-// while scenes.js loads, before runtime.js defines bug().
-const level = (o) => ({
+// ---------------------------------------------------------------- game part
+// The game levels are choreographed with one-shot keyframes keyed on step
+// flags: the root gets .s1 … .sN while step >= N. Unlike [data-step="N"], a
+// flag stays on for later steps, so a squashed bug stays squashed and a bug
+// that crossed stays on the other side. ← removes the flag (instant rewind).
+function markSteps(root, step, n) {
+  for (let k = 1; k < n; k++) root.classList.toggle(`s${k}`, step >= k);
+}
+
+// Timed side effects (pose changes) for the current step. Any new step
+// cancels the previous step's pending ones.
+function choreo(root, events) {
+  (root._choreo || []).forEach(clearTimeout);
+  root._choreo = events.map(([ms, fn]) => setTimeout(() => root.isConnected && fn(), ms));
+}
+// Pose of every bug inside `sel` ("idle" | "walk" | "jump").
+function pose(root, sel, p) {
+  root.querySelectorAll(`${sel} .bug, ${sel}.bug`).forEach((b) => (b.dataset.pose = p));
+}
+// Pose script: [[ms, sel, pose], …] → choreo.
+const poses = (root, list) => choreo(root, list.map(([ms, sel, p]) => [ms, () => pose(root, sel, p)]));
+
+// Ground strip with holes ([[from, to], …] in stage px). Solid pieces keep
+// the brick pattern aligned to the stage; holes are dark pits.
+function ground(holes = []) {
+  const pieces = [];
+  let x = 0;
+  holes.forEach(([a, b]) => {
+    pieces.push([x, a]);
+    x = b;
+  });
+  pieces.push([x, 1600]);
+  const solid = pieces
+    .filter(([a, b]) => b > a)
+    .map(
+      ([a, b]) =>
+        `<div class="pixel-ground${a > 0 ? " edge-l" : ""}${b < 1600 ? " edge-r" : ""}" style="left:${a}px;right:auto;width:${b - a}px;background-position:${-a}px 0"></div>`
+    )
+    .join("");
+  const pits = holes.map(([a, b]) => `<div class="pit" style="left:${a}px;width:${b - a}px"></div>`).join("");
+  return pits + solid;
+}
+
+// Level shell: HUD (LEVEL n + name), optional bullet points
+// ([[fromStep, html], …]), the level's own art, ground (with holes).
+//   o.before(root, step, prev) runs before the step flags change (to read
+//   the live position of a looping animation), o.onStep after.
+const levelScene = (o) => ({
   id: o.id,
   world: "game",
-  steps: o.steps || 3,
-  verifyWait: [1200, 2000, 2000, 2000],
+  steps: o.steps,
+  verifyWait: o.verifyWait,
   notes: o.notes,
   render: () => `
-    <div class="scene level ${o.className || ""}"
-         style="--x0:${o.x[0]}px;--x1:${o.x[1]}px;--x2:${o.x[2]}px">
+    <div class="scene level ${o.className || ""}">
+      ${ground(o.holes)}
       <div class="lvl-hud">
         <span class="lvl-chip">LEVEL ${o.n}</span>
         <span class="lvl-name">${o.name}</span>
       </div>
-      <div class="lvl-desc">${o.desc}</div>
-      <div class="lvl-stage">${o.obstacle}</div>
-      <div class="lvl-bug">${bug({ size: 144, pose: "idle", className: o.bugClass || "" })}</div>
-      ${typeof o.extra === "function" ? o.extra() : o.extra || ""}
-      <div class="lvl-why" data-from="2">${o.why}</div>
-      <div class="pixel-ground"></div>
+      ${o.points ? `<ul class="lvl-points">${o.points.map(([from, t]) => `<li data-from="${from}">${t}</li>`).join("")}</ul>` : ""}
+      ${o.art()}
     </div>`,
   onStep: (root, step, prev) => {
-    if (prev !== -1 && prev !== step) walkThenIdle(root);
+    if (o.before) o.before(root, step, prev);
+    markSteps(root, step, o.steps);
     if (o.onStep) o.onStep(root, step, prev);
   },
 });
+
+// Info bubble ("i" + text), revealed on step `from`.
+const tip = (text, from, extra = "") => `
+  <div class="tip ${extra}" data-from="${from}">
+    <div class="tip-i">i</div>
+    <div class="tip-text">${text}</div>
+  </div>`;
+
+// Signpost on the ground: board on a post, `x` = post centre.
+const sign = (text, x, extra = "") =>
+  `<div class="sign ${extra}" style="left:${x}px"><div class="sign-board">${text}</div></div>`;
+
+// Pixel mouse pointer (user testing level). K outline, W fill.
+const CURSOR_ROWS = [
+  "K...........",
+  "KK..........",
+  "KWK.........",
+  "KWWK........",
+  "KWWWK.......",
+  "KWWWWK......",
+  "KWWWWWK.....",
+  "KWWWWWWK....",
+  "KWWWWWWWK...",
+  "KWWWWWWWWK..",
+  "KWWWWWKKKKK.",
+  "KWWKWWK.....",
+  "KWK.KWWK....",
+  "KK..KWWK....",
+  "K....KWWK...",
+  ".....KWWK...",
+  "......KK....",
+];
+const pixelCursor = (px = 5) => `
+  <svg class="px-cursor" width="${12 * px}" height="${17 * px}" viewBox="0 0 12 17" shape-rendering="crispEdges" aria-hidden="true">
+    ${pixelRects(CURSOR_ROWS, 0, { K: "var(--ink)", W: "var(--paper)" })}
+  </svg>`;
+
+// Maze for the "unknown domain" level. # wall, . floor. The bug enters at
+// row 1 on the left and leaves at row 6 on the right (checked with a BFS:
+// the shortest path never walks left, so the bug never moonwalks).
+const MAZE = [
+  "#################",
+  "....#.....#.....#",
+  "#.#.#.###.#.###.#",
+  "#...#...#...#...#",
+  "#.#####.#####.###",
+  "#.#.....#...#...#",
+  "#.#.###.#.#.###..",
+  "#...#.....#.....#",
+  "#################",
+];
+const MAZE_CELL = 52;
+function mazePath() {
+  const H = MAZE.length;
+  const W = MAZE[0].length;
+  const start = [1, 0];
+  const end = [6, W - 1];
+  const key = ([r, c]) => `${r},${c}`;
+  const prev = { [key(start)]: null };
+  const queue = [start];
+  while (queue.length) {
+    const [r, c] = queue.shift();
+    for (const [dr, dc] of [[0, 1], [1, 0], [-1, 0], [0, -1]]) {
+      const n = [r + dr, c + dc];
+      if (n[0] < 0 || n[0] >= H || n[1] < 0 || n[1] >= W) continue;
+      if (MAZE[n[0]][n[1]] === "#" || key(n) in prev) continue;
+      prev[key(n)] = [r, c];
+      queue.push(n);
+    }
+  }
+  const cells = [];
+  for (let p = end; p; p = prev[key(p)]) cells.unshift(p);
+  const pt = ([r, c]) => `${c * MAZE_CELL + MAZE_CELL / 2} ${r * MAZE_CELL + MAZE_CELL / 2}`;
+  // Start one cell outside on the left, end one cell outside on the right.
+  return `M ${pt([1, -1])} ` + cells.map((p) => `L ${pt(p)}`).join(" ") + ` L ${pt([6, W + 1])}`;
+}
+function mazeSvg() {
+  let rects = "";
+  MAZE.forEach((row, r) =>
+    [...row].forEach((ch, c) => {
+      if (ch === "#") rects += `<rect x="${c}" y="${r}" width="1" height="1"/>`;
+    })
+  );
+  return `<svg class="mz-walls" viewBox="0 0 ${MAZE[0].length} ${MAZE.length}" shape-rendering="crispEdges" aria-hidden="true">${rects}</svg>`;
+}
+
+// Minesweeper board for the "nothing crashed" level: most of the field is
+// revealed, numbers count what hides in the covered corner (the bug too).
+const MS_W = 18;
+const MS_H = 8;
+const MS_BUG = [6, 14];
+const MS_HIDDEN = [[4, 12], [6, 12], [3, 14], [2, 16], [MS_BUG[0], MS_BUG[1]]];
+const msCovered = (r, c) => (c >= 12 && r >= 3 && !(c === 12 && r === 3)) || (r === 2 && c >= 15);
+function minesweeper() {
+  const isHidden = (r, c) => MS_HIDDEN.some(([hr, hc]) => hr === r && hc === c);
+  let cells = "";
+  for (let r = 0; r < MS_H; r++) {
+    for (let c = 0; c < MS_W; c++) {
+      if (r === MS_BUG[0] && c === MS_BUG[1]) {
+        cells += `<div class="ms-cell ms-bugcell"><div class="ms-cover"></div><div class="ms-bug">${bug({ size: 36, pose: "idle" })}</div></div>`;
+      } else if (msCovered(r, c)) {
+        cells += `<div class="ms-cell"><div class="ms-cover"></div></div>`;
+      } else {
+        let n = 0;
+        for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) if ((dr || dc) && isHidden(r + dr, c + dc)) n++;
+        cells += `<div class="ms-cell is-open">${n ? `<b class="n${n}">${n}</b>` : ""}</div>`;
+      }
+    }
+  }
+  return `<div class="ms-board" style="--cols:${MS_W}">${cells}</div>`;
+}
+
+// Starburst for the "BUM!" (n spikes), SVG in a 400×400 box.
+function starburst(n = 14, rOut = 196, rIn = 120) {
+  const pts = [];
+  for (let i = 0; i < n * 2; i++) {
+    const r = i % 2 ? rIn : rOut;
+    const a = (Math.PI * i) / n - Math.PI / 2;
+    pts.push(`${(200 + r * Math.cos(a)).toFixed(1)},${(200 + r * Math.sin(a)).toFixed(1)}`);
+  }
+  return pts.join(" ");
+}
 
 // ---------------------------------------------------------------- scenes
 
@@ -796,201 +956,340 @@ const scenes = [
   },
 
   // ============================================================ Přepnutí do hry
+  // No headline: the question is spoken. Ground is there from the start.
+  // 0 empty level · 1 agent jumps in · 2 agent makes five bugs (they fly
+  // out of him in arcs) · 3 "Běžte a zničte produkci!"
   {
     id: "switch-to-game",
     world: "game",
-    steps: 2,
-    verifyWait: [1400, 1200],
+    steps: 4,
+    verifyWait: [800, 1400, 2400, 1000],
     notes:
-      "Jak se tam ten řádek vůbec dostal? Pojďme si to zahrát. Hlavní hrdina celou dobu nebyl tým ani agent. Byl to bug. [Vyprávění bugu v 1. osobě je návrh.]",
+      "Jak se tam ten řádek vůbec dostal? Pojďme si to zahrát. (→) Přijde agent (→) a vyrobí pět bugů. (→) Běžte a zničte produkci!",
     render: () => `
-      <div class="scene slide switchgame">
-        <h1 class="headline center">Jak se tam ten řádek dostal?</h1>
-        <div class="hero" data-from="1">
-          <div class="bubble">Ahoj. Jsem jeden chybějící řádek.<br><b>Můj cíl: produkce.</b></div>
-          ${bug({ size: 216, pose: "idle" })}
-        </div>
-        <div class="pixel-ground ground-rise"></div>
+      <div class="scene intro-game">
+        ${ground()}
+        <div class="ig-agent">${agent({ size: 280 })}</div>
+        <div class="ig-bugs">${[0, 1, 2, 3, 4]
+          .map((i) => `<div class="ig-bug" style="--i:${i}"><div class="ig-arc">${bug({ size: 108, pose: "jump" })}</div></div>`)
+          .join("")}</div>
+        <div class="bubble ig-bubble" data-from="3">Běžte a zničte produkci!</div>
       </div>
     `,
+    onStep: (root, step, prev) => {
+      markSteps(root, step, 4);
+      if (step < 2) return choreo(root, []), pose(root, ".ig-bugs", "jump");
+      if (prev < 2) poses(root, [0, 1, 2, 3, 4].map((i) => [800 + i * 220, `.ig-bug:nth-child(${i + 1})`, "idle"]));
+    },
   },
 
   // ============================================================ Levels
-  level({
+  // L1 static checks = three crushers (format / lint / types).
+  // 0 crushers loop · 1 bug 1 walks under the first one and gets squashed ·
+  // 2 bug 2 walks through all three (the loops restart in sync with it, so
+  // every crusher is up while it passes) · 3 info bubble (hooks)
+  levelScene({
     id: "level-1",
     n: 1,
-    name: "Spawn",
-    desc: "Agent vygeneroval ~800 řádků. Starý kód dělal něco skrytě a v zadání to nebylo.",
-    x: [300, 760, 1150],
-    bugClass: "bug--stealth",
-    obstacle: `<div class="o-diff">${diffBars(26, 5)}</div>`,
-    why: "Schopnost: stealth. V diffu mě nikdo nevidí.",
+    name: "Statické kontroly",
+    steps: 4,
+    verifyWait: [1200, 2400, 3400, 1000],
+    className: "l1",
     notes:
-      "Level 1, spawn. Agent vygeneruje asi 800 řádků. Starý kód měl skryté chování, načítal stávající data, a nikdo to agentovi neřekl. Bug v diffu není vidět, protože tam chybí.",
+      "Level 1: statické kontroly. Code format, lint, type checking. Fungují jako buchary. (→) Prvního bugu rozmáčknou. (→) Druhý projde, protože kontrolují formu, ne chování. (→) Dají se nastavit třeba v Claude jako post-edit nebo stop hook.",
+    art: () => {
+      // Bug 2 walks 120 → 1300 px in 3 s; crusher i starts its
+      // cycle 0.15 s before the bug reaches it (crushers are 220 px wide), so it stays up for 1.2 s.
+      const v = 1180 / 3;
+      const xs = [640, 900, 1160];
+      const labels = ["code format", "lint", "type checking"];
+      const crushers = xs
+        .map((x, i) => {
+          const delay = ((x - 110 - 156 - 120) / v - 0.15).toFixed(2);
+          return `<div class="crusher" style="left:${x - 110}px;--idle:${-0.7 * i - 0.3}s;--pass:${delay}s"><div class="crusher-plate">${labels[i]}</div></div>`;
+        })
+        .join("");
+      return `
+        <div class="l1-beam"></div>
+        <div class="l1-crushers">${crushers}</div>
+        <div class="l1-bug l1-bug1">${bug({ size: 108 })}</div>
+        <div class="l1-bug l1-bug2">${bug({ size: 108 })}</div>
+        ${tip("Dá se nastavit třeba v Claude jako <b>post-edit</b> nebo <b>stop hook</b>.", 3, "l1-tip")}`;
+    },
+    onStep: (root, step, prev) => {
+      if (step <= prev) return choreo(root, []), pose(root, ".l1-bug2", "idle"), pose(root, ".l1-bug1", step >= 1 ? "jump" : "idle");
+      if (step === 1) poses(root, [[0, ".l1-bug1", "walk"], [1100, ".l1-bug1", "idle"], [1250, ".l1-bug1", "jump"]]);
+      if (step === 2) poses(root, [[0, ".l1-bug2", "walk"], [3000, ".l1-bug2", "idle"]]);
+    },
   }),
-  level({
+
+  // L2 tests = two holes (unit / integration).
+  // 0 holes · 1 "dřív silné" · 2 bug jumps the first hole, stops at the
+  // second (too wide) · 3 "dnes menší hodnota" · 4 agent jumps in, builds a
+  // floating bridge, the bug walks across and away
+  levelScene({
     id: "level-2",
     n: 2,
-    name: "Automatické brány",
-    desc: "Formátování, lint, spouštění testů, nastavení v Claude.",
-    x: [120, 560, 1260],
-    obstacle: `<div class="o-gates">${["formát", "lint", "testy", "nastavení"]
-      .map((g) => `<div class="gate"><div class="gate-top">${g}</div><div class="gate-ok" data-from="2">✓</div></div>`)
-      .join("")}</div>`,
-    why: "Brány hlídají, jak kód vypadá. Ne co v něm chybí.",
+    name: "Testy",
+    steps: 5,
+    verifyWait: [1200, 900, 2000, 900, 5000],
+    className: "l2",
+    holes: [[560, 720], [980, 1300]],
+    points: [
+      [1, "Dřív velmi silná ochrana."],
+      [3, "Dnes menší hodnota, pokud testy píše <b>stejný agent jako kód</b>."],
+    ],
     notes:
-      "Level 2: automatické brány. Formátování, lint, spouštění testů, nastavení v Claude. Brány, kterými agent bez kontroly neprojde. Jenže všechny kontrolují formu. Chybějící chování žádná nevidí.",
+      "Level 2: testy. Unit testy a integrační testy, dvě díry, které musí bug přeskočit. (→) Dřív to byla velmi silná ochrana. (→) První díru bug přeskočí, druhá je moc široká. (→) Jenže dnes mají testy menší hodnotu, pokud je píše stejný agent jako kód. (→) Agent přijde a bugovi postaví most.",
+    art: () => `
+      ${sign("unit testy", 470)}
+      ${sign("integrační testy", 880)}
+      <div class="l2-bridge">${[0, 1, 2, 3].map((i) => `<i style="--i:${i}"></i>`).join("")}</div>
+      <div class="l2-agent">${agent({ size: 224 })}</div>
+      <div class="l2-bug"><div class="l2-arc">${bug({ size: 108 })}</div></div>`,
+    onStep: (root, step, prev) => {
+      if (step <= prev) return choreo(root, []), pose(root, ".l2-bug", "idle");
+      if (step === 2)
+        poses(root, [[0, ".l2-bug", "walk"], [600, ".l2-bug", "jump"], [1300, ".l2-bug", "walk"], [1600, ".l2-bug", "idle"]]);
+      if (step === 4) poses(root, [[2000, ".l2-bug", "walk"], [4600, ".l2-bug", "idle"]]);
+    },
   }),
-  level({
+
+  // L3 automated code review = traps in the middle; the bug teleports
+  // over them. 0 traps · 1–2 points · 3 walk, beam out, beam in, walk on
+  levelScene({
     id: "level-3",
     n: 3,
-    name: "Testy a Playwright",
-    desc: "Testy psal agent ve stejném kontextu jako kód.",
-    x: [120, 420, 1240],
-    obstacle: `
-      <div class="o-shot">
-        <div class="shot-head">screenshot</div>
-        <div class="shot-body">Pokoj A<br>Kategorie: <b>X</b></div>
-        <div class="shot-pass" data-from="1">PASSED ✓</div>
-      </div>`,
-    why: "Stejný kontext = stejná slepá místa. A screenshot vypadal správně: UI ukazovalo nejstarší řádek.",
+    name: "Automatizované code review",
+    steps: 4,
+    verifyWait: [1200, 900, 900, 3000],
+    className: "l3",
+    points: [
+      [1, "Agent měl vlastní krok code review."],
+      [2, "Specializace na známé chyby."],
+    ],
     notes:
-      "Level 3: testy a Playwright. Testy psané agentem jsou levné, ale pokrývají jen známé problémy. Test ze stejného kontextu má stejná slepá místa jako kód. A screenshot vypadal správně, protože UI ukazovalo nejstarší řádek.",
+      "Level 3: automatizované code review. (→) Agent měl vlastní krok code review. (→) Je specializované na známé chyby. (→) Jenže tenhle bug nebyl známý, takže se pastem prostě vyhnul.",
+    art: () => {
+      const spikes = (n) => {
+        let pts = "0,76";
+        for (let i = 0; i < n; i++) pts += ` ${i * 36 + 18},6 ${(i + 1) * 36},76`;
+        return `<svg class="trap" viewBox="0 0 ${n * 36} 80" width="${n * 36}" height="80" aria-hidden="true"><polygon points="${pts}"/></svg>`;
+      };
+      return `
+        <div class="l3-traps">${spikes(4)}${spikes(4)}${spikes(4)}</div>
+        <div class="beam beam-out"></div>
+        <div class="beam beam-in"></div>
+        <div class="l3-bug"><div class="l3-tp">${bug({ size: 108 })}</div></div>`;
+    },
+    onStep: (root, step, prev) => {
+      if (step <= prev) return choreo(root, []), pose(root, ".l3-bug", "idle");
+      if (step === 3)
+        poses(root, [[0, ".l3-bug", "walk"], [780, ".l3-bug", "idle"], [1430, ".l3-bug", "walk"], [2600, ".l3-bug", "idle"]]);
+    },
   }),
-  level({
+
+  // L4 user testing: three bugs walk in, one hides behind a bush, the
+  // pointer clicks the other two away, then hovers over the bush (all fine).
+  // 0 scene · 1–3 points · 4 action · 5 the problem
+  levelScene({
     id: "level-4",
     n: 4,
-    name: "PR a review",
-    desc: "Velké PR, doména cizího týmu, nikoho tam neznám.",
-    x: [120, 380, 1180],
-    className: "lvl-jump",
-    obstacle: `
-      <div class="o-wall">${diffBars(30, 9)}</div>
-      <div class="o-boss"><div class="boss-eyes"><i></i><i></i></div><div class="boss-label">reviewer</div></div>`,
-    why: "~800 řádků se rozumně reviewovat nedá. Deset menších PR místo dvou bych ale nezvládl.",
+    name: "Testování uživatelem",
+    steps: 6,
+    verifyWait: [1200, 900, 900, 900, 4400, 1000],
+    className: "l4",
+    points: [
+      [1, "Proklikat aplikaci, jestli vypadá v pořádku."],
+      [2, "Dá se trochu automatizovat: agent pustí Playwright, pořídí screenshoty a podívá se na ně."],
+      [3, "Nedeterministické."],
+      [5, "<b>Problém:</b> chyba byla vizuálně nenápadná. Při výběru stejné kategorie vypadalo UI správně."],
+    ],
     notes:
-      "Level 4: PR a review. PR mělo asi 800 řádků, většinu psalo AI. Review z cizího týmu, kde jsem nikoho neznal. Velké PR jsem potřeboval, deset menších místo dvou bych nezvládl. Jenže velké PR se rozumně reviewovat nedá. [Návrh: ironie, pipeline agenta měla vlastní code review, ale ve stejném kontextu.]",
+      "Level 4: testování uživatelem. (→) Proklikat aplikaci, jestli vypadá v pořádku. (→) Dá se trochu automatizovat: agent pustí Playwright, pořídí screenshoty a podívá se na ně. (→) Je to nedeterministické. (→) Dva bugy chytíme, třetí se schová. (→) Problém: chyba byla vizuálně nenápadná, a když jsem vybral stejnou kategorii, UI vypadalo správně.",
+    art: () => `
+      <div class="l4-bug l4-a">${bug({ size: 108 })}</div>
+      <div class="l4-bush"><i></i><i></i><i></i></div>
+      <div class="l4-bug l4-b">${bug({ size: 108 })}</div>
+      <div class="l4-bug l4-c">${bug({ size: 108 })}</div>
+      <div class="poof poof-b"></div>
+      <div class="poof poof-c"></div>
+      <div class="l4-cursor">${pixelCursor(5)}</div>`,
+    onStep: (root, step, prev) => {
+      if (step <= prev) return choreo(root, []), pose(root, ".l4-bug", "idle");
+      if (step === 4) poses(root, [[0, ".l4-bug", "walk"], [1600, ".l4-bug", "idle"]]);
+    },
   }),
-  level({
+
+  // L5 feature flag: a big hole, a moving platform labelled FEATURE FLAG.
+  // 0 platform shuttles · 1 point · 2 the platform comes to the left edge
+  // (from wherever its loop was), the bug steps on, goes half-stealth,
+  // rides across and steps off · 3 the catch
+  levelScene({
     id: "level-5",
     n: 5,
-    name: "Databáze",
-    desc: "Každé uložení přidalo nový řádek. Databáze to přijala.",
-    x: [120, 380, 380],
-    className: "lvl-db",
-    obstacle: `
-      <div class="o-db"><div class="db-top"></div><div class="db-body">pokoj · kategorie</div></div>
-      <div class="o-lock" data-from="2"><div class="lock-shackle"></div><div class="lock-body">?</div></div>`,
-    // Function: bug() lives in runtime.js, which loads after this file.
-    extra: () => `
-      <div class="lvl-clones no-walk" data-from="2">
-        ${bug({ size: 108, className: "bug--clone" })}
-        ${bug({ size: 108, className: "bug--clone" })}
-        ${bug({ size: 108, className: "bug--clone" })}
-      </div>
-      ${junior(`<div class="lock-mini"></div>`, "Unique constraint = zámek: dvojice pokoj–kategorie smí být v tabulce jen jednou.", 2, "db-junior")}`,
-    why: "Bez zámku se bug klonuje. <span class='todo'>[ověřit: existoval unique constraint?]</span>",
+    name: "Feature flag",
+    steps: 4,
+    verifyWait: [1600, 900, 5200, 1000],
+    className: "l5",
+    holes: [[460, 1180]],
+    points: [
+      [1, "Funkci jde zapnout a vypnout, kdyby byl problém."],
+      [3, "Ale kvůli tomu se na chybu přišlo <b>později</b>."],
+    ],
     notes:
-      "Level 5: databáze. Žádný zámek, takže se bug klonuje: každé uložení = nový řádek. Pro juniory: unique constraint je zámek, který duplicitu odmítne. [Otevřená otázka: existoval v DB unique constraint?]",
+      "Level 5: feature flag. (→) Díky flagu jde funkci zapnout a vypnout, kdyby byl problém. (→) Bug na flag naskočí, trochu se zneviditelní a dostane se na druhou stranu. (→) Ale právě kvůli tomu se na chybu přišlo později.",
+    art: () => `
+      <div class="l5-plat"><span>FEATURE FLAG</span></div>
+      <div class="l5-bug">${bug({ size: 108 })}</div>`,
+    before: (root, step, prev) => {
+      if (step === 2 && prev < 2) {
+        const plat = root.querySelector(".l5-plat");
+        plat.style.setProperty("--p0", getComputedStyle(plat).left);
+      }
+    },
+    onStep: (root, step, prev) => {
+      if (step <= prev) return choreo(root, []), pose(root, ".l5-bug", "idle");
+      if (step === 2)
+        poses(root, [[0, ".l5-bug", "walk"], [1100, ".l5-bug", "idle"], [3700, ".l5-bug", "walk"], [4800, ".l5-bug", "idle"]]);
+    },
   }),
-  level({
+
+  // L6 unknown domain = a maze. 0 maze · 1 point + question marks ·
+  // 2 point + "tým: ?" sign · 3 the bug finds its way through (offset-path)
+  levelScene({
     id: "level-6",
     n: 6,
-    name: "Feature flag",
-    desc: "Flag byl nejdřív vypnutý.",
-    x: [120, 660, 1220],
-    className: "lvl-cave",
-    obstacle: `
-      <div class="o-cave"><div class="cave-sign">FLAG: <span class="swap"><span class="off" data-to="1">VYP</span><span class="on" data-from="2">ZAP</span></span></div></div>
-      <div class="zzz" data-from="1" data-to="1">z<span>z</span><span>z</span></div>`,
-    why: "Bug asi měsíc spal. Po zapnutí nic nespadlo hned. Zapnutá verze byla málo otestovaná.",
+    name: "Neznámá doména",
+    steps: 4,
+    verifyWait: [1200, 1200, 900, 4600],
+    className: "l6",
+    points: [
+      [1, "Refaktoring v „cizí“ části aplikace: nevěděl jsem přesně, jak všechno funguje."],
+      [2, "Hůř se shání člověk na review, když nevím ani, který tým to má na starosti."],
+    ],
     notes:
-      "Level 6: feature flag. Flag byl vypnutý, takže bug spal, asi měsíc po mergi. Když se flag zapnul, nic nespadlo. Zapnutou verzi jsme testovali málo.",
+      "Level 6: neznámá doména. (→) Refaktoroval jsem cizí část aplikace a nevěděl jsem přesně, jak všechno funguje. (→) A hůř se shání člověk na review, když nevím ani, který tým to má na starosti. (→) Bug se tu vyzná líp než já.",
+    art: () => `
+      <div class="l6-maze" style="width:${MAZE[0].length * MAZE_CELL}px;height:${MAZE.length * MAZE_CELL}px">
+        ${mazeSvg()}
+        ${[[7, 5], [1, 7], [3, 14], [1, 13]]
+          .map(([r, c], k) => `<div class="mz-q" data-from="1" style="left:${c * MAZE_CELL}px;top:${r * MAZE_CELL}px;transition-delay:${k * 0.15}s">?</div>`)
+          .join("")}
+        <div class="mz-bug" style="offset-path:path('${mazePath()}')">${bug({ size: 36 })}</div>
+      </div>
+      ${sign("tým: ?", 220, "l6-sign")}`,
+    onStep: (root, step, prev) => {
+      if (step <= prev) return choreo(root, []), pose(root, ".mz-bug", "idle");
+      if (step === 3) poses(root, [[0, ".mz-bug", "walk"], [4200, ".mz-bug", "idle"]]);
+    },
   }),
-  level({
+
+  // L7 code review: a huge PR keeps scrolling; two bugs jump in and hide
+  // between the lines. 0 scene · 1 point · 2 bugs hide · 3 point
+  levelScene({
     id: "level-7",
     n: 7,
-    name: "Pozdní projev",
-    desc: "Nic nespadlo. Problém vznikal až při synchronizaci.",
-    x: [120, 700, 1180],
-    className: "lvl-sync",
-    obstacle: `
-      <div class="o-pipe"></div>
-      <div class="o-world"><div class="world-label">druhý systém</div><div class="world-infect" data-from="2"></div></div>`,
-    why: "Bug nakazil jiný svět. Daleko od místa, kde vznikl.",
+    name: "Code review",
+    steps: 4,
+    verifyWait: [1200, 900, 2200, 1000],
+    className: "l7",
+    points: [
+      [1, "Abych projekt posouval dopředu, musel jsem posílat velká PR."],
+      [3, "10 malých PR by se ověřilo snáz než jedno velké. Ale je v tom organizační overhead."],
+    ],
     notes:
-      "Level 7: pozdní projev. Nic nespadlo hned. Problém vznikal až při synchronizaci s druhým systémem. [Název druhého systému a jak se selhání poznalo: zatím neznámé, nevymýšlet.]",
+      "Level 7: code review. (→) Abych projekt posouval dopředu, musel jsem posílat velká PR. (→) A ve velkém PR se bugy schovají snadno. (→) Deset malých PR by se ověřilo snáz než jedno velké, ale je v tom organizační overhead.",
+    art: () => {
+      const half = (seed) => `<div class="l7-half">${diffBars(34, seed)}
+        <div class="l7-hidden" style="top:${7 * 19}px;left:330px">${bug({ size: 36, pose: "idle" })}</div>
+        <div class="l7-hidden" style="top:${24 * 19}px;left:120px">${bug({ size: 36, pose: "idle" })}</div>
+      </div>`;
+      return `
+        <div class="l7-pr">
+          <div class="l7-head"><span>Pull request</span><span class="l7-files">Files changed</span></div>
+          <div class="l7-body"><div class="l7-scroll">${half(11)}${half(11)}</div></div>
+        </div>
+        <div class="l7-bug l7-b1"><div class="l7-arc">${bug({ size: 108 })}</div></div>
+        <div class="l7-bug l7-b2"><div class="l7-arc">${bug({ size: 108 })}</div></div>`;
+    },
+    onStep: (root, step, prev) => {
+      if (step <= prev) return choreo(root, []), pose(root, ".l7-bug", "idle");
+      if (step === 2) poses(root, [[0, ".l7-bug", "jump"]]);
+    },
   }),
 
-  // ============================================================ Boss fight
+  // L8 nothing crashed = minesweeper, most of the field revealed, nothing
+  // went off. 0 board · 1 point · 2 one covered tile flips: it's the bug
+  levelScene({
+    id: "level-8",
+    n: 8,
+    name: "Nic nespadlo",
+    steps: 3,
+    verifyWait: [1200, 900, 1400],
+    className: "l8",
+    points: [[1, "Padající kód bychom si všimli hned."]],
+    notes:
+      "Level 8: bug nezpůsoboval crash. Většina pole je odkrytá a nic nevybuchlo. (→) Padající kód bychom si všimli hned. (→) Tenhle bug nic neshodil. Jen tiše čekal.",
+    art: () => `<div class="l8-board">${minesweeper()}</div>`,
+  }),
+
+  // ============================================================ Bug vyhrál
+  // 0 bug walks up to the production server · 1 BUM: starburst, server
+  // alarm, screen shake, the bug cheers
   {
-    id: "boss",
+    id: "bug-wins",
     world: "game",
     steps: 2,
-    notes: "A boss fight? Ten už jste viděli. Byl to páteční odpoledne.",
+    verifyWait: [2200, 1600],
+    notes: "Bug došel až na produkci. (→) Bum. Bug vyhrál.",
     render: () => `
-      <div class="scene slide boss">
-        <div class="lvl-chip big">BOSS FIGHT</div>
-        <h1 class="headline center">Ten už jste viděli.</h1>
-        ${notif({ extra: "boss-callback", attrs: 'data-from="1"' })}
-        <div class="boss-bug">${bug({ size: 144, pose: "idle" })}</div>
-        <div class="pixel-ground"></div>
-      </div>
-    `,
-  },
-
-  // ============================================================ Patch notes
-  {
-    id: "patch-notes",
-    world: "game",
-    steps: 2,
-    verifyWait: [1800, 1800],
-    notes:
-      "Patch notes. Agent nedostal výpověď, dostal patch. Nejdřív databáze a testy, pak agent, pak proces. [Obsah je návrh z brainstormu, vybrat.]",
-    render: () => `
-      <div class="scene slide patch">
-        <div class="kicker">Patch notes</div>
-        <h1 class="headline">Agent nedostal výpověď. Dostal patch.</h1>
-        <div class="changelog">
-          <ul class="stagger-fill cl-a">
-            <li class="stagger-item"><span class="ver">v1.1</span>Unique constraint na vazbě pokoj–kategorie: databáze duplicitu odmítne.</li>
-            <li class="stagger-item"><span class="ver">v1.2</span>Testy na změnu a mazání, ne jen vytvoření. „Ulož dvakrát.“</li>
-            <li class="stagger-item"><span class="ver">v1.3</span>Agent nejdřív sepíše skryté chování starého kódu, pak implementuje.</li>
-            <li class="stagger-item"><span class="ver">v1.4</span>Porovnávací test staré vs. nové verze, včetně stavu databáze.</li>
-          </ul>
-          <ul class="stagger-fill cl-b">
-            <li class="stagger-item"><span class="ver">v1.5</span>Testy a review dělá agent s jiným kontextem: „Co tu chybí?“</li>
-            <li class="stagger-item"><span class="ver">v1.6</span>Menší PR, kontext vlastníkům domény předem.</li>
-            <li class="stagger-item"><span class="ver">v1.7</span>Flag nejdřív zapnutý na stagingu, pak na produkci.</li>
-            <li class="stagger-item"><span class="ver">v1.8</span>Kontrola konzistence dat mezi systémy + alert na rostoucí nesoulad.</li>
-          </ul>
+      <div class="scene bw">
+        ${ground()}
+        <div class="bw-shake">
+          <svg class="bw-star" viewBox="0 0 400 400" aria-hidden="true">
+            <polygon class="bw-star-out" points="${starburst(14, 196, 128)}"/>
+            <polygon class="bw-star-in" points="${starburst(14, 150, 96)}"/>
+          </svg>
+          <div class="bw-boom">BUM!</div>
+          <div class="bw-server">
+            <div class="bw-label">PRODUKCE</div>
+            ${[0, 1, 2, 3].map(() => `<div class="bw-slot"><i></i><i></i><i></i></div>`).join("")}
+          </div>
+          <div class="bw-bug">${bug({ size: 144 })}</div>
         </div>
+        <div class="bw-title" data-from="1">BUG VYHRÁL</div>
       </div>
     `,
+    onStep: (root, step, prev) => {
+      markSteps(root, step, 2);
+      if (step === 0) poses(root, [[0, ".bw-bug", "walk"], [2000, ".bw-bug", "idle"]]);
+      if (step === 1) poses(root, [[0, ".bw-bug", "jump"]]);
+    },
   },
 
-  // ============================================================ Pointa
+  // ============================================================ Co tedy s tím
+  // 0 question · 1–3 the three points · 4 thanks
   {
-    id: "punchline",
+    id: "takeaways",
     world: "game",
-    steps: 4,
+    steps: 5,
     notes:
-      "Agent není hloupý, je doslovný. Udělal přesně to, co jsem mu řekl. Řádek, který chybí, neuvidí člověk ani agent, takže ho musí zastavit systém. Závěr: [vybrat jednu ze tří vět; na slajdu je zatím ‚hra na easy‘]. Díky!",
+      "Co tedy s tím? (→) Možná by nebylo od věci držet se best practices, třeba malých PR. (→) Refaktorovacího agenta jsme vylepšili, aby se přesně tohle příště už nestalo. (→) Jde o to zmenšit pravděpodobnost chyby. Na sto procent úspěšní nikdy nebudeme. (→) Díky!",
     render: () => `
-      <div class="scene slide punch">
-        <h1 class="headline center">Agent není hloupý.<br><span class="hl">Je doslovný.</span></h1>
-        <p class="lede center" data-from="1" data-to="2">Udělal přesně to, co jsem mu řekl.<br>O skrytém chování starého kódu mu nikdo neřekl.</p>
-        <p class="lede center strong" data-from="2" data-to="2">Řádek, který chybí, neuvidí člověk ani agent.<br>Musí ho zastavit systém.</p>
-        <div class="finale" data-from="3">
-          <div class="finale-line">Bug nevyhrál, protože byl chytrý.<br>Vyhrál, protože hra byla na <b>easy</b>.</div>
-          <div class="finale-thanks">Díky!</div>
-        </div>
-        <div class="punch-bug" data-from="3">${bug({ size: 108, pose: "idle", facing: "left" })}</div>
-        <div class="pixel-ground"></div>
+      <div class="scene slide takeaways">
+        <h1 class="headline">Co tedy s tím?</h1>
+        <ul class="plain-list tk-list">
+          <li data-from="1">Možná by nebylo od věci držet se best practices, třeba <b>malých PR</b>.</li>
+          <li data-from="2">Refaktorovacího agenta jsme <b>vylepšili</b>, aby se přesně tohle příště už nestalo.</li>
+          <li data-from="3">Jde o to <b>zmenšit pravděpodobnost</b> chyby. Na 100&nbsp;% úspěšní nikdy nebudeme.</li>
+        </ul>
+        <div class="tk-thanks" data-from="4">Díky!</div>
+        <div class="tk-agent">${agent({ size: 224 })}</div>
+        ${ground()}
       </div>
     `,
   },
-
   // ============================================================ DEV
   {
     id: "bug-sheet",

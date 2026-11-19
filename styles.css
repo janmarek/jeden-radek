@@ -44,7 +44,9 @@
   --green: #3cc47a;        /* "Opraveno" stamp, added code line (Jan asked for green) */
   --code-kw: #d4493a;      /* code: keywords */
   --code-fn: #0592a0;      /* code: function names */
-  --slate: #7d8ba8;        /* grey-blue: DB link dots */
+  --slate: #7d8ba8;        /* grey-blue: DB link dots, crushers, traps */
+  --pit: #3a3546;          /* holes in the game ground */
+  --pit-deep: #1b1922;
 
   /* Bug sprite palette (override per instance or via modifier class) */
   --bug-ink: var(--ink);
@@ -522,14 +524,8 @@ body {
 
 
 /* =====================================================================
- * Shared diff/code card bits (level obstacles, find-bug's file header)
+ * find-bug's file header
  * ===================================================================== */
-.o-diff, .o-wall {
-  background: var(--paper);
-  border: 3px solid var(--ink);
-  border-radius: 18px;
-  box-shadow: 8px 8px 0 var(--ink);
-}
 .diff-head {
   height: 56px;
   padding: 0 24px;
@@ -1477,18 +1473,18 @@ body {
 .job .jo-human b { color: var(--coral); }
 
 /* =====================================================================
- * 14 switch-to-game: the hero introduces itself
+ * Game part shared bits: ground pieces + pits (ground() in scenes.js),
+ * speech bubble, info tip, signpost
  * ===================================================================== */
-.switchgame .headline { margin-top: 60px; }
-.switchgame .hero {
+.pixel-ground.edge-l { border-left: 6px solid var(--ink); }
+.pixel-ground.edge-r { border-right: 6px solid var(--ink); }
+.pit {
   position: absolute;
-  left: 50%;
-  bottom: 120px;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  bottom: 0;
+  height: 120px;
+  background: linear-gradient(var(--pit), var(--pit-deep));
 }
+
 .bubble {
   position: relative;
   margin-bottom: 26px;
@@ -1513,14 +1509,100 @@ body {
   border-bottom: 3px solid var(--ink);
   transform: translateX(-50%) rotate(45deg);
 }
-.switchgame .ground-rise { transform: translateY(100%); transition: transform 0.6s ease-out; }
-.switchgame[data-step="1"] .ground-rise { transform: none; }
+
+.tip {
+  position: absolute;
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 18px 24px;
+  background: var(--lavender);
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  box-shadow: 6px 6px 0 var(--ink);
+  z-index: 7;
+}
+.tip-i {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--yellow);
+  font-size: 28px;
+  font-weight: 800;
+}
+.tip-text { font-size: 28px; font-weight: 500; line-height: 1.35; }
+.tip-text b { font-weight: 800; }
+
+.sign { position: absolute; bottom: 120px; width: 0; height: 200px; z-index: 2; }
+.sign::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  width: 12px;
+  top: 30px;
+  bottom: 0;
+  background: var(--ink-soft);
+  border: 3px solid var(--ink);
+  border-bottom: none;
+}
+.sign-board {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translateX(-50%);
+  padding: 8px 18px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 4px 4px 0 var(--ink);
+  font-size: 24px;
+  font-weight: 800;
+  white-space: nowrap;
+}
 
 /* =====================================================================
- * 15–21 levels (level() template in scenes.js)
- * Bug moves --x0 → --x1 → --x2 across steps 0 → 1 → 2.
+ * switch-to-game: no headline, ground from the start. Agent jumps in,
+ * five bugs fly out of him in arcs (staggered), then the order.
  * ===================================================================== */
-.level .lvl-hud { position: absolute; left: 120px; top: 74px; display: flex; align-items: center; gap: 22px; }
+.intro-game .ig-agent { position: absolute; left: 160px; bottom: 120px; opacity: 0; transform-origin: 50% 100%; }
+.intro-game.s1 .ig-agent { opacity: 1; animation: ag-jump-in 0.9s cubic-bezier(.3, .7, .4, 1) both; }
+.intro-game .ig-bug {
+  position: absolute;
+  bottom: 120px;
+  left: calc(480px + var(--i) * 172px);
+  opacity: 0;
+}
+.intro-game.s2 .ig-bug { animation: ig-fly-x 0.8s linear calc(var(--i) * 0.22s) both; }
+.intro-game.s2 .ig-arc { animation: ig-fly-y 0.8s calc(var(--i) * 0.22s) both; }
+@keyframes ig-fly-x {
+  0%   { opacity: 0; transform: translateX(calc(-318px - var(--i) * 172px)); }
+  10%  { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes ig-fly-y {
+  0%   { transform: translateY(-150px) scale(0.3); animation-timing-function: ease-out; }
+  40%  { transform: translateY(-300px) scale(1); animation-timing-function: ease-in; }
+  100% { transform: none; }
+}
+.intro-game .ig-bubble {
+  position: absolute;
+  left: 90px;
+  bottom: 430px;
+  margin: 0;
+  font-size: 40px;
+  font-weight: 800;
+}
+.intro-game .ig-bubble::after { left: 150px; }
+
+/* =====================================================================
+ * Levels (levelScene() in scenes.js): HUD + bullet points on top, the
+ * level's art below. Step flags .s1 … .sN drive the choreography.
+ * ===================================================================== */
+.level .lvl-hud { position: absolute; left: 120px; top: 74px; display: flex; align-items: center; gap: 22px; z-index: 6; }
 .lvl-chip {
   padding: 10px 18px;
   background: var(--ink);
@@ -1530,308 +1612,546 @@ body {
   font-weight: 800;
   letter-spacing: 0.12em;
 }
-.lvl-chip.big { font-size: 40px; padding: 14px 28px; }
 .lvl-name { font-size: 56px; font-weight: 800; }
-.level .lvl-desc {
+.lvl-points {
   position: absolute;
   left: 120px;
   top: 164px;
   max-width: 1360px;
-  font-size: 30px;
-  font-weight: 500;
-  color: var(--ink-soft);
-}
-.level .lvl-why {
-  position: absolute;
-  left: 120px;
-  top: 226px;
-  max-width: 1360px;
-  padding: 12px 22px;
-  background: var(--yellow);
-  border: 3px solid var(--ink);
-  border-radius: 14px;
-  box-shadow: 5px 5px 0 var(--ink);
-  font-size: 28px;
-  font-weight: 700;
+  margin: 0;
+  padding: 0;
+  list-style: none;
   z-index: 6;
 }
-.lvl-why .todo { color: var(--coral); font-weight: 600; font-size: 22px; }
-.level .lvl-stage { position: absolute; inset: 0; }
-.level .lvl-bug { position: absolute; bottom: 120px; left: var(--x0); transition: left 1.6s linear; z-index: 5; }
-.level[data-step="1"] .lvl-bug { left: var(--x1); }
-.level[data-step="2"] .lvl-bug { left: var(--x2); }
-
-/* L1 spawn: diff panel the bug hides in */
-.o-diff { position: absolute; left: 200px; bottom: 120px; width: 520px; height: 380px; overflow: hidden; padding-top: 14px; border-bottom: none; border-radius: 18px 18px 0 0; }
-.o-diff .dl { height: 7px; margin: 5px 0 5px calc(20px + var(--i) * 22px); }
-
-/* L2 gates */
-.o-gates { position: absolute; left: 600px; bottom: 120px; display: flex; gap: 60px; }
-.gate {
+.lvl-points li {
   position: relative;
-  width: 110px;
-  height: 320px;
-  border: 6px solid var(--ink);
-  border-bottom: none;
-  border-radius: 55px 55px 0 0;
-  background: rgba(221, 212, 255, 0.45);
-}
-.gate-top {
-  position: absolute;
-  left: 50%;
-  top: -48px;
-  transform: translateX(-50%);
-  padding: 4px 12px;
-  background: var(--paper);
-  border: 3px solid var(--ink);
-  border-radius: 8px;
-  font-size: 18px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-.gate-ok { position: absolute; left: 0; right: 0; top: 40px; text-align: center; font-size: 48px; font-weight: 800; color: #079aa8; }
-.gate:nth-child(1) .gate-ok { transition-delay: 0.3s; }
-.gate:nth-child(2) .gate-ok { transition-delay: 0.6s; }
-.gate:nth-child(3) .gate-ok { transition-delay: 0.9s; }
-.gate:nth-child(4) .gate-ok { transition-delay: 1.2s; }
-
-/* L3 screenshot that passed */
-.o-shot {
-  position: absolute;
-  left: 680px;
-  bottom: 170px;
-  width: 460px;
-  height: 300px;
-  background: var(--paper);
-  border: 3px solid var(--ink);
-  border-radius: 16px;
-  box-shadow: 8px 8px 0 var(--ink);
-}
-.shot-head { height: 40px; padding: 6px 16px; background: var(--cyan); border-bottom: 3px solid var(--ink); border-radius: 13px 13px 0 0; font-size: 18px; font-weight: 700; }
-.shot-body { padding: 28px 30px; font-size: 36px; font-weight: 600; line-height: 1.4; }
-.shot-pass {
-  position: absolute;
-  right: -34px;
-  top: -30px;
-  padding: 10px 18px;
-  background: var(--cyan);
-  border: 3px solid var(--ink);
-  border-radius: 12px;
-  rotate: 8deg;
+  margin-bottom: 10px;
+  padding-left: 38px;
   font-size: 28px;
-  font-weight: 800;
+  font-weight: 500;
+  line-height: 1.35;
 }
-
-/* L4 wall of lines + sleepy reviewer; bug hops over at step 2 */
-.o-wall { position: absolute; left: 640px; bottom: 120px; width: 220px; height: 300px; overflow: hidden; padding-top: 10px; border-bottom: none; border-radius: 14px 14px 0 0; }
-.o-wall .dl { height: 7px; margin: 5px 0 5px calc(10px + var(--i) * 12px); }
-.o-boss {
-  position: absolute;
-  left: 650px;
-  bottom: 420px;
-  width: 200px;
-  height: 130px;
-  background: var(--lavender);
-  border: 4px solid var(--ink);
-  border-radius: 70px 70px 18px 18px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.boss-eyes { display: flex; gap: 22px; }
-.boss-eyes i {
-  position: relative;
-  width: 38px;
-  height: 38px;
-  overflow: hidden;
-  background: #fff;
-  border: 4px solid var(--ink);
-  border-radius: 50%;
-}
-.boss-eyes i::after {
+.lvl-points li::before {
   content: "";
   position: absolute;
   left: 0;
-  right: 0;
-  top: 0;
-  height: 55%;
-  background: var(--lavender);
-  border-bottom: 4px solid var(--ink);
+  top: 0.42em;
+  width: 16px;
+  height: 16px;
+  background: var(--yellow);
+  border: 3px solid var(--ink);
+  border-radius: 4px;
 }
-.boss-label { font-size: 18px; font-weight: 800; }
-.lvl-jump[data-step="2"] .lvl-bug .bug { animation: bug-hop 1.6s ease-in-out; }
-@keyframes bug-hop {
-  0%, 100% { transform: translateY(0); }
-  45%, 55% { transform: translateY(-360px); }
-}
+.lvl-points b { font-weight: 800; }
+.l1-bug, .l2-bug, .l3-bug, .l4-bug, .l5-bug, .l7-bug { position: absolute; bottom: 120px; z-index: 5; }
 
-/* L5 database cylinder, clones, the "?" lock */
-.o-db { position: absolute; left: 600px; bottom: 120px; width: 300px; height: 260px; }
-.db-top { position: absolute; left: 0; top: 0; width: 300px; height: 70px; background: var(--cyan); border: 4px solid var(--ink); border-radius: 50%; z-index: 1; }
-.db-body {
+/* L1 static checks: crushers hang from a beam; the container clips the
+   rods at the beam. Up = top 36px, down = +240px (teeth just above a
+   squashed bug). */
+.l1-beam { position: absolute; left: 500px; width: 800px; top: 300px; height: 24px; background: var(--ink); border-radius: 6px; z-index: 3; }
+.l1-crushers { position: absolute; left: 0; top: 324px; width: 1600px; height: 460px; overflow: hidden; z-index: 6; }
+.crusher {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 35px;
-  bottom: 0;
-  padding-top: 70px;
-  background: var(--cyan);
-  border: 4px solid var(--ink);
-  border-top: none;
+  top: 36px;
+  width: 220px;
+  height: 150px;
+  background:
+    radial-gradient(circle at 16px 16px, var(--ink) 5px, transparent 6px),
+    radial-gradient(circle at calc(100% - 16px) 16px, var(--ink) 5px, transparent 6px),
+    radial-gradient(circle at 16px calc(100% - 16px), var(--ink) 5px, transparent 6px),
+    radial-gradient(circle at calc(100% - 16px) calc(100% - 16px), var(--ink) 5px, transparent 6px),
+    var(--slate);
+  border: 5px solid var(--ink);
+  border-radius: 12px;
+  animation: crush 2.4s var(--idle) infinite;
+}
+.crusher::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 20px;
+  height: 400px;
+  margin-left: -10px;
+  background: repeating-linear-gradient(var(--ink-soft) 0 14px, var(--ink) 14px 18px);
+  border: 3px solid var(--ink);
+  border-bottom: none;
+}
+.crusher::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 100%;
+  height: 14px;
+  background: conic-gradient(from -45deg at 50% 100%, var(--ink) 90deg, transparent 0) 0 0 / 24px 14px;
+}
+.crusher-plate {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 6px 4px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
   text-align: center;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
+  white-space: nowrap;
 }
-.lvl-clones { position: absolute; left: 930px; bottom: 120px; display: flex; gap: 10px; }
-.o-lock { position: absolute; left: 708px; bottom: 400px; display: flex; flex-direction: column; align-items: center; }
-.lock-shackle { width: 50px; height: 40px; border: 8px solid var(--ink); border-bottom: none; border-radius: 25px 25px 0 0; }
-.lock-body {
-  width: 84px;
-  height: 66px;
+.l1.s1:not(.s2) .crusher:nth-child(1) { animation: slam-once 2s both; }
+.l1.s2 .crusher { animation: crush-pass 2.4s var(--pass) infinite both; }
+@keyframes crush {
+  0%, 50% { transform: translateY(0); animation-timing-function: ease-in; }
+  58%     { transform: translateY(240px); animation-timing-function: linear; }
+  75%     { transform: translateY(240px); animation-timing-function: ease-in-out; }
+  100%    { transform: translateY(0); }
+}
+@keyframes crush-pass {
+  0%, 50% { transform: translateY(0); animation-timing-function: ease-in; }
+  58%     { transform: translateY(240px); animation-timing-function: linear; }
+  75%     { transform: translateY(240px); animation-timing-function: ease-in-out; }
+  100%    { transform: translateY(0); }
+}
+@keyframes slam-once {
+  0%, 55% { transform: translateY(0); animation-timing-function: ease-in; }
+  62%     { transform: translateY(240px); animation-timing-function: linear; }
+  85%     { transform: translateY(240px); animation-timing-function: ease-in-out; }
+  100%    { transform: translateY(0); }
+}
+.l1-bug1 { left: 300px; transition: left 1.1s linear; }
+.l1.s1 .l1-bug1 { left: 562px; }
+.l1-bug1 .bug { transform-origin: 50% 100%; }
+.l1.s1 .l1-bug1 .bug { animation: squash 2s both; }
+@keyframes squash {
+  0%, 61% { transform: none; }
+  63%, 100% { transform: scale(1.3, 0.15); }
+}
+.l1-bug2 { left: 120px; transition: left 3s linear; }
+.l1.s2 .l1-bug2 { left: 1300px; }
+.l1 .l1-tip { right: 120px; top: 160px; width: 560px; }
+
+/* L2 tests: two pits; bug jumps the first (step 2), the agent builds a
+   floating bridge over the second and the bug walks off (step 4). */
+.l2-bug { left: 160px; }
+.l2.s2 .l2-bug { animation: l2-x 1.6s linear both; }
+.l2.s2 .l2-arc { animation: l2-y 1.6s both; }
+.l2.s4 .l2-bug { animation: l2-cross 2.6s linear 2s both; }
+@keyframes l2-x {
+  0%    { left: 160px; }
+  37.5% { left: 400px; }
+  81%   { left: 740px; }
+  100%  { left: 820px; }
+}
+@keyframes l2-y {
+  0%, 37.5% { transform: none; animation-timing-function: ease-out; }
+  59%       { transform: translateY(-170px); animation-timing-function: ease-in; }
+  81%, 100% { transform: none; }
+}
+@keyframes l2-cross {
+  from { left: 820px; }
+  to   { left: 1720px; }
+}
+.l2-bridge { position: absolute; left: 984px; width: 312px; bottom: 76px; display: flex; gap: 8px; z-index: 3; }
+.l2-bridge i {
+  flex: none;
+  width: 72px;
+  height: 44px;
+  background: linear-gradient(var(--ink), var(--ink)) 50% 0 / 4px 100% no-repeat, var(--lavender);
+  border: 4px solid var(--ink);
+  border-radius: 6px;
+  scale: 0;
+}
+.l2.s4 .l2-bridge i {
+  animation:
+    block-pop 0.35s cubic-bezier(.34, 1.56, .64, 1) calc(1s + var(--i) * 0.18s) both,
+    block-float 1.4s ease-in-out calc(1.6s + var(--i) * 0.25s) infinite alternate;
+}
+@keyframes block-pop { from { scale: 0; } to { scale: 1; } }
+@keyframes block-float { from { translate: 0 0; } to { translate: 0 -5px; } }
+.l2-agent { position: absolute; left: 1380px; bottom: 120px; opacity: 0; transform-origin: 50% 100%; z-index: 4; }
+.l2.s4 .l2-agent { opacity: 1; animation: ag-jump-in-r 0.9s cubic-bezier(.3, .7, .4, 1) both; }
+@keyframes ag-jump-in-r {
+  0%   { transform: translate(480px, 0); }
+  55%  { transform: translate(90px, -200px); }
+  85%  { transform: translate(0, 0) scale(1.08, 0.9); }
+  100% { transform: translate(0, 0) scale(1, 1); }
+}
+
+/* L3 automated review: spike traps (turn coral = tuned to known bugs),
+   the bug beams out before them and in after them. */
+.l3-traps { position: absolute; left: 580px; bottom: 120px; display: flex; gap: 50px; z-index: 3; }
+.trap { display: block; overflow: visible; }
+.trap polygon {
+  fill: var(--slate);
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  transition: fill 0.4s ease-out;
+}
+.l3.s2 .trap polygon { fill: var(--coral); }
+.l3-bug { left: 200px; }
+.l3-tp { transform-origin: 50% 100%; }
+.l3.s3 .l3-bug { animation: l3-x 2.6s linear both; }
+.l3.s3 .l3-tp { animation: l3-tp 2.6s both; }
+@keyframes l3-x {
+  0%    { left: 200px; }
+  30%   { left: 380px; }
+  42%   { left: 380px; }
+  42.1% { left: 1160px; }
+  55%   { left: 1160px; }
+  100%  { left: 1380px; }
+}
+@keyframes l3-tp {
+  0%, 30%   { transform: none; opacity: 1; }
+  36%       { transform: scale(0.25, 1.3); opacity: 0.7; }
+  42%       { transform: scale(0, 1.4); opacity: 0; }
+  48%       { transform: scale(0.25, 1.3); opacity: 0.7; }
+  55%, 100% { transform: none; opacity: 1; }
+}
+.beam {
+  position: absolute;
+  bottom: 120px;
+  width: 70px;
+  height: 340px;
+  margin-left: -35px;
+  background: linear-gradient(to top, var(--cyan), transparent);
+  border-radius: 35px 35px 0 0;
+  opacity: 0;
+  z-index: 4;
+}
+.beam-out { left: 458px; }
+.beam-in { left: 1238px; }
+.l3.s3 .beam-out { animation: beam-out 2.6s both; }
+.l3.s3 .beam-in { animation: beam-in 2.6s both; }
+@keyframes beam-out {
+  0%, 28%   { opacity: 0; transform: scaleX(0.2); }
+  35%       { opacity: 0.9; transform: scaleX(1); }
+  45%, 100% { opacity: 0; transform: scaleX(0.2); }
+}
+@keyframes beam-in {
+  0%, 40%   { opacity: 0; transform: scaleX(0.2); }
+  47%       { opacity: 0.9; transform: scaleX(1); }
+  58%, 100% { opacity: 0; transform: scaleX(0.2); }
+}
+
+/* L4 user testing: a hides behind the bush (antennae peek out), the
+   pointer clicks b and c away, then hovers over the bush. */
+.l4-a { left: 460px; transition: left 1.6s linear; }
+.l4-b { left: 290px; transition: left 1.6s linear; transform-origin: 50% 100%; }
+.l4-c { left: 120px; transition: left 1.6s linear; transform-origin: 50% 100%; }
+.l4.s4 .l4-a { left: 1050px; }
+.l4.s4 .l4-b { left: 800px; animation: l4-pop-b 4s both; }
+.l4.s4 .l4-c { left: 640px; animation: l4-pop-c 4s both; }
+@keyframes l4-pop-b {
+  0%, 58%   { scale: 1; opacity: 1; }
+  61%       { scale: 1.15; opacity: 1; }
+  65%, 100% { scale: 0; opacity: 0; }
+}
+@keyframes l4-pop-c {
+  0%, 76%   { scale: 1; opacity: 1; }
+  79%       { scale: 1.15; opacity: 1; }
+  83%, 100% { scale: 0; opacity: 0; }
+}
+.l4-bush { position: absolute; left: 1000px; bottom: 120px; width: 240px; height: 90px; z-index: 6; }
+.l4-bush i {
+  position: absolute;
+  bottom: -6px;
+  background: var(--green);
+  border: 5px solid var(--ink);
+  border-radius: 60px 60px 10px 10px;
+}
+.l4-bush i:nth-child(1) { left: 0; width: 120px; height: 76px; }
+.l4-bush i:nth-child(2) { left: 64px; width: 124px; height: 96px; }
+.l4-bush i:nth-child(3) { left: 140px; width: 100px; height: 70px; }
+.poof {
+  position: absolute;
+  top: 726px;
+  width: 170px;
+  height: 170px;
+  margin: -85px 0 0 -85px;
+  border: 10px dotted var(--coral);
+  border-radius: 50%;
+  opacity: 0;
+  z-index: 6;
+}
+.poof-b { left: 878px; }
+.poof-c { left: 718px; }
+.l4.s4 .poof-b { animation: poof-b 4s both; }
+.l4.s4 .poof-c { animation: poof-c 4s both; }
+@keyframes poof-b {
+  0%, 59%   { opacity: 0; scale: 0.3; }
+  61%       { opacity: 1; scale: 0.6; }
+  72%, 100% { opacity: 0; scale: 1.3; }
+}
+@keyframes poof-c {
+  0%, 77%   { opacity: 0; scale: 0.3; }
+  79%       { opacity: 1; scale: 0.6; }
+  90%, 100% { opacity: 0; scale: 1.3; }
+}
+.l4-cursor { position: absolute; left: 1660px; top: 300px; z-index: 8; transform-origin: 0 0; }
+.l4.s4 .l4-cursor { animation: l4-cursor 4s ease-in-out both; }
+@keyframes l4-cursor {
+  0%, 45%    { left: 1660px; top: 300px; scale: 1; }
+  57.5%      { left: 878px; top: 712px; scale: 1; }
+  58.75%     { scale: 0.8; }
+  60%, 62.5% { left: 878px; top: 712px; scale: 1; }
+  75%        { left: 718px; top: 712px; scale: 1; }
+  76.25%     { scale: 0.8; }
+  77.5%, 80% { left: 718px; top: 712px; scale: 1; }
+  95%, 100%  { left: 990px; top: 600px; scale: 1; }
+}
+.px-cursor { display: block; }
+
+/* L5 feature flag: platform shuttles over the pit; on step 2 it comes to
+   the left edge from wherever it was (--p0), the bug boards, fades to
+   half-stealth, rides across and steps off. */
+.l5-plat {
+  position: absolute;
+  left: 470px;
+  bottom: 74px;
+  width: 260px;
+  height: 46px;
   display: grid;
   place-items: center;
   background: var(--yellow);
   border: 4px solid var(--ink);
   border-radius: 10px;
-  font-size: 36px;
+  font-size: 20px;
   font-weight: 800;
+  letter-spacing: 0.1em;
+  z-index: 3;
+  animation: plat-idle 2.6s ease-in-out infinite alternate;
 }
-.lvl-db .db-junior { right: 120px; top: 310px; width: 400px; }
-.lock-mini { width: 46px; height: 40px; background: var(--yellow); border: 3px solid var(--ink); border-radius: 6px; position: relative; margin-top: 20px; }
-.lock-mini::before {
-  content: "";
-  position: absolute;
-  left: 8px;
-  top: -24px;
-  width: 24px;
-  height: 22px;
-  border: 5px solid var(--ink);
-  border-bottom: none;
-  border-radius: 14px 14px 0 0;
+.l5.s2 .l5-plat { animation: plat-ride 5s linear both; }
+@keyframes plat-idle { from { left: 470px; } to { left: 910px; } }
+@keyframes plat-ride {
+  0%        { left: var(--p0, 470px); }
+  16%, 26%  { left: 470px; }
+  74%, 100% { left: 910px; }
+}
+.l5-bug { left: 140px; }
+.l5.s2 .l5-bug { animation: l5-x 5s linear both, l5-ghost 5s linear both; }
+@keyframes l5-x {
+  0%        { left: 140px; }
+  22%, 26%  { left: 522px; }
+  74%       { left: 962px; }
+  96%, 100% { left: 1300px; }
+}
+@keyframes l5-ghost {
+  0%, 24% { opacity: 1; }
+  32%     { opacity: 0.25; }
+  50%     { opacity: 0.4; }
+  56%     { opacity: 0.2; }
+  74%     { opacity: 0.35; }
+  100%    { opacity: 0.3; }
 }
 
-/* L6 cave + sign, bug sleeps at step 1 */
-.o-cave {
+/* L6 unknown domain: pixel maze; the bug follows the BFS path
+   (offset-path set inline from mazePath()). */
+.l6-maze { position: absolute; left: 358px; top: 300px; background: var(--paper); }
+.mz-walls { position: absolute; inset: 0; width: 100%; height: 100%; fill: var(--ink); }
+.mz-q {
   position: absolute;
-  left: 560px;
-  bottom: 120px;
-  width: 520px;
-  height: 330px;
-  background: #3a3546;
-  border: 4px solid var(--ink);
-  border-bottom: none;
-  border-radius: 260px 260px 0 0;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  font-size: 38px;
+  font-weight: 800;
+  color: var(--coral);
 }
-.cave-sign {
+.mz-bug { position: absolute; left: 0; top: 0; offset-rotate: 0deg; offset-distance: 0%; z-index: 2; }
+.l6.s3 .mz-bug { animation: mz-run 4.2s linear both; }
+@keyframes mz-run { to { offset-distance: 100%; } }
+.l6 .l6-sign { opacity: 0; transition: opacity 0.45s ease-out; }
+.l6.s2 .l6-sign { opacity: 1; }
+
+/* L7 code review: a long PR scrolls forever (two identical halves); two
+   bugs jump in and then show up small between the lines. */
+.l7-pr {
   position: absolute;
-  left: 50%;
-  top: -66px;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
-  padding: 8px 16px;
+  left: 720px;
+  width: 740px;
+  bottom: 120px;
+  height: 430px;
   background: var(--paper);
   border: 3px solid var(--ink);
-  border-radius: 10px;
-  font-size: 22px;
-  font-weight: 800;
-  white-space: nowrap;
-}
-.cave-sign .off { color: var(--coral); }
-.cave-sign .on { color: #079aa8; }
-.zzz { position: absolute; left: 880px; bottom: 300px; font-size: 40px; font-weight: 800; color: var(--lavender); z-index: 6; }
-.zzz span:nth-child(1) { position: relative; left: 14px; top: -30px; font-size: 32px; }
-.zzz span:nth-child(2) { position: relative; left: 22px; top: -60px; font-size: 26px; }
-
-/* L7 sync pipe into another world */
-.o-pipe {
-  position: absolute;
-  left: 420px;
-  bottom: 160px;
-  width: 760px;
-  height: 44px;
-  background: var(--lavender);
-  border: 4px solid var(--ink);
-  border-radius: 22px;
-}
-.o-world {
-  position: absolute;
-  right: 120px;
-  bottom: 120px;
-  width: 300px;
-  height: 420px;
-  background: var(--paper);
-  border: 4px solid var(--ink);
   border-bottom: none;
-  border-radius: 24px 24px 0 0;
+  border-radius: 18px 18px 0 0;
+  overflow: hidden;
+  z-index: 3;
 }
-.world-label { margin-top: 18px; text-align: center; font-size: 24px; font-weight: 800; }
-.world-infect {
-  position: absolute;
-  left: 20px;
-  right: 20px;
-  top: 70px;
-  bottom: 20px;
-  border-radius: 12px;
-  background: radial-gradient(var(--coral) 32%, transparent 35%) 0 0 / 40px 40px;
+.l7-head {
+  height: 56px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid var(--ink);
+  font-size: 20px;
+  font-weight: 700;
+}
+.l7-files { color: var(--ink-soft); font-weight: 500; }
+.l7-body { position: absolute; left: 0; right: 0; top: 56px; bottom: 0; overflow: hidden; }
+.l7-scroll { animation: l7-scroll 18s linear infinite; }
+@keyframes l7-scroll { to { transform: translateY(-50%); } }
+.l7-half { position: relative; padding: 10px 0; }
+.l7 .dl { height: 9px; margin: 0 0 10px calc(40px + var(--i) * 28px); }
+.l7-hidden { position: absolute; opacity: 0; transition: opacity 0.5s ease-out; }
+.l7.s2 .l7-hidden { opacity: 1; transition-delay: 1.1s; }
+.l7-b1 { left: 180px; }
+.l7-b2 { left: 380px; }
+.l7-arc { transform-origin: 50% 100%; }
+.l7.s2 .l7-b1 { animation: l7-dive-1 1.1s ease-in both; }
+.l7.s2 .l7-b2 { animation: l7-dive-2 1.1s ease-in 0.25s both; }
+.l7.s2 .l7-arc { animation: l7-arc 1.1s both; }
+.l7.s2 .l7-b2 .l7-arc { animation-delay: 0.25s; }
+@keyframes l7-dive-1 { from { left: 180px; } to { left: 880px; } }
+@keyframes l7-dive-2 { from { left: 380px; } to { left: 1120px; } }
+@keyframes l7-arc {
+  0%   { transform: none; opacity: 1; animation-timing-function: ease-out; }
+  45%  { transform: translateY(-280px) scale(0.75); opacity: 1; animation-timing-function: ease-in; }
+  100% { transform: translateY(-200px) scale(0.15); opacity: 0; }
 }
 
-/* =====================================================================
- * 22 boss
- * ===================================================================== */
-.boss .lvl-chip.big { position: absolute; left: 50%; top: 110px; transform: translateX(-50%); }
-.boss .headline { margin-top: 140px; }
-.boss .boss-callback {
+/* L8 nothing crashed: minesweeper, mostly revealed; on step 2 the covered
+   tile at MS_BUG flips and the bug sits there. */
+.l8-board {
   position: absolute;
   left: 50%;
-  top: 420px;
+  top: 330px;
   transform: translateX(-50%);
-  width: max-content;
+  padding: 14px;
+  background: var(--cream-2);
+  border: 4px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: 8px 8px 0 var(--ink);
 }
-.boss .boss-bug { position: absolute; left: 140px; bottom: 120px; }
+.ms-board { display: grid; grid-template-columns: repeat(var(--cols), 44px); grid-auto-rows: 44px; }
+.ms-cell { position: relative; display: grid; place-items: center; }
+.ms-cell.is-open { background: var(--paper); box-shadow: inset 0 0 0 1px var(--cream-2); }
+.ms-cell b { font-size: 26px; font-weight: 800; }
+.ms-cell .n1 { color: var(--code-fn); }
+.ms-cell .n2 { color: var(--green); }
+.ms-cell .n3 { color: var(--coral); }
+.ms-cover {
+  position: absolute;
+  inset: 0;
+  background: var(--lavender);
+  box-shadow: inset 4px 4px 0 var(--paper), inset -4px -4px 0 var(--slate);
+  transition: transform 0.35s ease-in;
+}
+.ms-bugcell { background: var(--paper); }
+.ms-bug { position: relative; z-index: 2; opacity: 0; transition: opacity 0.3s ease-out; }
+.l8.s2 .ms-bugcell .ms-cover { transform: scaleY(0); }
+.l8.s2 .ms-bug { opacity: 1; transition-delay: 0.3s; }
 
 /* =====================================================================
- * 23 patch notes
+ * bug-wins: the bug walks up to the production server; BUM.
  * ===================================================================== */
-.patch .headline { font-size: 64px; }
-.patch .changelog {
+.bw .bw-shake { position: absolute; inset: 0; }
+.bw.s1 .bw-shake { animation: bw-shake 0.5s steps(1) both; }
+@keyframes bw-shake {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(-12px, 6px); }
+  40%  { transform: translate(10px, -8px); }
+  60%  { transform: translate(-8px, -4px); }
+  80%  { transform: translate(6px, 8px); }
+  100% { transform: translate(0, 0); }
+}
+.bw-server {
+  position: absolute;
+  left: 1120px;
+  bottom: 120px;
+  width: 240px;
+  height: 330px;
+  padding: 74px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--slate);
+  border: 5px solid var(--ink);
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  z-index: 3;
+}
+.bw-label {
+  position: absolute;
+  left: 50%;
+  top: 16px;
+  transform: translateX(-50%);
+  padding: 4px 14px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.bw-slot {
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  background: var(--ink);
+  border-radius: 6px;
+}
+.bw-slot i { width: 14px; height: 14px; border-radius: 3px; background: var(--green); }
+.bw.s1 .bw-slot i { background: var(--coral); animation: bw-blink 0.5s steps(1) infinite; }
+.bw.s1 .bw-slot:nth-child(odd) i { animation-delay: -0.25s; }
+@keyframes bw-blink { 50% { opacity: 0.25; } }
+.bw-star { position: absolute; left: 1040px; top: 170px; width: 400px; height: 400px; scale: 0; z-index: 2; }
+.bw-star-out { fill: var(--yellow); stroke: var(--ink); stroke-width: 6; stroke-linejoin: round; }
+.bw-star-in { fill: var(--coral); stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
+.bw.s1 .bw-star { animation: bw-pop 0.5s cubic-bezier(.34, 1.56, .64, 1) both; }
+.bw-boom {
+  position: absolute;
+  left: 1240px;
+  top: 290px;
+  transform: translateX(-50%) rotate(-8deg);
+  font-size: 104px;
+  font-weight: 800;
+  color: var(--paper);
+  -webkit-text-stroke: 4px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 6px 6px 0 var(--ink);
+  scale: 0;
+  z-index: 4;
+}
+.bw.s1 .bw-boom { animation: bw-pop 0.45s cubic-bezier(.34, 1.56, .64, 1) 0.12s both; }
+@keyframes bw-pop { from { scale: 0; } to { scale: 1; } }
+.bw-bug { position: absolute; left: -220px; bottom: 120px; transition: left 2s linear; z-index: 4; }
+.bw[data-step] .bw-bug { left: 880px; }
+.bw.s1 .bw-bug .bug { animation: bw-hop 0.6s ease-in-out 0.3s infinite; }
+@keyframes bw-hop { 50% { transform: translateY(-70px); } }
+.bw-title {
   position: absolute;
   left: 120px;
-  right: 120px;
-  top: 300px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-}
-.changelog ul { margin: 0; padding: 0; list-style: none; }
-.changelog li { display: flex; align-items: baseline; gap: 16px; margin-bottom: 24px; font-size: 25px; line-height: 1.35; }
-.changelog .ver {
-  flex: none;
-  padding: 4px 10px;
+  top: 110px;
+  padding: 14px 34px;
+  rotate: -3deg;
   background: var(--ink);
   color: var(--yellow);
-  border-radius: 8px;
-  font-size: 18px;
+  border-radius: 16px;
+  box-shadow: 8px 8px 0 var(--coral);
+  font-size: 72px;
   font-weight: 800;
+  letter-spacing: 0.08em;
 }
-.patch[data-step="0"] .cl-a .stagger-item,
-.patch[data-step="1"] .stagger-item { opacity: 1; transform: none; }
 
 /* =====================================================================
- * 24 punchline
+ * takeaways: "Co tedy s tím?" three points, then thanks; agent stays
  * ===================================================================== */
-.punch .headline { margin-top: 50px; font-size: 96px; }
-.punch .hl { color: var(--coral); }
-.punch .lede { position: absolute; left: 120px; right: 120px; }
-.punch .lede[data-from="1"] { top: 370px; }
-.punch .lede[data-from="2"] { top: 500px; }
-.punch .finale { position: absolute; left: 0; right: 0; top: 380px; text-align: center; }
-.finale-line { font-size: 40px; font-weight: 700; line-height: 1.35; }
-.finale-line b { color: var(--coral); }
-.finale-thanks { margin-top: 28px; font-size: 80px; font-weight: 800; color: var(--coral); }
-.punch .punch-bug { position: absolute; right: 180px; bottom: 120px; }
+.takeaways .tk-list { max-width: 1080px; margin-top: 48px; }
+.takeaways .tk-list li { margin-bottom: 30px; font-size: 38px; font-weight: 600; line-height: 1.3; }
+.takeaways .tk-list li::before { top: 0.36em; }
+.takeaways .tk-list b { font-weight: 800; color: var(--coral); }
+.takeaways .tk-thanks { position: absolute; right: 380px; bottom: 150px; font-size: 88px; font-weight: 800; color: var(--coral); }
+.takeaways .tk-agent { position: absolute; right: 150px; bottom: 120px; }
 
 /* =====================================================================
  * Scene: bug-sheet (DEV ONLY: character sheet for reviewing the sprite;

@@ -203,6 +203,42 @@ Tohle je zdroj pravdy. Co tu není, se nesmí prezentovat jako fakt.
   room-edit, db-tables a find-bug.
 - Ve Slacku vypíná flag **Hector** (dříve E'Tore). Slajd „Co se děje?“ bez štítku „já“.
 
+### Herní část přepracovaná (19. 11.)
+
+Autor herní část přestavěl; nahrazuje řádky 14–24 v Seznamu slajdů níže
+(staré levely Spawn, Databáze, Pozdní projev, Boss fight, Patch notes a Pointa
+jsou pryč, „boss fight“ a „agent není hloupý, je doslovný“ byly mimo).
+
+- **Přepnutí do hry:** bez nadpisu, země už je vidět. Přijde agent, vyrobí pět
+  bugů, bublina „Běžte a zničte produkci!“.
+- **L1 Statické kontroly:** code format, lint, type checking jako buchary. První
+  bug rozmáčknou, druhý projde. Info bublina: dá se nastavit třeba v Claude jako
+  post-edit nebo stop hook.
+- **L2 Testy:** unit a integrační testy jako dvě díry. Dřív velmi silná ochrana;
+  dnes menší hodnota, pokud testy píše stejný agent jako kód. U druhé díry přijde
+  agent a postaví plovoucí most.
+- **L3 Automatizované code review:** agent měl krok code review, specializace na
+  známé chyby. Pasti uprostřed, bug je přeskočí teleportem.
+- **L4 Testování uživatelem:** proklikat aplikaci; trochu automatizovat (agent
+  pustí Playwright, screenshoty, podívá se na ně); nedeterministické. Problém:
+  chyba byla vizuálně nenápadná, při výběru stejné kategorie UI vypadalo správně.
+  Tři bugy, jeden se schová za keř, ostatní eliminujeme.
+- **L5 Feature flag:** funkci jde zapnout a vypnout; ale kvůli tomu se na chybu
+  přišlo později. Velká díra, plošina „feature flag“ jezdí sem a tam, bug na ni
+  naskočí, trochu se zneviditelní a přejede.
+- **L6 Neznámá doména:** refaktoring cizí části aplikace, autor nevěděl přesně,
+  jak všechno funguje; hůř se shání reviewer, když neví ani, který tým to vlastní.
+  Bludiště (vizuál autor zadal s otazníkem).
+- **L7 Code review:** aby projekt šel dopředu, musel posílat velká PR; 10 malých by
+  se ověřilo snáz, ale je v tom organizační overhead. Scrollující kód, dva bugy se
+  v něm schovají.
+- **L8 Nic nespadlo:** bug nezpůsoboval crash, padajícího kódu bychom si všimli
+  hned. Minesweeper, většina pole odkrytá.
+- **Bum slide:** bug vyhrál (výbuch na produkci).
+- **Co tedy s tím:** možná držet se best practices (malá PR); refaktorovacího
+  agenta jsme vylepšili, aby se přesně tohle příště nestalo; jde o zmenšení
+  pravděpodobnosti chyby, na 100 % úspěšní nebudeme nikdy.
+
 ### Nevymýšlet (zatím neznámé)
 
 - Název produktu a druhého systému, se kterým se synchronizovalo.

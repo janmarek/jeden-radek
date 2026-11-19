@@ -83,7 +83,13 @@ toggles `.is-on`. Uses the standalone `translate` property, so the element's own
 spot (a value that changes per step).
 
 Slides use `.scene.slide` + `.kicker` / `.headline` / `.lede`; the game levels use
-the `level()` template in scenes.js (bug moves `--x0 → --x1 → --x2` over 3 steps).
+`levelScene()` in scenes.js (HUD + bullet points + the level's own `art()` +
+`ground(holes)`). Level choreography: `markSteps()` puts `.s1 … .sN` on the root
+while step >= N, and one-shot keyframes hang on those flags, so an end state
+(squashed bug, bug on the far side) survives later steps; `[data-step="N"]` would
+drop it. Timed pose changes go through `poses()` / `choreo()`, which cancel the
+previous step's timers. When a looping animation must hand over to a scripted one
+(L5 platform), read its live position in `o.before` before the flags change.
 Anything calling `bug()` at definition time must be wrapped in a function, since
 scenes.js loads before runtime.js.
 
