@@ -1,20 +1,26 @@
 // Screenshot verification: walk the deck with real arrow presses and
 // capture #stage for every scene + step into verify-shots/.
-// Run: node verify.mjs            (all scenes)
-//      node verify.mjs bug-sheet  (only scenes whose id contains the arg)
+// Run: node verify.mjs                 (all scenes)
+//      node verify.mjs bug-sheet       (only scenes whose id contains the arg)
+//      node verify.mjs room-edit,job   (comma list: any of them)
+//
+// Old shots of the scenes being shot are deleted first (all shots when no
+// filter), so there's never a need to rm verify-shots by hand. It only
+// ever deletes NN-<id>-stepN.png files inside verify-shots/.
 //
 // Wait per step defaults to 900ms. A scene can declare longer waits:
 //   verifyWait: 2800            same wait for every step
 //   verifyWait: [2800, 900]     per step
 import { chromium } from "playwright";
 import { createServer } from "http";
-import { readFile, mkdir } from "fs/promises";
+import { readFile, mkdir, readdir, unlink } from "fs/promises";
 import { extname, join, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = 4174;
-const filter = process.argv[2] || "";
+const filters = (process.argv[2] || "").split(",").map((f) => f.trim()).filter(Boolean);
+const wanted = (id) => !filters.length || filters.some((f) => id.includes(f));
 
 const mime = {
   ".html": "text/html",
@@ -71,6 +77,19 @@ const manifest = await page.evaluate(() =>
 const shotDir = join(__dirname, "verify-shots");
 await mkdir(shotDir, { recursive: true });
 
+// Drop stale shots of the scenes we're about to shoot (scene numbers shift
+// when scenes are added, so match on the id part only).
+const SHOT_RE = /^\d+-(.+)-step\d+\.png$/;
+let removed = 0;
+for (const f of await readdir(shotDir)) {
+  const m = f.match(SHOT_RE);
+  if (m && wanted(m[1])) {
+    await unlink(join(shotDir, f));
+    removed++;
+  }
+}
+if (removed) console.log(`  (removed ${removed} old shots)`);
+
 let total = 0;
 await page.evaluate(() => mountScene(0, 0));
 for (let i = 0; i < manifest.length; i++) {
@@ -80,7 +99,7 @@ for (let i = 0; i < manifest.length; i++) {
     if (step === 0 && i > 0 && manifest[i - 1].exitDuration) {
       wait = Math.max(wait, manifest[i - 1].exitDuration + 900);
     }
-    if (!filter || s.id.includes(filter)) {
+    if (wanted(s.id)) {
       await page.waitForTimeout(wait);
       const filename = `${String(i + 1).padStart(2, "0")}-${s.id}-step${step}.png`;
       await page.locator("#stage").screenshot({ path: join(shotDir, filename) });

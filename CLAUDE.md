@@ -152,7 +152,10 @@ editor | browser`, `.window-enter-*` / `.window-exit-*`, `.typewriter` + `.curso
 ## Verification
 
 `node verify.mjs [id-filter]` walks the deck with real key presses and saves
-`verify-shots/NN-id-stepN.png` (gitignored). Read the PNGs back to check. Use it for
+`verify-shots/NN-id-stepN.png` (gitignored). Read the PNGs back to check.
+Filter by id substring, comma list allowed (`node verify.mjs room-edit,job`).
+It deletes the old shots of the scenes it shoots by itself: never `rm`
+verify-shots by hand (Jan doesn't want to confirm rm commands). Use it for
 risky changes (new sprite art, merged scenes, big CSS rewrites) or when Jan asks;
 Jan checks routine edits in the browser himself. Playwright is pinned to 1.60.0 to
 reuse the browser already cached on this machine.

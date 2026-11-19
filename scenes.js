@@ -416,7 +416,7 @@ const scenes = [
       return `
       <div class="scene slide slackscene">
         <div class="sl-win">
-          <div class="sl-head"><img src="img/slack-mark.svg" alt=""><span># incident</span></div>
+          <div class="sl-head"><img src="img/slack-mark.svg" alt=""><span>#incident-duplicite-category-assignments</span></div>
           <div class="sl-feed">
             ${msg("Astrid", "A", "coral", "Nefunguje mi synchronizace do našeho systému.", 0)}
             ${msg("Astrid", "A", "coral", "Padá to, hotelové pokoje se objevují ve více kategoriích.", 1, true)}
