@@ -120,8 +120,8 @@ Tohle je zdroj pravdy. Co tu není, se nesmí prezentovat jako fakt.
 
 ### Doplněno autorem (17. 11.)
 
-- Firma: **Mews**, dělá software pro hotely, existuje 14 let. Autor tam pracoval
-  (už ne). Jméno firmy smí na slajd, logo a firemní barvy ne.
+- Firma: **Mews**, dělá software pro hotely, existuje 14 let, přes 1000
+  zaměstnanců, stovky vývojářů. Autor tam pracoval (už ne). Jméno firmy smí na slajd, logo a firemní barvy ne.
 - Talk otevírá „Věřte nevěřte“: příběh se opravdu stal. Vizuálně odkaz na
   pořad Věřte nevěřte (Beyond Belief): tma, mlha, světelný kužel, zářící patkové
   písmo. Jen nálada, žádné logo pořadu.

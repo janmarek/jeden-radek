@@ -540,9 +540,11 @@ body {
  * turns, walks to the left edge and turns back to face a black 90s TV that
  * shows the original "Věřte nevěřte" mood (fog, spotlight, glowing text).
  * Jan wants the subtle original effect, no extra grain/scanlines/flicker.
- * Timeline on entrance (keyed off [data-step], so ← doesn't replay it):
- *   0.35s turn · 0.45–1.95s walk · 2.15s turn back · 2.2s TV pops ·
- *   2.9s screen fades up from black · 3.6s title resolves.
+ * Timeline on entrance (keyed off [data-step], so ← doesn't replay it).
+ * Jan wanted a faster intro: the TV pops right away, the bug turns and
+ * walks in parallel.
+ *   0.1s TV pops · 0.35s turn · 0.45–1.95s walk · 0.6s screen fades up
+ *   from black · 1.1s title resolves · 2.15s bug turns back.
  * ===================================================================== */
 .truestory { overflow: hidden; }
 .ts-bug {
@@ -565,7 +567,7 @@ body {
   transform-origin: 50% 100%;
   transform: scale(0.15);
   opacity: 0;
-  transition: transform 0.6s cubic-bezier(0.3, 1.5, 0.5, 1) 2.2s, opacity 0.15s linear 2.2s;
+  transition: transform 0.6s cubic-bezier(0.3, 1.5, 0.5, 1) 0.1s, opacity 0.15s linear 0.1s;
 }
 .truestory[data-step] .tv { transform: none; opacity: 1; }
 .tv-body {
@@ -605,7 +607,7 @@ body {
   height: 12px;
   background: #4a1d1a;
   border-radius: 50%;
-  transition: background 0.1s 2.9s, box-shadow 0.1s 2.9s;
+  transition: background 0.1s 0.6s, box-shadow 0.1s 0.6s;
 }
 .truestory[data-step] .tv-led { background: #6dff7a; box-shadow: 0 0 10px #6dff7a; }
 
@@ -628,7 +630,7 @@ body {
 }
 .truestory[data-step] .tv-on {
   animation:
-    tv-switch-on 1.1s ease-out 2.9s both;
+    tv-switch-on 1.1s ease-out 0.6s both;
 }
 /* Switch-on from black: no flash, no snow, the picture just comes up. */
 @keyframes tv-switch-on {
@@ -691,7 +693,7 @@ body {
   opacity: 0;
   letter-spacing: 0.25em;
   filter: blur(10px);
-  transition: opacity 1.4s ease-out 3.6s, letter-spacing 1.8s ease-out 3.6s, filter 1.4s ease-out 3.6s;
+  transition: opacity 1.4s ease-out 1.1s, letter-spacing 1.8s ease-out 1.1s, filter 1.4s ease-out 1.1s;
 }
 .truestory[data-step] .bb-title { opacity: 1; letter-spacing: 0.02em; filter: none; }
 @keyframes bb-glow {
@@ -708,7 +710,8 @@ body {
 }
 .ts-mews.is-on { letter-spacing: 0.02em; filter: none; }
 .bb-sub,
-.ts-what {
+.ts-what,
+.ts-size {
   position: absolute;
   left: 0;
   right: 0;
@@ -722,9 +725,12 @@ body {
   white-space: nowrap;
 }
 .bb-sub[data-from],
-.ts-what[data-from] { translate: 0 0; filter: blur(6px); transition: opacity 1s ease-out, filter 1s ease-out; }
+.ts-what[data-from],
+.ts-size[data-from] { translate: 0 0; filter: blur(6px); transition: opacity 1s ease-out, filter 1s ease-out; }
 .bb-sub.is-on,
-.ts-what.is-on { filter: none; }
+.ts-what.is-on,
+.ts-size.is-on { filter: none; }
+.ts-size { top: 316px; font-size: 26px; color: rgba(222, 226, 255, 0.7); }
 
 /* =====================================================================
  * mews-pms: modern screen (majority) vs older backend-rendered one.
@@ -786,6 +792,13 @@ body {
   border: 3px solid var(--ink);
   border-radius: 10px;
 }
+.pms-age {
+  margin-top: 26px;
+  text-align: center;
+  font-size: 34px;
+  font-weight: 700;
+}
+.pms-age b { color: var(--coral); }
 .mo-edit { font-size: 20px; font-weight: 600; color: #2a6fdb; text-decoration: underline; }
 .brp-label {
   position: absolute;
@@ -853,7 +866,7 @@ body {
   opacity: 0;
   transition: stroke-dashoffset 0.6s ease-out, opacity 0s;
 }
-.named[data-step="4"] .tally .tally-new {
+.named[data-step="5"] .tally .tally-new {
   stroke-dashoffset: 0;
   opacity: 1;
   transition: stroke-dashoffset 0.6s ease-out 0.3s, opacity 0s 0.3s;
@@ -1112,7 +1125,7 @@ body {
  * ===================================================================== */
 .tiles.tiles-3 { grid-template-columns: repeat(3, 420px); gap: 50px; }
 .react .tiles { top: 300px; }
-.react .tile { height: 420px; font-size: 40px; }
+.react .tile { height: 340px; font-size: 44px; }
 .react .tile small { font-size: 24px; line-height: 1.35; margin-top: 10px; }
 .react .tile[data-from],
 .worked .tile[data-from] {
@@ -1285,7 +1298,7 @@ body {
 .findbug .fb-win {
   position: absolute;
   left: 120px;
-  top: 236px;
+  top: 262px;
   width: 1360px;
   background: var(--paper);
   border: 3px solid var(--ink);
@@ -1323,10 +1336,9 @@ body {
   border-radius: 10px;
   font: 800 20px/30px var(--font-sans);
 }
-.findbug .fb-stamp {
+/* Stamp (find-bug "Opraveno", job "Hotovo"): tilted card that drops in. */
+.stamp {
   position: absolute;
-  left: 1000px;
-  top: 690px;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -1339,11 +1351,20 @@ body {
   font-weight: 800;
   rotate: -6deg;
   scale: 1.6;
-  transition: opacity 0.2s, scale 0.35s cubic-bezier(.34, 1.6, .64, 1);
+  transition: opacity 0.2s, scale 0.35s cubic-bezier(.34, 1.6, .64, 1), background 0.8s ease;
 }
-.findbug .fb-stamp.is-on { scale: 1; }
-.fb-stamp .swap > [data-from],
-.fb-stamp .swap > [data-to] { translate: 0 0; transition: opacity 0.25s; }
+.stamp.is-on { scale: 1; }
+.findbug .fb-stamp { left: 1000px; top: 690px; }
+/* Step 4 "Opraveno?": no swap blink. The green fades into yellow, the
+   check icon crossfades to a question mark, the "?" fades in. */
+.fb-ico { display: grid; }
+.fb-ico > svg { grid-area: 1 / 1; transition: opacity 0.8s ease; }
+.fb-ico > svg:last-child { opacity: 0; }
+.fb-q { display: inline-block; max-width: 0; opacity: 0; transition: max-width 0.5s ease, opacity 0.8s ease; vertical-align: top; }
+.findbug[data-step="4"] .fb-stamp { background: var(--yellow); }
+.findbug[data-step="4"] .fb-ico > svg:first-child { opacity: 0; }
+.findbug[data-step="4"] .fb-ico > svg:last-child { opacity: 1; }
+.findbug[data-step="4"] .fb-q { max-width: 1em; opacity: 1; }
 
 /* =====================================================================
  * damage: "Napravení škod", three lines one per step
@@ -1369,14 +1390,14 @@ body {
 .pl-cards {
   position: absolute;
   left: 120px;
-  top: 250px;
+  top: 276px;
   display: grid;
   grid-template-columns: repeat(3, 420px);
   gap: 50px;
 }
 .pl-card {
   position: relative;
-  height: 560px;
+  height: 500px;
   padding: 26px 28px;
   background: var(--paper);
   border: 3px solid var(--ink);
@@ -1384,6 +1405,8 @@ body {
   box-shadow: 8px 8px 0 var(--ink);
   transition: opacity 0.4s, translate 0.4s cubic-bezier(.34, 1.5, .64, 1), background 0.4s;
 }
+.pl-card[data-from] { translate: 0 40px; }
+.pl-card.is-on { translate: 0 0; }
 .pl-head { display: flex; align-items: center; gap: 16px; }
 .pl-letter {
   width: 56px;
@@ -1396,14 +1419,14 @@ body {
   font-size: 28px;
   font-weight: 800;
 }
-.pl-title { margin-top: 18px; font-size: 34px; font-weight: 800; line-height: 1.15; }
+.pl-title { margin-top: 18px; font-size: 40px; font-weight: 800; line-height: 1.15; }
 .pl-list { margin: 22px 0 0; padding: 0; list-style: none; }
-.pl-list li { display: flex; align-items: flex-start; gap: 14px; margin-top: 16px; font-size: 24px; font-weight: 600; line-height: 1.35; }
+.pl-list li { display: flex; align-items: flex-start; gap: 14px; margin-top: 18px; font-size: 30px; font-weight: 600; line-height: 1.35; }
 .pl-sign {
   flex: none;
   width: 34px;
   height: 34px;
-  margin-top: 1px;
+  margin-top: 4px;
   display: grid;
   place-items: center;
   border: 3px solid var(--ink);
@@ -1411,8 +1434,8 @@ body {
 }
 .pl-pro .pl-sign { background: var(--green); }
 .pl-con .pl-sign { background: var(--coral); }
-.poll[data-step="4"] .pl-card:not(.pl-pick) { opacity: 0.4; }
-.poll[data-step="4"] .pl-pick { translate: 0 -14px; background: var(--yellow); }
+.poll[data-step="7"] .pl-card:not(.pl-pick) { opacity: 0.4; }
+.poll[data-step="7"] .pl-pick { translate: 0 -14px; background: var(--yellow); }
 
 /* =====================================================================
  * job: one-off job runner with a small UI (not a console): job picker,
@@ -1421,9 +1444,9 @@ body {
 .job .jo-win {
   position: absolute;
   left: 120px;
-  top: 230px;
+  top: 272px;
   width: 1360px;
-  height: 540px;
+  height: 520px;
   background: var(--paper);
   border: 3px solid var(--ink);
   border-radius: 22px;
@@ -1470,8 +1493,9 @@ body {
   font-size: 26px;
   font-weight: 800;
 }
-.job .jo-human { position: absolute; left: 120px; top: 806px; font-size: 34px; font-weight: 600; }
+.job .jo-human { position: absolute; left: 120px; top: 818px; font-size: 34px; font-weight: 600; }
 .job .jo-human b { color: var(--coral); }
+.job .jo-done { left: 1120px; top: 650px; }
 
 /* =====================================================================
  * Game part shared bits: ground pieces next to gaps (ground() in
@@ -1520,7 +1544,7 @@ body {
 }
 
 /* =====================================================================
- * switch-to-game: no headline, ground from the start. The agent jumps in
+ * switch-to-game: headline "Proč se to tedy stalo?", ground from the start. The agent jumps in
  * on entry; step 1 throws five bugs out of him (staggered arcs) and shows
  * the order at the same time.
  * ===================================================================== */
@@ -1544,10 +1568,11 @@ body {
   40%  { transform: translateY(-300px) scale(1); animation-timing-function: ease-in; }
   100% { transform: none; }
 }
+.intro-game .ig-title { position: absolute; left: 120px; top: 96px; margin: 0; }
 .intro-game .ig-bubble {
   position: absolute;
   left: 50%;
-  top: 150px;
+  top: 290px;
   transform: translateX(-50%);
   padding: 22px 40px;
   font-size: 56px;
@@ -1583,7 +1608,8 @@ body {
 .level .lvl-points b { color: var(--coral); }
 .l1-bug, .l2-bug, .l3-bug, .l4-bug, .l5-bug { position: absolute; bottom: 120px; z-index: 5; }
 
-/* L1 static checks: floating islands (yellow, green grass on top like the
+/* L1 static checks: floating islands (light brown like the DB table header
+   (Jan found yellow too saturated), green grass on top like the
    bushes) that drop like crushers. Up = top 330px, down = bottom edge just
    above the ground (+276px). Every scripted step first eases each island
    from where its loop was (--y0, read in `before`) back up (`rise`), so
@@ -1597,7 +1623,7 @@ body {
   top: 330px;
   width: 220px;
   height: 170px;
-  background: var(--yellow);
+  background: var(--cream-2);
   border: 6px solid var(--ink);
   border-radius: 14px;
   box-shadow: inset 0 22px 0 0 var(--green), inset 0 28px 0 0 var(--ink), 0 8px 0 rgba(35, 33, 42, 0.18);
@@ -1661,11 +1687,13 @@ body {
   68%, 100% { transform: scale(1.3, 0.15); opacity: 0; }
 }
 .l1-splat { position: absolute; left: 790px; bottom: 116px; width: 220px; height: 24px; fill: var(--coral); opacity: 0; transform-origin: 50% 100%; z-index: 4; }
-.l1.s1 .l1-splat { animation: splat 2.6s both; }
+.l1.s1 .l1-splat { animation: splat 4.6s both; }
+/* Splat lands with the squash (≈1.77 s), stays a moment, then fades away. */
 @keyframes splat {
-  0%, 67%   { opacity: 0; transform: scale(0.4, 0.2); }
-  68%       { opacity: 1; transform: scale(1.15, 0.7); }
-  76%, 100% { opacity: 1; transform: none; }
+  0%, 37.8% { opacity: 0; transform: scale(0.4, 0.2); }
+  38.5%     { opacity: 1; transform: scale(1.15, 0.7); }
+  43%, 65%  { opacity: 1; transform: none; }
+  90%, 100% { opacity: 0; transform: none; }
 }
 .l1-bug2 { left: 120px; transition: left 3s linear; }
 .l1.s2 .l1-bug2 { left: 1300px; }
@@ -1920,10 +1948,10 @@ body {
    two bugs sitting between the lines. */
 .l7-pr {
   position: absolute;
-  left: 320px;
-  width: 960px;
-  top: 400px;
-  height: 460px;
+  left: 120px;
+  width: 1360px;
+  top: 320px;
+  height: 540px;
   background: var(--paper);
   border: 3px solid var(--ink);
   border-radius: 18px;

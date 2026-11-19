@@ -330,18 +330,18 @@ const scenes = [
   // and turns back; a black 90s TV pops in and shows the mood of the
   // "Věřte nevěřte" TV show (Beyond Belief): dark, fog, spotlight, glowing
   // text (Poppins, like the rest of the deck). Original CSS only.
-  // step 0: bug turn/walk/turn → TV pops in (off, black) → screen
-  // fades up from black → title
+  // step 0: TV pops in right away (bug turns/walks/turns meanwhile) →
+  // screen fades up from black → title
   // step 1: "…tohle se opravdu stalo."
   // step 2: Věřte nevěřte fades out, Mews appears in the TV ·
-  // step 3: "software pro hotely"
+  // step 3: "software pro hotely" · step 4: "> 1000 zaměstnanců, …"
   {
     id: "true-story",
     world: "game",
-    steps: 4,
-    verifyWait: [5600, 1200, 1000, 1000],
+    steps: 5,
+    verifyWait: [3000, 1200, 1000, 1000, 1000],
     notes:
-      "Bug přijde domů a pustí si televizi: Věřte nevěřte. (→) …tohle se opravdu stalo. (→) Pracoval jsem v Mews, (→) firma dělá software pro hotely.",
+      "Bug přijde domů a pustí si televizi: Věřte nevěřte. (→) …tohle se opravdu stalo. (→) Pracoval jsem v Mews, (→) firma dělá software pro hotely. (→) Přes tisíc zaměstnanců, stovky vývojářů.",
     render: () => `
       <div class="scene truestory">
         <div class="ts-bug">${bug({ size: 144, pose: "idle" })}</div>
@@ -358,6 +358,7 @@ const scenes = [
                 </div>
                 <div class="ts-mews" data-from="2">Mews</div>
                 <div class="ts-what" data-from="3">software pro hotely</div>
+                <div class="ts-size" data-from="4">&gt;&nbsp;1000 zaměstnanců, stovky vývojářů</div>
               </div>
               <div class="tv-glass"></div>
             </div>
@@ -384,33 +385,35 @@ const scenes = [
   },
 
   // ============================================================ Mews PMS
-  // step 0: modern screen (majority) · 1: older screen appears ·
-  // 2: "Backend rendered pages" label stamped over the old one
+  // step 0: headline · 1: modern screen (majority) · 2: older screen ·
+  // 3: "Firma existuje 14 let" under the old one · 4: "Backend rendered
+  // pages" label stamped over the old one
   {
     id: "mews-pms",
     world: "game",
-    steps: 3,
+    steps: 5,
     notes:
-      "Mews PMS je hlavní produkt. Firma existuje 14 let. Většina obrazovek je v Reactu nad REST API. Ale jsou tam i starší části: ty renderuje backend pomocí Razor šablon. Říkali jsme jim backend rendered pages.",
+      "Mews PMS je hlavní produkt. (→) Většina obrazovek je v Reactu nad REST API. (→) Ale jsou tam i starší části: ty renderuje backend pomocí Razor šablon. (→) Firma existuje 14 let. (→) Říkali jsme jim backend rendered pages.",
     render: () => `
       <div class="scene slide pms">
         <h1 class="headline">Mews PMS</h1>
-        <p class="lede">Hlavní produkt. Firma existuje <b>14 let</b>.</p>
+        <p class="lede">Hlavní produkt.</p>
         <div class="screens">
-          <figure class="screen-new">
+          <figure class="screen-new" data-from="1">
             <div class="mock mock-new">
               <div class="mk-head"><span></span><button class="mn-danger">${icon("trash-2", { size: 20, stroke: 2.5 })} Smazat vybrané</button></div>
               ${Array.from({ length: 5 }, (_, i) => `<div class="mk-row"><i class="mn-check${i === 1 || i === 2 ? " on" : ""}"></i><span class="mk-text"></span><span class="mn-edit">${icon("pencil", { size: 30, stroke: 2.75 })}</span></div>`).join("")}
             </div>
             <figcaption><b>Většina</b> · React + REST API</figcaption>
           </figure>
-          <figure class="screen-old" data-from="1">
+          <figure class="screen-old" data-from="2">
             <div class="mock mock-old">
               <div class="mk-head"><span></span></div>
               ${[180, 120, 220, 150, 200].map((w) => `<div class="mk-row"><span class="mk-text" style="width:${w}px"></span><a class="mo-edit">Upravit</a><a class="mo-edit">Smazat</a></div>`).join("")}
             </div>
             <figcaption><b>Starší části</b> · Razor, HTML z backendu</figcaption>
-            <div class="brp-label" data-from="2">Backend rendered pages</div>
+            <div class="pms-age" data-from="3">Firma existuje <b>14 let</b>.</div>
+            <div class="brp-label" data-from="4">Backend rendered pages</div>
           </figure>
         </div>
       </div>
@@ -423,40 +426,41 @@ const scenes = [
     world: "game",
     steps: 4,
     notes:
-      "Co je na tom špatně? Jiná technologie, takže stránky vypadají jinak než zbytek aplikace a špatně se rozvíjejí. A pak přijde dilema: potřebuju na takové stránce doplnit něco malého. Doplním to po staru, nebo přepíšu celou stránku?",
+      "Co je na tom špatně? Vypadají trochu jinak než zbytek aplikace. (→) Je to legacy kód, vývojáři do toho neradi sahají. (→) Způsobuje technické problémy. (→) A pak přijde dilema: potřebuju na takové stránce doplnit něco malého. Doplním to postaru, nebo přepíšu celou stránku?",
     render: () => `
       <div class="scene slide wrong">
         <div class="kicker">Backend rendered pages</div>
         <h1 class="headline">Co je na tom špatně?</h1>
         <ul class="plain-list">
-          <li>Jiná technologie</li>
-          <li data-from="1">Vypadají jinak než zbytek aplikace</li>
-          <li data-from="2">Špatně se rozvíjejí</li>
+          <li>Vypadají trochu jinak než zbytek aplikace</li>
+          <li data-from="1">Legacy kód, vývojáři do toho neradi sahají</li>
+          <li data-from="2">Způsobuje technické problémy</li>
         </ul>
         <div class="dilemma-line" data-from="3">
-          Potřebuju doplnit něco malého:<br><b>po staru</b>, nebo <b>přepsat celou stránku</b>?
+          Potřebuju doplnit něco malého:<br><b>postaru</b>, nebo <b>přepsat celou stránku</b>?
         </div>
       </div>
     `,
   },
 
-  // ============================================================ Proč se s tím něco neudělá
+  // ============================================================ Proč se s tím nic nedělá
+  // 0 headline only · 1–5 the points one by one (5 draws the coral tally)
   {
     id: "named-problem",
     world: "game",
-    steps: 5,
-    verifyWait: [900, 900, 900, 1200, 1600],
+    steps: 6,
+    verifyWait: [900, 900, 900, 900, 1200, 1600],
     notes:
-      "Proč se s tím něco neudělá? Ve firmě to byl problém pojmenovaný už několik let. Jenže postaru bylo napsaných nižší stovky stránek. A co zákazníkovi přinese přepis? Oproti novým funkcím nic moc. Přesto se o to pokoušelo mnoho lidí a byl to jeden z cílů firmy v oblasti technických vylepšení. Tak jsem se rozhodl, že to zkusím taky. (Počet čárek je ilustrační.)",
+      "Proč se s tím nic nedělá? (→) Ve firmě to byl problém pojmenovaný už několik let. (→) Jenže postaru bylo napsaných nižší stovky stránek. (→) A co zákazníkovi přinese přepis? Oproti novým funkcím nic moc. (→) Přesto se o to pokoušelo mnoho lidí a byl to jeden z cílů firmy v oblasti technických vylepšení. (→) Tak jsem se rozhodl, že to zkusím taky. (Počet čárek je ilustrační.)",
     render: () => `
       <div class="scene slide named">
-        <h1 class="headline">Proč se s tím něco neudělá?</h1>
+        <h1 class="headline">Proč se s tím nic nedělá?</h1>
         <ul class="plain-list named-list">
-          <li>Ve firmě to byl problém pojmenovaný už několik let.</li>
-          <li data-from="1">Postaru bylo napsaných <b>nižší stovky</b> stránek.</li>
-          <li data-from="2">Co zákazníkovi přinese přepis? Oproti novým funkcím nic moc.</li>
-          <li data-from="3">Přesto se o to pokoušelo mnoho lidí. Jeden z cílů firmy v technických vylepšeních.<span class="li-tally">${tallySvg(7)}</span></li>
-          <li data-from="4" class="named-me">Rozhodl jsem se, že to zkusím taky.</li>
+          <li data-from="1">Problém pojmenovaný několik let.</li>
+          <li data-from="2"><b>Nižší stovky</b> stránek.</li>
+          <li data-from="3">Co to přinese zákazníkovi?</li>
+          <li data-from="4">Přesto to zkoušelo řešit mnoho lidí.<span class="li-tally">${tallySvg(7)}</span></li>
+          <li data-from="5" class="named-me">Rozhodl jsem se, že to zkusím taky.</li>
         </ul>
       </div>
     `,
@@ -472,7 +476,7 @@ const scenes = [
     steps: 12,
     verifyWait: [1400, 900, 900, 900, 900, 1000, 900, 900, 900, 900, 900, 900],
     notes:
-      "Vyrobil jsem refaktorovacího agenta. Nebylo to těžké: navázal jsem na práci ostatních lidí, kteří napsali dobrou dokumentaci a některé věci částečně automatizovali. Jejich práce taky poskytla příklady, jak se to má dělat. K tomu jsem dodal svou představu, jak má agent postupovat: analýza kódu, specifikace, API, frontendové komponenty, propojit API a frontend, a samozřejmě code review a opravit chyby.",
+      "Vyrobil jsem refaktorovacího agenta. Nebylo to těžké: (→) navázal jsem na práci ostatních. (→) Napsali dobrou dokumentaci a některé věci částečně zautomatizovali. (→) Jejich práci jsem použil jako příklad. (→) K tomu jsem dodal svou představu fungování: (→) zanalyzovat kód, napsat specifikaci, napsat API, napsat frontendové komponenty, propojit API a frontend, udělat code review a opravit chyby.",
     render: () => `
       <div class="scene slide agentscene">
         <h1 class="headline">Vyrobil jsem refaktorovacího agenta</h1>
@@ -480,21 +484,21 @@ const scenes = [
         <div class="ag-a" data-from="1" data-to="4">
           <div class="ag-lead">Nebylo to těžké.</div>
           <ul class="plain-list ag-list">
-            <li data-from="2">Navázal jsem na práci ostatních lidí,</li>
-            <li data-from="3">kteří napsali dobrou dokumentaci a některé věci částečně automatizovali.</li>
-            <li data-from="4">Jejich práce taky poskytla příklady, jak se to má dělat.</li>
+            <li data-from="2">Navázal jsem na práci ostatních.</li>
+            <li data-from="3">Napsali dobrou dokumentaci a některé věci částečně zautomatizovali.</li>
+            <li data-from="4">Jejich práci jsem použil jako příklad.</li>
           </ul>
         </div>
         <div class="ag-b" data-from="5">
-          <div class="ag-lead">K tomu jsem dodal svou představu, jak má agent postupovat:</div>
+          <div class="ag-lead">K tomu jsem dodal svou představu fungování:</div>
           <ol class="ag-steps">
             ${[
-              "analýza kódu",
-              "napsání specifikace",
+              "zanalyzovat kód",
+              "napsat specifikaci",
               "napsat API",
               "napsat frontendové komponenty",
               "propojit API a frontend",
-              "samozřejmě udělat code review a opravit chyby",
+              "udělat code review a opravit chyby",
             ]
               .map((t, k) => `<li data-from="${6 + k}"><b>${k + 1}</b>${t}</li>`)
               .join("")}
@@ -513,15 +517,15 @@ const scenes = [
     steps: 6,
     verifyWait: [900, 900, 900, 900, 900, 1200],
     notes:
-      "A fungovalo to. (→) Agent vytvořil dobrý základ v produkční kvalitě. (→) Lepší UX, (→) vzhled konzistentní se zbytkem aplikace, (→) dalo se to dál vylepšovat (→) a přibyly nové funkce: inline edit a bulk delete.",
+      "A fungovalo to. (→) Agent vytvořil dobrý základ v produkční kvalitě. (→) Lepší UX, (→) jednotný vzhled se zbytkem aplikace, (→) snadné další vylepšování (→) a přibyly nové funkce: inline edit a bulk delete.",
     render: () => `
       <div class="scene slide worked">
         <h1 class="headline">Fungovalo to.</h1>
         <p class="lede" data-from="1">Agent vytvořil <b>dobrý základ v produkční kvalitě</b>.</p>
         <div class="tiles">
           <div class="tile t-yellow" data-from="2"><div class="tile-ico">${icon("smile", { size: 64 })}</div>Lepší UX</div>
-          <div class="tile t-cyan" data-from="3"><div class="tile-ico">${icon("layout-grid", { size: 64 })}</div>Konzistentní vzhled</div>
-          <div class="tile t-lavender" data-from="4"><div class="tile-ico">${icon("trending-up", { size: 64 })}</div>Dá se dál vylepšovat</div>
+          <div class="tile t-cyan" data-from="3"><div class="tile-ico">${icon("layout-grid", { size: 64 })}</div>Jednotný vzhled</div>
+          <div class="tile t-lavender" data-from="4"><div class="tile-ico">${icon("trending-up", { size: 64 })}</div>Snadné další vylepšování</div>
           <div class="tile t-coral" data-from="5"><div class="tile-ico">${icon("pencil", { size: 56 })}${icon("trash-2", { size: 56 })}</div>Nové funkce<small>inline edit, bulk delete</small></div>
         </div>
       </div>
@@ -556,7 +560,7 @@ const scenes = [
     steps: 4,
     verifyWait: [1200, 900, 900, 1200],
     notes:
-      "Astrid: Nefunguje mi synchronizace do našeho systému. (→) Padá to, hotelové pokoje se objevují ve více kategoriích. (→) Janse: Potvrzuji, v databázi vidím 140 duplicit. (→) Hector: To bude naše nová stránka, vypnu to.",
+      "Astrid: Nefunguje synchronizace do našeho systému. (→) Padá to, hotelové pokoje mají více kategorií. (→) Janse: Potvrzuji, v databázi vidím 140 duplicit. (→) Hector: To bude naše nová stránka, vypnu to.",
     render: () => {
       const msg = (who, initial, color, text, from, cont = false) => `
         <div class="sl-msg${cont ? " sl-cont" : ""}" data-from="${from}">
@@ -571,8 +575,8 @@ const scenes = [
         <div class="sl-win">
           <div class="sl-head"><img src="img/slack-mark.svg" alt=""><span>#incident-duplicite-category-assignments</span></div>
           <div class="sl-feed">
-            ${msg("Astrid", "A", "coral", "Nefunguje mi synchronizace do našeho systému.", 0)}
-            ${msg("Astrid", "A", "coral", "Padá to, hotelové pokoje se objevují ve více kategoriích.", 1, true)}
+            ${msg("Astrid", "A", "coral", "Nefunguje synchronizace do našeho systému.", 0)}
+            ${msg("Astrid", "A", "coral", "Padá to, hotelové pokoje mají více kategorií.", 1, true)}
             ${msg("Janse", "J", "cyan", "Potvrzuji, v databázi vidím <b>140 duplicit</b>.", 2)}
             ${msg("Hector", "H", "lavender", "To bude naše nová stránka, vypnu to.", 3)}
           </div>
@@ -590,17 +594,18 @@ const scenes = [
     steps: 8,
     verifyWait: [900, 700, 700, 700, 700, 700, 1600, 900],
     notes:
-      "Co se děje? (→) Máš přístup do produkční aplikace? (→) K logům a metrikám? (→) Umíš zjistit, co je v produkční databázi? (→) Máme dost informací? (→) Víš, jak pracovat se systémem na správu incidentů? (→) Jak jsem na tom byl já: produkce ano, logy ano, produkční databáze ne, informace ne, incidenty ano. (→) Příprava je důležitá. Ale když něco nebude optimální, příště to zvládneš líp.",
+      "Co se děje? (→) Přístup do produkční aplikace. (→) Přístup k logům a metrikám. (→) Přístup do produkční databáze. (→) Dost informací. (→) Znalost systému na správu incidentů. (→) Jak jsem na tom byl já: produkce ano, logy ano, produkční databáze ne, informace ne, incidenty ano. (→) Příprava je důležitá. Ale buď v klidu, příště to zvládneš líp.",
     render: () => {
       const items = [
-        ["Máš přístup do produkční aplikace?", true],
-        ["Máš přístup k logům a metrikám?", true],
-        ["Umíš zjistit, co je v produkční databázi?", false],
-        ["Máme dost informací?", false],
-        ["Víš, jak pracovat se systémem na správu incidentů?", true],
+        ["Přístup do produkční aplikace", true],
+        ["Přístup k logům a metrikám", true],
+        ["Přístup do produkční databáze", false],
+        ["Dost informací", false],
+        ["Znalost systému na správu incidentů", true],
       ];
       return `
       <div class="scene slide panic">
+        <div class="kicker">Incident</div>
         <h1 class="headline">Co se děje?</h1>
         <div class="pn-emoji" aria-hidden="true">😱</div>
         <ul class="pn-list">
@@ -614,7 +619,7 @@ const scenes = [
             .join("")}
         </ul>
         <div class="pn-takeaway" data-from="7">
-          Příprava je důležitá. Ale když něco nebude optimální, <b>příště to zvládneš líp.</b>
+          Příprava je důležitá. Ale buď v klidu, <b>příště to zvládneš líp.</b>
         </div>
       </div>`;
     },
@@ -628,14 +633,15 @@ const scenes = [
     steps: 4,
     verifyWait: [900, 900, 900, 1200],
     notes:
-      "Jak reagovat na incident? (→) Feature flag: vypnout. Pro juniory: flag je vypínač funkce, kód zůstane nasazený. (→) Chladná hlava: když nevím, co se děje, první krok je zjistit, co se děje. (→) Informovat. A to je těžké.",
+      "Jak reagovat? (→) Feature flag: vypnout. Pro juniory: flag je vypínač funkce, kód zůstane nasazený. (→) Chladná hlava: když nevím, co se děje, první krok je zjistit, co se děje. (→) Informovat. A to je těžké.",
     render: () => `
       <div class="scene slide react">
-        <h1 class="headline">Jak reagovat na incident</h1>
+        <div class="kicker">Incident</div>
+        <h1 class="headline">Jak reagovat</h1>
         <div class="tiles tiles-3">
-          <div class="tile t-cyan" data-from="1"><div class="tile-ico">${icon("toggle-right", { size: 64 })}</div>Feature flag<small>Vypínač funkce. Kód zůstane nasazený, funkce jde vypnout.</small></div>
-          <div class="tile t-lavender" data-from="2"><div class="tile-ico">${icon("snowflake", { size: 64 })}</div>Chladná hlava<small>Když nevím, co se děje, první krok je zjistit, co se děje.</small></div>
-          <div class="tile t-yellow" data-from="3"><div class="tile-ico">${icon("megaphone", { size: 64 })}</div>Informovat<small>A to je těžké.</small></div>
+          <div class="tile t-cyan" data-from="1"><div class="tile-ico">${icon("toggle-right", { size: 64 })}</div>Feature flag</div>
+          <div class="tile t-lavender" data-from="2"><div class="tile-ico">${icon("snowflake", { size: 64 })}</div>Chladná hlava</div>
+          <div class="tile t-yellow" data-from="3"><div class="tile-ico">${icon("megaphone", { size: 64 })}</div>Informovat</div>
         </div>
       </div>
     `,
@@ -661,6 +667,7 @@ const scenes = [
       ];
       return `
       <div class="scene slide roomedit">
+        <div class="kicker">Incident</div>
         <h1 class="headline">Co bylo rozbité?</h1>
         <div class="re-win">
           <div class="re-head">Pokoje
@@ -718,6 +725,7 @@ const scenes = [
       const asg = (id, r, c, at) => [id, r, c, "admin", at, "false"];
       return `
       <div class="scene slide dbtables">
+        <div class="kicker">Incident</div>
         <h1 class="headline">Jak to vypadalo v databázi</h1>
         ${tbl("rooms", ["id", "number", "floor"], [[1, "101", 1], [2, "102", 1], [3, "201", 2], [4, "202", 2]].map((r) => tr(r)).join(""), "dbt-rooms")}
         ${tbl("room_categories", ["id", "name"], [[1, "Standard"], [2, "Deluxe"], [3, "Suite"]].map((r) => tr(r)).join(""), "dbt-cats")}
@@ -766,7 +774,7 @@ const scenes = [
 
   // ============================================================ Oprava kódu
   // 0 top of roomService.ts · 1 scrolls to updateRoom() · 2 the missing line
-  // slides in · 3 green "Opraveno" stamp · 4 "Opraveno?"
+  // slides in · 3 green "Opraveno" stamp · 4 it fades to yellow "Opraveno?"
   {
     id: "find-bug",
     world: "serious",
@@ -823,12 +831,13 @@ const scenes = [
         .join("");
       return `
       <div class="scene slide findbug">
+        <div class="kicker">Incident</div>
         <h1 class="headline">Oprava kódu</h1>
         <div class="fb-win">
           <div class="diff-head"><span class="diff-title">roomService.ts</span></div>
           <div class="fb-body"><div class="fb-scroll" style="--scroll:${-target * 38}px">${body}</div></div>
         </div>
-        <div class="fb-stamp" data-from="3">${icon("circle-check", { size: 56, stroke: 3 })}<span class="swap"><span data-to="3">Opraveno</span><span data-from="4">Opraveno?</span></span></div>
+        <div class="stamp fb-stamp" data-from="3"><span class="fb-ico">${icon("circle-check", { size: 56, stroke: 3 })}${icon("circle-help", { size: 56, stroke: 3 })}</span><span>Opraveno<span class="fb-q">?</span></span></div>
       </div>`;
     },
   },
@@ -839,14 +848,14 @@ const scenes = [
     world: "serious",
     steps: 4,
     notes:
-      "Napravení škod. Oprava kódu nestačila: (→) v databázi byl pořád nepořádek. (→) Co přesně se musí smazat a jak to zjistit? (→) A jakým způsobem to vyčistit?",
+      "Napravení škod. Oprava kódu nestačila: (→) v databázi zůstal nepořádek. (→) Co přesně smazat? (→) A jakým způsobem to vyčistit?",
     render: () => `
       <div class="scene slide damage">
         <div class="kicker">Incident</div>
         <h1 class="headline">Napravení škod</h1>
         <ul class="dm-list">
-          <li data-from="1"><span class="dm-ico t-coral">${icon("database", { size: 46 })}</span><span>V databázi byl pořád nepořádek.</span></li>
-          <li data-from="2"><span class="dm-ico t-lavender">${icon("search-x", { size: 46 })}</span><span>Co přesně se musí smazat a jak to zjistit?</span></li>
+          <li data-from="1"><span class="dm-ico t-coral">${icon("database", { size: 46 })}</span><span>V databázi zůstal nepořádek.</span></li>
+          <li data-from="2"><span class="dm-ico t-lavender">${icon("search", { size: 46 })}</span><span>Co přesně smazat?</span></li>
           <li data-from="3"><span class="dm-ico t-yellow">${icon("eraser", { size: 46 })}</span><span>Jakým způsobem to vyčistit?</span></li>
         </ul>
       </div>
@@ -854,38 +863,39 @@ const scenes = [
   },
 
   // ============================================================ Anketa: jak to vyčistit
-  // 0 three options (audience votes) · 1–3 pros/cons per option ·
-  // 4 the job is what I did, the others fade
+  // 0 headline · 1–3 the three cards (titles only) one by one, audience
+  // votes · 4–6 pros/cons per card · 7 the job is what I did, the others fade
   {
     id: "cleanup-poll",
     world: "serious",
-    steps: 5,
+    steps: 8,
     notes:
-      "Anketa: jak byste to vyčistili? A) naklikat v UI, B) poslat SQL přímo do databáze, C) napsat uklízecí job. Hlasujte rukama. (→) UI: možná by stačilo stávající UI. Jenže nejde to, není v něm vidět ani chyba, ani která kategorie je správná. (→) SQL: není potřeba nic vyrábět, oprava hned. Ale je to velmi nebezpečné a stejně jsem na to neměl práva. (→) Job: pomalé, musím napsat kód a čekat na deploy. Ale rychleji bych to bezpečně stejně nezvládl. Je bezpečný, ukáže rozsah problému a nechá mě rozhodnout. (→) Takže job.",
+      "Anketa: jak byste to vyčistili? (→) A) naklikat v UI, (→) B) pustit SQL v databázi, (→) C) uklízecí job. Hlasujte rukama. (→) UI: možná by stačilo stávající UI. Jenže v něm není vidět ani chyba, ani která kategorie je správná. (→) SQL: oprava hned. Ale je to velmi nebezpečné a stejně jsem na to neměl práva. (→) Job: pomalé, musím napsat kód a čekat na deploy. Ale je bezpečný, ukáže rozsah problému a nechá mě rozhodnout. (→) Takže job.",
     render: () => {
       const pro = (t, from) => `<li class="pl-pro" data-from="${from}"><span class="pl-sign">${icon("plus", { size: 22, stroke: 3.5 })}</span><span>${t}</span></li>`;
       const con = (t, from) => `<li class="pl-con" data-from="${from}"><span class="pl-sign">${icon("minus", { size: 22, stroke: 3.5 })}</span><span>${t}</span></li>`;
-      const card = (letter, ico, title, items, cls = "") => `
-        <div class="pl-card ${cls}">
-          <div class="pl-head"><span class="pl-letter">${letter}</span>${icon(ico, { size: 40 })}</div>
+      const card = (letter, title, items, from, cls = "") => `
+        <div class="pl-card ${cls}" data-from="${from}">
+          <div class="pl-head"><span class="pl-letter">${letter}</span></div>
           <div class="pl-title">${title}</div>
           <ul class="pl-list">${items}</ul>
         </div>`;
       return `
       <div class="scene slide poll">
+        <div class="kicker">Napravení škod</div>
         <h1 class="headline">Jak to vyčistit?</h1>
         <div class="pl-cards">
-          ${card("A", "mouse-pointer-click", "Naklikat to v UI",
-            pro("Možná by stačilo stávající UI.", 1) +
-            con("Nejde to: není vidět ani chyba, ani která kategorie je správná.", 1))}
-          ${card("B", "terminal", "Poslat SQL přímo do databáze",
-            pro("Není potřeba nic vyrábět, oprava hned.", 2) +
-            con("Velmi nebezpečné.", 2) +
-            con("Stejně nemám práva.", 2))}
-          ${card("C", "play", "Napsat uklízecí job",
-            con("Pomalé: napsat kód, čekat na deploy. Rychleji bych to bezpečně stejně nezvládl.", 3) +
-            pro("Bezpečné.", 3) +
-            pro("Ukáže rozsah problému a nechá mě rozhodnout.", 3), "pl-pick")}
+          ${card("A", "Naklikat to v UI",
+            pro("Možná stačí stávající UI.", 4) +
+            con("Chyba v UI není vidět.", 4), 1)}
+          ${card("B", "Pustit SQL v DB",
+            pro("Oprava hned.", 5) +
+            con("Velmi nebezpečné.", 5) +
+            con("Nemám práva.", 5), 2)}
+          ${card("C", "Uklízecí job",
+            con("Pomalé: kód a deploy.", 6) +
+            pro("Bezpečné.", 6) +
+            pro("Ukáže rozsah, rozhodnu já.", 6), 3, "pl-pick")}
         </div>
       </div>`;
     },
@@ -894,15 +904,15 @@ const scenes = [
   // ============================================================ Jednorázový job (UI)
   // 0 Investigate… with {"hotelIds"} · 1 Run job → JSON with the duplicate
   // assignments (same or different category id? which one is older?) ·
-  // 2 Delete… with {"assignmentIds"}, a human picked them
-  // Ids are 6-char hex, shortened like git commit hashes.
+  // 2 Delete… with {"assignmentIds"}, a human picked them · 3 green
+  // "Hotovo" stamp. Ids are 6-char hex, shortened like git commit hashes.
   {
     id: "job",
     world: "serious",
-    steps: 3,
-    verifyWait: [900, 1400, 1100],
+    steps: 4,
+    verifyWait: [900, 1400, 1100, 900],
     notes:
-      "Byly to dva joby s jednoduchým UI. První, InvestigateDuplicateRoomCategoryAssignments, dostal JSON se seznamem hotelů. (→) Run job a vyplivl JSON s duplicitními vazbami i s dalšími daty: jsou to stejné kategorie, nebo jiné? Která vazba je starší? (→) Podle toho jsem vybral, co smazat, a dal to druhému jobu, DeleteDuplicateRoomCategoryAssignments. Co smazat, rozhoduje člověk.",
+      "Byly to dva joby s jednoduchým UI. První, InvestigateDuplicateRoomCategoryAssignments, dostal JSON se seznamem hotelů. (→) Run job a vyplivl JSON s duplicitními vazbami i s dalšími daty: jsou to stejné kategorie, nebo jiné? Která vazba je starší? (→) Podle toho jsem vybral, co smazat, a dal to druhému jobu, DeleteDuplicateRoomCategoryAssignments. Co smazat, rozhoduje člověk. (→) Hotovo.",
     render: () => {
       const s = (v) => `<span class="js">"${v}"</span>`;
       const k = (v) => `<span class="jk">"${v}"</span>`;
@@ -959,23 +969,25 @@ const scenes = [
           </div>
         </div>
         <div class="jo-human" data-from="2">Co smazat, rozhoduje <b>člověk</b>.</div>
+        <div class="stamp jo-done" data-from="3">${icon("circle-check", { size: 56, stroke: 3 })}Hotovo</div>
       </div>`;
     },
   },
 
   // ============================================================ Přepnutí do hry
-  // No headline: the question is spoken. Ground is there from the start.
+  // Headline "Proč se to tedy stalo?". Ground is there from the start.
   // 0 agent jumps in right away · 1 he throws out five bugs (arcs) and the
-  // order appears at the same time (tail-less bubble, top centre)
+  // order appears at the same time (tail-less bubble, centre)
   {
     id: "switch-to-game",
     world: "game",
     steps: 2,
     verifyWait: [1400, 2400],
     notes:
-      "Jak se tam ten řádek vůbec dostal? Pojďme si to zahrát. Přijde agent (→) a vyrobí pět bugů: Běžte a zničte produkci!",
+      "Proč se to tedy stalo? Pojďme si to zahrát. Přijde agent (→) a vyrobí pět bugů: Běžte a zničte produkci!",
     render: () => `
       <div class="scene intro-game">
+        <h1 class="headline ig-title">Proč se to tedy stalo?</h1>
         ${ground()}
         <div class="ig-agent">${agent({ size: 280 })}</div>
         <div class="ig-bugs">${[0, 1, 2, 3, 4]
@@ -1085,10 +1097,10 @@ const scenes = [
     className: "l3",
     points: [
       [1, "Agent měl vlastní krok code review."],
-      [2, "Specializace na známé chyby."],
+      [2, "Řeší především známé chyby."],
     ],
     notes:
-      "Level 3: automatizované code review. (→) Agent měl vlastní krok code review. (→) Je specializované na známé chyby. (→) Jenže tenhle bug nebyl známý, takže se pastem prostě vyhnul.",
+      "Level 3: automatizované code review. (→) Agent měl vlastní krok code review. (→) Řeší především známé chyby. (→) Jenže tenhle bug nebyl známý, takže se pastem prostě vyhnul.",
     art: () => {
       const spikes = (n) => {
         let pts = "0,80";
@@ -1121,13 +1133,13 @@ const scenes = [
     verifyWait: [1200, 900, 900, 900, 4400, 1000],
     className: "l4",
     points: [
-      [1, "Proklikat aplikaci, jestli vypadá v pořádku."],
-      [2, "Dá se trochu automatizovat: agent pustí Playwright, pořídí screenshoty a podívá se na ně."],
+      [1, "Proklikej aplikaci. Vypadá ok?"],
+      [2, "Lze částečně automatizovat."],
       [3, "Nedeterministické."],
       [5, "<b>Problém:</b> chyba byla vizuálně nenápadná. Při výběru stejné kategorie vypadalo UI správně."],
     ],
     notes:
-      "Level 4: testování uživatelem. (→) Proklikat aplikaci, jestli vypadá v pořádku. (→) Dá se trochu automatizovat: agent pustí Playwright, pořídí screenshoty a podívá se na ně. (→) Je to nedeterministické. (→) Dva bugy chytíme, třetí se schová. (→) Problém: chyba byla vizuálně nenápadná, a když jsem vybral stejnou kategorii, UI vypadalo správně.",
+      "Level 4: testování uživatelem. (→) Proklikej aplikaci. Vypadá ok? (→) Lze částečně automatizovat: agent pustí Playwright, pořídí screenshoty a podívá se na ně. (→) Je to nedeterministické. (→) Dva bugy chytíme, třetí se schová. (→) Problém: chyba byla vizuálně nenápadná, a když jsem vybral stejnou kategorii, UI vypadalo správně.",
     art: () => `
       <div class="l4-bug l4-a">${bug({ size: 108 })}</div>
       <div class="l4-bush"><i></i><i></i><i></i></div>
@@ -1176,22 +1188,22 @@ const scenes = [
     },
   }),
 
-  // L6 unknown domain = a maze (no ground, coral walls on the cream).
+  // L6 domain knowledge (the bug's obstacle; I lacked it) = a maze (no ground, coral walls on the cream).
   // 0 maze · 1–2 points · 3 the bug finds its way through (offset-path)
   levelScene({
     id: "level-6",
     n: 6,
-    name: "Neznámá doména",
+    name: "Znalost domény",
     steps: 4,
     verifyWait: [1200, 900, 900, 4600],
     className: "l6",
     ground: false,
     points: [
       [1, "Cizí část aplikace: nevěděl jsem přesně, jak vše funguje."],
-      [2, "Hůř se shání reviewer, když nevím, který tým to vlastní."],
+      [2, "Vím, kdo mi udělá review?"],
     ],
     notes:
-      "Level 6: neznámá doména. (→) Refaktoroval jsem cizí část aplikace a nevěděl jsem přesně, jak všechno funguje. (→) A hůř se shání člověk na review, když nevím ani, který tým to má na starosti. (→) Bug se tu vyzná líp než já.",
+      "Level 6: znalost domény. Tou by se bug zastavil. (→) Jenže já refaktoroval cizí část aplikace a nevěděl jsem přesně, jak všechno funguje. (→) Vím, kdo mi udělá review? Hůř se shání, když nevím ani, který tým to má na starosti. (→) Bug se tu vyzná líp než já.",
     art: () => `
       <div class="l6-maze" style="width:${MAZE[0].length * MAZE_CELL}px;height:${MAZE.length * MAZE_CELL}px">
         ${mazeSvg()}
@@ -1215,11 +1227,11 @@ const scenes = [
     className: "l7",
     ground: false,
     points: [
-      [1, "Abych projekt posouval dopředu, musel jsem posílat velká PR."],
-      [2, "10 malých PR by se ověřilo snáz než jedno velké. Ale je v tom organizační overhead."],
+      [1, "Posílal jsem velké PR, aby projekt běžel dopředu rychleji."],
+      [2, "10 malých PR se ověří snáz než jedno velké."],
     ],
     notes:
-      "Level 7: code review. Ve velkém PR se bugy schovají snadno. (→) Abych projekt posouval dopředu, musel jsem posílat velká PR. (→) Deset malých PR by se ověřilo snáz než jedno velké, ale je v tom organizační overhead.",
+      "Level 7: code review. Ve velkém PR se bugy schovají snadno. (→) Posílal jsem velké PR, aby projekt běžel dopředu rychleji. (→) Deset malých PR se ověří snáz než jedno velké.",
     art: () => {
       const half = (seed) => `<div class="l7-half">${diffBars(34, seed)}
         <div class="l7-hidden" style="top:${26 * 19}px;left:520px">${bug({ size: 54, pose: "idle" })}</div>
@@ -1233,21 +1245,21 @@ const scenes = [
     },
   }),
 
-  // L8 nothing crashed = minesweeper without a frame. The bug is the player
+  // L8 crash monitoring (the bug didn't crash, so it never fired) = minesweeper without a frame. The bug is the player
   // standing in the middle of the revealed field; one mine is flagged.
   // No ground. 0 board · 1 the bug hops, a group of cells opens at once ·
   // 2 point
   levelScene({
     id: "level-8",
     n: 8,
-    name: "Nic nespadlo",
+    name: "Sledování pádů",
     steps: 3,
     verifyWait: [1200, 1200, 900],
     className: "l8",
     ground: false,
-    points: [[2, "Padající kód bychom si všimli hned."]],
+    points: [[2, "Padajícího kódu bychom si všimli hned."]],
     notes:
-      "Level 8: bug nezpůsoboval crash. Bug tu hraje hledání min: většina pole je odkrytá. (→) Odkryje další políčka a zase nic nevybuchlo. (→) Padající kód bychom si všimli hned.",
+      "Level 8: sledování pádů. Jenže bug nezpůsoboval crash. Bug tu hraje hledání min: většina pole je odkrytá. (→) Odkryje další políčka a zase nic nevybuchlo. (→) Padajícího kódu bychom si všimli hned.",
     art: () => `
       <div class="l8-board">
         ${minesweeper()}
