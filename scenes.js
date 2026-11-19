@@ -31,6 +31,22 @@ function diffBars(n, seed = 7, gapAt = -1) {
   return out;
 }
 
+// 10 s countdown in .cd-num (teaser, find-bug). Resets when inactive.
+function runCountdown(root, active) {
+  clearInterval(root._cd);
+  const num = root.querySelector(".cd-num");
+  if (!num) return;
+  let t = 10;
+  num.textContent = String(t);
+  if (!active) return;
+  root._cd = setInterval(() => {
+    if (!num.isConnected) return clearInterval(root._cd);
+    t = Math.max(0, t - 1);
+    num.textContent = String(t);
+    if (t === 0) clearInterval(root._cd);
+  }, 1000);
+}
+
 // Bug walks during the CSS move, then stands still.
 function walkThenIdle(root, ms = 1600) {
   root.querySelectorAll(".bug").forEach((b) => {
@@ -380,14 +396,14 @@ const scenes = [
   // ============================================================ Slack: incident thread
   // Slack window in the deck's card style; messages arrive one per step.
   // 0 Astrid (sync) · 1 Astrid (categories) · 2 Janse (140 duplicates) ·
-  // 3 E'Tore (turns it off)
+  // 3 Hector (turns it off)
   {
     id: "slack",
     world: "serious",
     steps: 4,
     verifyWait: [1200, 900, 900, 1200],
     notes:
-      "Astrid: Nefunguje mi synchronizace do našeho systému. (→) Padá to, hotelové pokoje se objevují ve více kategoriích. (→) Janse: Potvrzuji, v databázi vidím 140 duplicit. (→) E'Tore: To bude naše nová stránka, vypnu to.",
+      "Astrid: Nefunguje mi synchronizace do našeho systému. (→) Padá to, hotelové pokoje se objevují ve více kategoriích. (→) Janse: Potvrzuji, v databázi vidím 140 duplicit. (→) Hector: To bude naše nová stránka, vypnu to.",
     render: () => {
       const msg = (who, initial, color, text, from, cont = false) => `
         <div class="sl-msg${cont ? " sl-cont" : ""}" data-from="${from}">
@@ -405,14 +421,14 @@ const scenes = [
             ${msg("Astrid", "A", "coral", "Nefunguje mi synchronizace do našeho systému.", 0)}
             ${msg("Astrid", "A", "coral", "Padá to, hotelové pokoje se objevují ve více kategoriích.", 1, true)}
             ${msg("Janse", "J", "cyan", "Potvrzuji, v databázi vidím <b>140 duplicit</b>.", 2)}
-            ${msg("E'Tore", "E", "lavender", "To bude naše nová stránka, vypnu to.", 3)}
+            ${msg("Hector", "H", "lavender", "To bude naše nová stránka, vypnu to.", 3)}
           </div>
         </div>
       </div>`;
     },
   },
 
-  // ============================================================ Co se to děje? + checklist
+  // ============================================================ Co se děje? + checklist
   // 0 headline + panic emoji · 1–5 checklist questions one by one ·
   // 6 my own answers (✓ ✓ ✗ ✗ ✓) · 7 takeaway
   {
@@ -421,7 +437,7 @@ const scenes = [
     steps: 8,
     verifyWait: [900, 700, 700, 700, 700, 700, 1600, 900],
     notes:
-      "Co se to děje? (→) Máš přístup do produkční aplikace? (→) K logům a metrikám? (→) Umíš zjistit, co je v produkční databázi? (→) Máme dost informací? (→) Víš, jak pracovat se systémem na správu incidentů? (→) Jak jsem na tom byl já: produkce ano, logy ano, produkční databáze ne, informace ne, incidenty ano. (→) Příprava je důležitá. Ale když něco nebude optimální, příště to zvládneš líp.",
+      "Co se děje? (→) Máš přístup do produkční aplikace? (→) K logům a metrikám? (→) Umíš zjistit, co je v produkční databázi? (→) Máme dost informací? (→) Víš, jak pracovat se systémem na správu incidentů? (→) Jak jsem na tom byl já: produkce ano, logy ano, produkční databáze ne, informace ne, incidenty ano. (→) Příprava je důležitá. Ale když něco nebude optimální, příště to zvládneš líp.",
     render: () => {
       const items = [
         ["Máš přístup do produkční aplikace?", true],
@@ -432,9 +448,8 @@ const scenes = [
       ];
       return `
       <div class="scene slide panic">
-        <h1 class="headline">Co se to děje?</h1>
+        <h1 class="headline">Co se děje?</h1>
         <div class="pn-emoji" aria-hidden="true">😱</div>
-        <div class="pn-me" data-from="6">já</div>
         <ul class="pn-list">
           ${items
             .map(
@@ -473,44 +488,249 @@ const scenes = [
     `,
   },
 
-  // ============================================================ Jednorázový job (UI)
-  // 0 the job's UI lists the real DB state · 1 a human ticks what to delete ·
-  // 2 quote about deploy
+  // ============================================================ Co bylo rozbité: editace pokoje
+  // 0 room table · 1 Upravit on 101 opens the side panel · 2 category
+  // Standard → Deluxe · 3 save: toast "Uloženo", panel closes, row still Standard
   {
-    id: "job",
+    id: "room-edit",
     world: "serious",
-    steps: 3,
-    verifyWait: [900, 1000, 1000],
+    steps: 4,
+    verifyWait: [900, 1000, 900, 1100],
     notes:
-      "Zjistit, co se děje: UI aplikace skutečný stav neukazovalo. Napsal jsem jednorázový job s jednoduchým UI: vypíše, co v databázi opravdu je, (→) a umí smazat vybrané řádky. Co smazat, rozhoduje člověk. (→) Deploy trvá, ale rychleji to stejně nezvládnu.",
+      "Co bylo rozbité? Obyčejná stránka: seznam pokojů, u každého tlačítko Upravit. (→) Otevře se formulář v bočním panelu: číslo pokoje, patro a hlavně kategorie. (→) Změním kategorii ze Standard na Deluxe (→) a uložím. Uloženo. A kategorie je pořád Standard.",
     render: () => {
-      const rows = [
-        ["A", "X", true],
-        ["A", "Y", false],
-        ["B", "X", true],
-        ["B", "Z", false],
+      const rooms = [
+        ["101", "1", "Standard"],
+        ["102", "1", "Standard"],
+        ["201", "2", "Deluxe"],
+        ["202", "2", "Suite"],
       ];
       return `
-      <div class="scene slide job">
-        <h1 class="headline">Napsal jsem jednorázový job</h1>
-        <p class="lede">Ukáže, co je v databázi doopravdy.</p>
-        <div class="jb-win">
-          <div class="jb-head"><span>Vazby pokoj–kategorie</span><button class="jb-del" data-from="1">${icon("trash-2", { size: 22, stroke: 2.75 })} Smazat vybrané</button></div>
-          <div class="jb-row jb-th"><span></span><span>pokoj</span><span>kategorie</span><span></span></div>
-          ${rows
+      <div class="scene slide roomedit">
+        <div class="kicker">Co bylo rozbité</div>
+        <h1 class="headline">Změna kategorie pokoje</h1>
+        <div class="re-win">
+          <div class="re-head">Pokoje
+            <span class="re-toast" data-from="3">${icon("check", { size: 26, stroke: 3.5 })} Uloženo</span>
+          </div>
+          <div class="re-row re-th"><span>číslo</span><span>patro</span><span>kategorie</span><span></span></div>
+          ${rooms
             .map(
-              ([p, c, old]) => `
-            <div class="jb-row${old ? " jb-pick" : ""}">
-              <span class="jb-check">${icon("check", { size: 26, stroke: 3.5 })}</span>
-              <span>${p}</span><span>${c}</span>
-              <span class="jb-tag">${old ? "nejstarší" : ""}</span>
+              ([n, f, c], i) => `
+            <div class="re-row${i === 0 ? " re-hit" : ""}">
+              <span>${n}</span><span>${f}</span><span class="re-cat">${c}</span>
+              <span><span class="re-edit">${icon("pencil", { size: 22 })} Upravit</span></span>
             </div>`
             )
             .join("")}
-          <div class="jb-more">…</div>
+          <div class="re-panel">
+            <div class="re-ptitle">Upravit pokoj</div>
+            <label class="re-field"><span>Číslo pokoje</span><span class="re-input">101</span></label>
+            <label class="re-field"><span>Patro</span><span class="re-input">1</span></label>
+            <label class="re-field"><span>Kategorie</span>
+              <span class="re-input re-select">
+                <span class="swap"><span data-to="1">Standard</span><span data-from="2">Deluxe</span></span>
+                ${icon("chevron-down", { size: 30 })}
+              </span>
+            </label>
+            <span class="re-save">Uložit</span>
+          </div>
         </div>
-        <div class="jb-human" data-from="1">Co smazat, rozhoduje <b>člověk</b>.</div>
-        <blockquote class="quote jb-quote" data-from="2">Deploy trvá.<br>Rychleji to stejně nezvládnu.</blockquote>
+        <div class="re-caption" data-from="3">Uloženo. A kategorie je pořád <b>Standard</b>.</div>
+      </div>`;
+    },
+  },
+
+  // ============================================================ Co bylo rozbité: databáze
+  // 0 the three tables with sample data · 1 the save from room-edit added a row
+  {
+    id: "db-tables",
+    world: "serious",
+    steps: 2,
+    notes:
+      "Jak to vypadá v databázi. Tabulka pokojů, tabulka kategorií a mezi nimi propojovací tabulka room_category_assignments: který pokoj má kterou kategorii, kdo a kdy to založil a jestli je vazba smazaná. (→) Uložení přidalo nový řádek. Ten starý zůstal.",
+    render: () => {
+      const tbl = (name, cols, rows, extra = "") => `
+        <div class="dbt-tbl ${extra}">
+          <div class="dbt-name">${icon("database", { size: 26 })} ${name}</div>
+          <table class="dbt">
+            <thead><tr>${cols.map((c) => `<th>${c}</th>`).join("")}</tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+      const tr = (cells, attrs = "") => `<tr ${attrs}>${cells.map((c) => `<td>${c}</td>`).join("")}</tr>`;
+      const asg = (id, r, c, at) => [id, r, c, "admin", at, "false"];
+      return `
+      <div class="scene slide dbtables">
+        <div class="kicker">Co bylo rozbité</div>
+        <h1 class="headline">V databázi</h1>
+        <div class="dbt-left">
+          ${tbl("rooms", ["id", "number"], [[1, "101"], [2, "102"], [3, "201"], [4, "202"]].map((r) => tr(r)).join(""))}
+          ${tbl("room_categories", ["id", "name"], [[1, "Standard"], [2, "Deluxe"], [3, "Suite"]].map((r) => tr(r)).join(""))}
+        </div>
+        ${tbl(
+          "room_category_assignments",
+          ["id", "room_id", "room_category_id", "created_by", "created_at", "deleted"],
+          tr(asg(1, 1, 1, "2026-07-02 09:14"), 'class="dbt-old"') +
+            tr(asg(2, 2, 1, "2026-07-02 09:15")) +
+            tr(asg(3, 3, 2, "2026-07-02 09:15")) +
+            tr(asg(4, 4, 3, "2026-07-02 09:16")) +
+            tr(asg(5, 1, 2, "2026-08-13 15:42"), 'class="dbt-new"'),
+          "dbt-main"
+        )}
+        <div class="dbt-caption" data-from="1">Uložení přidalo řádek.<br><b>Starý zůstal.</b></div>
+      </div>`;
+    },
+  },
+
+  // ============================================================ Najdi chybu (konkrétní kód)
+  // 0 updateRoom() · 1 10s countdown · 2 the missing line slides in ·
+  // 3 green "Opraveno" stamp · 4 "Opraveno?"
+  {
+    id: "find-bug",
+    world: "serious",
+    steps: 5,
+    verifyWait: [900, 3000, 1000, 900, 900],
+    notes:
+      "Rozcvička: tady je zjednodušená funkce updateRoom. Najdete chybu? (→ spustí odpočet 10 s) (→) Chyba není v žádném řádku, který tam je. Chyběl jeden řádek: loadCategories. Bez něj je room.categories prázdné, takže se stará vazba nikdy nesmaže a vždycky se jen přidá nová. (→) Opraveno. (→) …opraveno?",
+    render: () => {
+      const kw = (s) => `<span class="ck">${s}</span>`;
+      const fn = (s) => `<span class="cf">${s}</span>`;
+      const lines = [
+        `${kw("async function")} ${fn("updateRoom")}(input) {`,
+        `  ${kw("const")} room = ${kw("await")} ${fn("getRoom")}(input.roomId);`,
+        null,
+        `  room.number = input.number;`,
+        `  room.floor = input.floor;`,
+        ``,
+        `  ${kw("if")} (room.categories.length &gt; 0) {`,
+        `    ${kw("await")} ${fn("deleteCategoryAssignment")}(room.categories[0]);`,
+        `  }`,
+        `  ${kw("await")} ${fn("createCategoryAssignment")}(room, input.categoryId);`,
+        ``,
+        `  ${kw("await")} ${fn("saveRoom")}(room);`,
+        `}`,
+      ];
+      let n = 0;
+      const body = lines
+        .map((l) =>
+          l === null
+            ? `<div class="fb-line fb-missing"><span class="fb-no">+</span><span class="fb-code">  ${kw("await")} ${fn("loadCategories")}(room);</span><span class="fb-tag">jeden řádek</span></div>`
+            : `<div class="fb-line"><span class="fb-no">${++n}</span><span class="fb-code">${l}</span></div>`
+        )
+        .join("");
+      return `
+      <div class="scene slide findbug">
+        <div class="kicker">Rozcvička</div>
+        <h1 class="headline">Najdi chybu.</h1>
+        <div class="countdown" data-from="1" data-to="1"><span class="cd-num">10</span><span class="cd-unit">s</span></div>
+        <div class="fb-win">
+          <div class="diff-head"><span class="diff-title">room-service.ts</span></div>
+          <div class="fb-body">${body}</div>
+        </div>
+        <div class="fb-stamp" data-from="3">${icon("circle-check", { size: 56, stroke: 3 })}<span class="swap"><span data-to="3">Opraveno</span><span data-from="4">Opraveno?</span></span></div>
+      </div>`;
+    },
+    onStep: (root, step) => runCountdown(root, step === 1),
+  },
+
+  // ============================================================ Napravení škod
+  {
+    id: "damage",
+    world: "serious",
+    steps: 4,
+    notes:
+      "Napravení škod. Oprava kódu nestačila: (→) v databázi byl pořád nepořádek, (→) a já jsem přesně neznal rozsah. (→) Napsal jsem tedy jednorázový job.",
+    render: () => `
+      <div class="scene slide damage">
+        <div class="kicker">Incident</div>
+        <h1 class="headline">Napravení škod</h1>
+        <ul class="dm-list">
+          <li data-from="1"><span class="dm-ico t-coral">${icon("database", { size: 46 })}</span><span>V databázi byl pořád nepořádek.</span></li>
+          <li data-from="2"><span class="dm-ico t-lavender">${icon("search-x", { size: 46 })}</span><span>Neznal jsem přesně rozsah.</span></li>
+          <li data-from="3"><span class="dm-ico t-yellow">${icon("play", { size: 46 })}</span><span>Napsal jsem tedy <b>jednorázový job</b>.</span></li>
+        </ul>
+      </div>
+    `,
+  },
+
+  // ============================================================ Jednorázový job (UI)
+  // 0 Investigate… with {"hotelIds"} · 1 Run job → JSON with the duplicate
+  // assignments (same or different category id? which one is older?) ·
+  // 2 Delete… with {"assignmentIds"}, a human picked them · 3 deploy quote
+  {
+    id: "job",
+    world: "serious",
+    steps: 4,
+    verifyWait: [900, 1400, 1100, 900],
+    notes:
+      "Byly to dva joby s jednoduchým UI. První, InvestigateDuplicateRoomCategoryAssignments, dostal JSON se seznamem hotelů. (→) Run job a vyplivl JSON s duplicitními vazbami i s dalšími daty: jsou to stejné kategorie, nebo jiné? Která vazba je starší? (→) Podle toho jsem vybral, co smazat, a dal to druhému jobu, DeleteDuplicateRoomCategoryAssignments. Co smazat, rozhoduje člověk. (→) Deploy trvá, ale rychleji to stejně nezvládnu.",
+    render: () => {
+      const s = (v) => `<span class="js">"${v}"</span>`;
+      const k = (v) => `<span class="jk">"${v}"</span>`;
+      const a = (id, cat, at, cls) =>
+        `      { ${k("id")}: ${s(id)}, ${k("categoryId")}: <span class="${cls}">${s(cat)}</span>,\n        ${k("createdAt")}: ${s(at)}, ${k("createdBy")}: ${s("admin")} }`;
+      const investigateOut = [
+        `[`,
+        `  { ${k("room")}: ${s("101")}, ${k("assignments")}: [`,
+        a("7c1e…", "a10b…", "2026-07-02 09:14", "jo-diff") + ",",
+        a("e905…", "c44d…", "2026-08-13 15:42", "jo-diff") + " ] },",
+        `  { ${k("room")}: ${s("202")}, ${k("assignments")}: [`,
+        a("2b8a…", "f3e2…", "2026-07-02 09:16", "jo-same") + ",",
+        a("91fd…", "f3e2…", "2026-08-27 14:31", "jo-same") + " ] },",
+        `  …`,
+        `]`,
+      ].join("\n");
+      return `
+      <div class="scene slide job">
+        <div class="kicker">Napravení škod</div>
+        <h1 class="headline">Jednorázový job</h1>
+        <div class="jo-win">
+          <div class="jo-head">
+            <span class="jo-label">Job</span>
+            <span class="jo-name swap">
+              <span data-to="1">InvestigateDuplicateRoomCategoryAssignments</span>
+              <span data-from="2">DeleteDuplicateRoomCategoryAssignments</span>
+            </span>
+            ${icon("chevron-down", { size: 30 })}
+          </div>
+          <div class="jo-body">
+            <div class="jo-in">
+              <div class="jo-cap">Input</div>
+              <div class="jo-box swap">
+<pre data-to="1">{
+  ${k("hotelIds")}: [
+    ${s("8d3f…")},
+    ${s("b71c…")},
+    …
+  ]
+}</pre>
+<pre data-from="2">{
+  ${k("assignmentIds")}: [
+    ${s("91fd…")},
+    …
+  ]
+}</pre>
+              </div>
+              <span class="jo-run">${icon("play", { size: 24 })} Run job</span>
+            </div>
+            <div class="jo-out">
+              <div class="jo-cap">Output</div>
+              <div class="swap">
+<pre class="jo-empty" data-to="0">–</pre>
+<pre data-from="1" data-to="1">${investigateOut}</pre>
+<pre data-from="2">{
+  ${k("deleted")}: [
+    ${s("91fd…")},
+    …
+  ]
+}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="jo-human" data-from="2">Co smazat, rozhoduje <b>člověk</b>.</div>
+        <div class="jo-quote" data-from="3">Deploy trvá. Rychleji to stejně nezvládnu.</div>
       </div>`;
     },
   },
@@ -581,20 +801,7 @@ const scenes = [
         </div>
       </div>
     `,
-    onStep: (root, step) => {
-      clearInterval(root._cd);
-      const num = root.querySelector(".cd-num");
-      if (!num) return;
-      let t = 10;
-      num.textContent = String(t);
-      if (step !== 1) return;
-      root._cd = setInterval(() => {
-        if (!num.isConnected) return clearInterval(root._cd);
-        t = Math.max(0, t - 1);
-        num.textContent = String(t);
-        if (t === 0) clearInterval(root._cd);
-      }, 1000);
-    },
+    onStep: (root, step) => runCountdown(root, step === 1),
   },
 
   // ============================================================ Odhalení

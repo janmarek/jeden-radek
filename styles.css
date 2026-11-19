@@ -41,6 +41,9 @@
   --ink: #23212a;          /* text + outlines */
   --ink-soft: #5d5866;     /* secondary text */
   --paper: #fffaf3;
+  --green: #3cc47a;        /* "Opraveno" stamp, added code line (Jan asked for green) */
+  --code-kw: #d4493a;      /* code: keywords */
+  --code-fn: #0592a0;      /* code: function names */
 
   /* Bug sprite palette (override per instance or via modifier class) */
   --bug-ink: var(--ink);
@@ -520,7 +523,8 @@ body {
 /* =====================================================================
  * 2 teaser: diff + 10s countdown (step 1 scrolls the diff)
  * ===================================================================== */
-.teaser .countdown {
+.teaser .countdown,
+.findbug .countdown {
   position: absolute;
   right: 120px;
   top: 70px;
@@ -529,7 +533,9 @@ body {
   color: var(--coral);
   line-height: 1;
 }
-.teaser .cd-unit { font-size: 48px; margin-left: 6px; }
+.findbug .countdown { top: 60px; }
+.teaser .cd-unit,
+.findbug .cd-unit { font-size: 48px; margin-left: 6px; }
 .diff-win {
   position: absolute;
   left: 120px;
@@ -1135,24 +1141,16 @@ body {
 .sl-text b { color: var(--coral); font-weight: 800; }
 
 /* =====================================================================
- * panic: "Co se to děje?" + emoji, checklist questions one by one, then
+ * panic: "Co se děje?" + static emoji, checklist questions one by one, then
  * my own answers drop into the boxes (staggered), then the takeaway
  * ===================================================================== */
 .panic .pn-emoji {
   position: absolute;
   right: 150px;
-  top: 70px;
-  font-size: 220px;
+  top: 80px;
+  font-size: 130px;
   line-height: 1;
   rotate: 8deg;
-  animation: pn-shake 2.4s ease-in-out infinite;
-}
-@keyframes pn-shake {
-  0%, 80%, 100% { translate: 0 0; }
-  84% { translate: -6px 0; }
-  88% { translate: 6px 0; }
-  92% { translate: -4px 0; }
-  96% { translate: 4px 0; }
 }
 .pn-list { position: absolute; left: 120px; top: 280px; margin: 0; padding: 0; list-style: none; }
 .pn-list li { display: flex; align-items: center; gap: 26px; margin-bottom: 26px; font-size: 38px; font-weight: 700; }
@@ -1175,17 +1173,6 @@ body {
 .panic[data-step="7"] .pn-box.ok { background: var(--cyan); }
 .panic[data-step="6"] .pn-box.no,
 .panic[data-step="7"] .pn-box.no { background: var(--coral); }
-.panic .pn-me {
-  position: absolute;
-  left: 120px;
-  top: 236px;
-  width: 62px;
-  text-align: center;
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
 .panic .pn-takeaway {
   position: absolute;
   left: 120px;
@@ -1218,81 +1205,296 @@ body {
 .worked .tile.is-on { translate: 0 0; scale: 1; }
 
 /* =====================================================================
- * job: the one-off job had a small UI (not a console): real DB rows,
- * a human ticks which to delete, then the deploy quote
+ * room-edit: room table + side-panel form; after save the row still
+ * shows the old category
  * ===================================================================== */
-.job .jb-win {
+.roomedit .re-win {
   position: absolute;
   left: 120px;
-  top: 330px;
-  width: 860px;
+  top: 250px;
+  width: 1360px;
+  height: 500px;
   background: var(--paper);
   border: 3px solid var(--ink);
   border-radius: 22px;
-  box-shadow: 8px 8px 0 var(--cyan);
+  box-shadow: 8px 8px 0 var(--ink);
   overflow: hidden;
 }
-.jb-head {
+.re-head {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 84px;
-  padding: 0 24px 0 30px;
+  height: 76px;
+  padding: 0 34px;
+  background: var(--lavender);
   border-bottom: 3px solid var(--ink);
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 700;
 }
-.jb-del {
+.re-toast {
+  position: absolute;
+  right: 26px;
+  top: 14px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 18px;
-  font: 700 22px var(--font-sans);
-  color: var(--ink);
-  background: var(--coral);
+  padding: 6px 18px;
+  background: var(--cyan);
   border: 3px solid var(--ink);
   border-radius: 12px;
+  font-size: 24px;
 }
-.jb-row {
+.re-row {
   display: grid;
-  grid-template-columns: 50px 160px 1fr 180px;
+  grid-template-columns: 200px 180px 1fr 230px;
   align-items: center;
-  gap: 20px;
-  padding: 14px 30px;
+  padding: 0 34px;
+  height: 86px;
   border-top: 2px solid var(--cream-2);
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 600;
   transition: background 0.3s;
 }
-.jb-th { border-top: 0; padding: 12px 30px; font-size: 18px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
-.jb-check {
-  width: 40px;
-  height: 40px;
+.re-th { height: 56px; border-top: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+.re-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  font-size: 22px;
+  font-weight: 700;
+  transition: background 0.2s;
+}
+.roomedit[data-step="1"] .re-hit,
+.roomedit[data-step="2"] .re-hit { background: rgba(254, 218, 60, 0.35); }
+.roomedit[data-step="1"] .re-hit .re-edit,
+.roomedit[data-step="2"] .re-hit .re-edit { background: var(--yellow); }
+.re-cat { justify-self: start; padding: 2px 12px; margin-left: -12px; border-radius: 10px; transition: background 0.4s 0.3s; }
+.roomedit[data-step="3"] .re-hit .re-cat { background: rgba(254, 113, 96, 0.35); }
+.re-panel {
+  position: absolute;
+  top: 76px;
+  right: 0;
+  bottom: 0;
+  width: 560px;
+  padding: 30px 36px;
+  background: var(--paper);
+  border-left: 3px solid var(--ink);
+  box-shadow: -10px 0 0 rgba(35, 33, 42, 0.1);
+  translate: 105% 0;
+  transition: translate 0.45s cubic-bezier(.3, .9, .4, 1);
+}
+.roomedit[data-step="1"] .re-panel,
+.roomedit[data-step="2"] .re-panel { translate: 0 0; }
+.re-ptitle { font-size: 30px; font-weight: 800; }
+.re-field { display: block; margin-top: 18px; }
+.re-field > span:first-child { display: block; font-size: 17px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+.re-input {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  height: 58px;
+  padding: 0 18px;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  font-size: 28px;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+.roomedit[data-step="2"] .re-select { background: rgba(6, 204, 221, 0.3); }
+.re-save {
+  position: absolute;
+  right: 36px;
+  top: 22px;
+  padding: 10px 28px;
+  background: var(--cyan);
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: 4px 4px 0 var(--ink);
+  font-size: 24px;
+  font-weight: 800;
+}
+.roomedit .re-caption { position: absolute; left: 120px; top: 790px; font-size: 38px; font-weight: 600; }
+.roomedit .re-caption b { color: var(--coral); }
+
+/* =====================================================================
+ * db-tables: rooms, room_categories, room_category_assignments with
+ * sample rows; step 1 = the save appended a row, the old one stayed
+ * ===================================================================== */
+.dbtables .dbt-left { position: absolute; left: 120px; top: 250px; width: 300px; }
+.dbtables .dbt-left .dbt-tbl + .dbt-tbl { margin-top: 34px; }
+.dbtables .dbt-main { position: absolute; left: 500px; top: 250px; }
+.dbt-name { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font: 700 24px var(--font-mono); color: var(--coral); }
+.dbt {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  border-collapse: collapse;
+  font: 500 22px var(--font-mono);
+}
+.dbt-left .dbt { width: 300px; }
+.dbt th {
+  padding: 10px 16px;
+  text-align: left;
+  background: var(--cream-2);
+  font-size: 16px;
+  font-weight: 700;
+}
+.dbt td { padding: 9px 16px; border-top: 2px solid var(--cream-2); white-space: nowrap; transition: background 0.4s; }
+.dbt-new { opacity: 0; transition: opacity 0.4s; }
+.dbtables[data-step="1"] .dbt-new { opacity: 1; }
+.dbtables[data-step="1"] .dbt-new td { background: rgba(254, 113, 96, 0.3); }
+.dbtables[data-step="1"] .dbt-old td { background: rgba(221, 212, 255, 0.8); }
+.dbtables .dbt-caption { position: absolute; left: 500px; top: 640px; font-size: 38px; font-weight: 600; line-height: 1.3; }
+.dbtables .dbt-caption b { color: var(--coral); }
+
+/* =====================================================================
+ * find-bug: concrete updateRoom(); the missing line slides in, then a
+ * green "Opraveno" stamp, then "Opraveno?"
+ * ===================================================================== */
+.findbug .fb-win {
+  position: absolute;
+  left: 120px;
+  top: 240px;
+  width: 1360px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  box-shadow: 8px 8px 0 var(--ink);
+  overflow: hidden;
+}
+.fb-body {
+  padding: 12px 0;
+  background: linear-gradient(90deg, #f1e7da 0 76px, transparent 76px);
+  font: 500 26px/40px var(--font-mono);
+  white-space: pre;
+}
+.fb-line { position: relative; display: flex; height: 40px; }
+.fb-no { flex: none; width: 76px; padding-right: 18px; text-align: right; color: var(--ink-soft); opacity: 0.6; }
+.fb-code { padding-left: 24px; }
+.ck { color: var(--code-kw); font-weight: 700; }
+.cf { color: var(--code-fn); font-weight: 700; }
+.fb-missing { height: 0; overflow: hidden; transition: height 0.5s cubic-bezier(.3, .9, .4, 1), background 0.4s; }
+.findbug:is([data-step="2"], [data-step="3"], [data-step="4"]) .fb-missing { height: 40px; background: color-mix(in srgb, var(--green) 28%, transparent); }
+.fb-missing .fb-no { color: var(--ink); opacity: 1; font-weight: 800; }
+.fb-tag {
+  margin-left: 30px;
+  align-self: center;
+  padding: 0 14px;
+  background: var(--green);
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  font: 800 20px/30px var(--font-sans);
+}
+.findbug .fb-stamp {
+  position: absolute;
+  left: 1000px;
+  top: 700px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 34px 14px 24px;
+  background: var(--green);
+  border: 4px solid var(--ink);
+  border-radius: 20px;
+  box-shadow: 8px 8px 0 var(--ink);
+  font-size: 64px;
+  font-weight: 800;
+  rotate: -6deg;
+  scale: 1.6;
+  transition: opacity 0.2s, scale 0.35s cubic-bezier(.34, 1.6, .64, 1), rotate 0.4s;
+}
+.findbug .fb-stamp.is-on { scale: 1; }
+.findbug[data-step="4"] .fb-stamp { rotate: 3deg; }
+.fb-stamp .swap > [data-from],
+.fb-stamp .swap > [data-to] { translate: 0 0; transition: opacity 0.25s; }
+
+/* =====================================================================
+ * damage: "Napravení škod", three lines one per step
+ * ===================================================================== */
+.dm-list { position: absolute; left: 120px; top: 320px; margin: 0; padding: 0; list-style: none; }
+.dm-list li { display: flex; align-items: center; gap: 34px; margin-bottom: 44px; font-size: 52px; font-weight: 700; }
+.dm-list b { color: var(--coral); }
+.dm-ico {
+  flex: none;
+  width: 104px;
+  height: 104px;
   display: grid;
   place-items: center;
   border: 3px solid var(--ink);
-  border-radius: 9px;
-  background: var(--paper);
+  border-radius: 22px;
+  box-shadow: 6px 6px 0 var(--ink);
 }
-.jb-check .icon { opacity: 0; transition: opacity 0.2s; }
-.job:not([data-step="0"]) .jb-pick { background: rgba(254, 113, 96, 0.18); }
-.job:not([data-step="0"]) .jb-pick .jb-check { background: var(--coral); }
-.job:not([data-step="0"]) .jb-pick .jb-check .icon { opacity: 1; }
-.jb-tag { font-size: 20px; font-weight: 700; color: var(--ink-soft); }
-.jb-more { padding: 6px 30px 14px; font-size: 28px; color: var(--ink-soft); border-top: 2px solid var(--cream-2); }
-.job .jb-human { position: absolute; left: 1060px; top: 360px; width: 420px; font-size: 36px; font-weight: 600; line-height: 1.3; }
-.job .jb-human b { color: var(--coral); }
-.job .jb-quote {
+
+/* =====================================================================
+ * job: one-off job runner with a small UI (not a console): job picker,
+ * JSON input, Run job, JSON output. Investigate → Delete.
+ * ===================================================================== */
+.job .jo-win {
   position: absolute;
-  left: 1060px;
-  top: 540px;
-  width: 440px;
-  margin: 0;
-  padding-left: 28px;
+  left: 120px;
+  top: 230px;
+  width: 1360px;
+  height: 540px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 22px;
+  box-shadow: 8px 8px 0 var(--ink);
+  overflow: hidden;
+}
+.jo-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 76px;
+  padding: 0 30px;
+  background: var(--lavender);
+  border-bottom: 3px solid var(--ink);
+}
+.jo-label { font-size: 18px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+.jo-name { font: 700 28px var(--font-mono); }
+.jo-name > [data-from],
+.jo-name > [data-to] { translate: 0 0; }
+.jo-body { display: grid; grid-template-columns: 420px 1fr; height: calc(100% - 76px); }
+.jo-in { position: relative; padding: 20px 28px; border-right: 3px solid var(--ink); }
+.jo-out { padding: 20px 28px; background: #fbf4ea; }
+.jo-cap { margin-bottom: 10px; font-size: 17px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+.jo-box { display: grid; padding: 14px 18px; border: 3px solid var(--ink); border-radius: 12px; background: var(--paper); }
+.job pre { margin: 0; font: 500 22px/1.4 var(--font-mono); }
+.jo-out pre { font-size: 19px; line-height: 1.45; }
+.jo-empty { color: var(--ink-soft); }
+.jk { color: var(--code-fn); }
+.js { color: var(--ink); }
+.jo-diff .js { background: rgba(254, 113, 96, 0.4); border-radius: 4px; }
+.jo-same .js { background: rgba(6, 204, 221, 0.35); border-radius: 4px; }
+.jo-run {
+  position: absolute;
+  left: 28px;
+  bottom: 26px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 24px;
+  background: var(--cyan);
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: 4px 4px 0 var(--ink);
+  font-size: 26px;
+  font-weight: 800;
+}
+.job .jo-human { position: absolute; left: 120px; top: 806px; font-size: 34px; font-weight: 600; }
+.job .jo-human b { color: var(--coral); }
+.job .jo-quote {
+  position: absolute;
+  left: 690px;
+  top: 800px;
+  padding-left: 24px;
   border-left: 8px solid var(--coral);
-  font-size: 38px;
+  font-size: 34px;
   font-weight: 700;
-  line-height: 1.3;
 }
 
 /* =====================================================================

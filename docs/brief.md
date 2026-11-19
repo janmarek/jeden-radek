@@ -166,8 +166,8 @@ Tohle je zdroj pravdy. Co tu není, se nesmí prezentovat jako fakt.
   - Astrid: „Nefunguje mi synchronizace do našeho systému.“ / „Padá to, hotelové
     pokoje se objevují ve více kategoriích.“
   - Janse: „Potvrzuji, v databázi vidím 140 duplicit.“ (**140 duplicit** je fakt)
-  - E'Tore: „To bude naše nová stránka, vypnu to.“ (flag vypnul kolega)
-- „Co se to děje?“ (panika) + checklist: přístup do produkční aplikace, k logům
+  - Hector: „To bude naše nová stránka, vypnu to.“ (flag vypnul kolega)
+- „Co se děje?“ (panika) + checklist: přístup do produkční aplikace, k logům
   a metrikám, zjistit co je v produkční DB, dost informací, systém na správu
   incidentů. Autor: produkce ✓, logy ✓, produkční DB ✗, informace ✗,
   incidenty ✓. Závěr: příprava je důležitá, ale když něco nebude optimální,
@@ -175,6 +175,24 @@ Tohle je zdroj pravdy. Co tu není, se nesmí prezentovat jako fakt.
 - Jak reagovat na incident: feature flag; chladná hlava (když nevím, co se děje,
   první krok je zjistit, co se děje); informovat (těžké).
 - Jednorázový job měl **UI, ne konzoli**.
+
+### Doplněno autorem (19. 11.)
+
+- Za „Jak reagovat na incident“ nové slajdy (pořadí autor doladí):
+  - **Co bylo rozbité:** tabulka pokojů s tlačítkem Upravit, formulář v bočním
+    panelu (číslo, patro, kategorie). Po uložení se kategorie nezmění.
+  - **Databáze:** tabulky `rooms`, `room_categories`, `room_category_assignments`
+    (`room_id`, `room_category_id`, `created_by`, `created_at`, `deleted`).
+    Uložení přidá řádek. Ukázková data jsou ilustrační.
+  - **Najdi chybu (konkrétní kód):** ukázková `updateRoom`, kde se při neprázdných
+    `room.categories` volá `deleteCategoryAssignment`; chybějící řádek byl
+    `loadCategories()`. Pak zelený badge „Opraveno“, pak „Opraveno?“.
+  - **Napravení škod:** v DB byl pořád nepořádek, rozsah neznámý, proto jednorázový job.
+  - **Job:** `InvestigateDuplicateRoomCategoryAssignments` dostane
+    `{"hotelIds": [...]}`, po „Run job“ vrátí JSON s duplicitními vazbami a daty
+    (stejná/jiná kategorie, která je starší). Výběr pak dostane
+    `DeleteDuplicateRoomCategoryAssignments` `{"assignmentIds": [...]}`.
+- Ve Slacku vypíná flag **Hector** (dříve E'Tore). Slajd „Co se děje?“ bez štítku „já“.
 
 ### Nevymýšlet (zatím neznámé)
 
@@ -303,5 +321,11 @@ agent nerozhoduje sám.
 - Vizuál titulky a přepnutí do 8bit stylu: kdy přesně (slajd 1 vs. 14)?
 - Vyprávění bugu v první osobě (slajd 14, bublina): ponechat?
 - Patch notes (slajd 23): všech osm, nebo vybrat?
+- Slajd s databází: „save přidá řádek (stejný)“ znamená identický duplikát
+  (stejná kategorie), nebo nový řádek s novou kategorií? Teď je tam nová kategorie.
+- Názvy jobů: autor psal „Duplicite…Asignments“, na slajdu je
+  „Duplicate…Assignments“. Jak se jmenovaly doopravdy?
+- Zůstanou staré slajdy `teaser`, `reveal` a `what-happened`, když teď incident
+  má konkrétní kód a tabulky?
 - Kde má být klíčový obrázek „Co se stalo“ (propojovací tabulka)? Teď je po
   slajdu s jobem.
