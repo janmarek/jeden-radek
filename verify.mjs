@@ -1,7 +1,7 @@
 // Screenshot verification: walk the deck with real arrow presses and
 // capture #stage for every scene + step into verify-shots/.
 // Run: node verify.mjs                 (all scenes)
-//      node verify.mjs bug-sheet       (only scenes whose id contains the arg)
+//      node verify.mjs level-1         (only scenes whose id contains the arg)
 //      node verify.mjs room-edit,job   (comma list: any of them)
 //
 // Old shots of the scenes being shot are deleted first (all shots when no

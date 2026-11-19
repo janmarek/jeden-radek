@@ -39,7 +39,8 @@ scenes have a `world`; verify waits live on the scene (`verifyWait`).
 - **DEV only exception:** the faint "incident →" and "hra →" links on the title
   (`data-goto`, gated by `DEV_JUMP` in scenes.js) jump to the `mostly` scene (just
   before the Slack notification that opens the incident) and to `switch-to-game`
-  (start of the game part) for rehearsing later parts. Set `DEV_JUMP = false` before the talk.
+  (start of the game part) for rehearsing later parts. They fade out 5 s after
+  the title mounts. Set `DEV_JUMP = false` before the talk.
 
 ## Architecture
 

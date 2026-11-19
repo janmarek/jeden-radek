@@ -104,7 +104,7 @@ const DEV_JUMP = true;
 // ---------------------------------------------------------------- game part
 // The game levels are choreographed with one-shot keyframes keyed on step
 // flags: the root gets .s1 … .sN while step >= N. Unlike [data-step="N"], a
-// flag stays on for later steps, so a squashed bug stays squashed and a bug
+// flag stays on for later steps, so a splat stays on the ground and a bug
 // that crossed stays on the other side. ← removes the flag (instant rewind).
 function markSteps(root, step, n) {
   for (let k = 1; k < n; k++) root.classList.toggle(`s${k}`, step >= k);
@@ -123,8 +123,9 @@ function pose(root, sel, p) {
 // Pose script: [[ms, sel, pose], …] → choreo.
 const poses = (root, list) => choreo(root, list.map(([ms, sel, p]) => [ms, () => pose(root, sel, p)]));
 
-// Ground strip with holes ([[from, to], …] in stage px). Solid pieces keep
-// the brick pattern aligned to the stage; holes are dark pits.
+// Ground strip with holes ([[from, to], …] in stage px). Holes are plain
+// gaps (no pit fill); solid pieces keep the brick pattern aligned to the
+// stage and get an ink edge next to a hole.
 function ground(holes = []) {
   const pieces = [];
   let x = 0;
@@ -133,19 +134,18 @@ function ground(holes = []) {
     x = b;
   });
   pieces.push([x, 1600]);
-  const solid = pieces
+  return pieces
     .filter(([a, b]) => b > a)
     .map(
       ([a, b]) =>
         `<div class="pixel-ground${a > 0 ? " edge-l" : ""}${b < 1600 ? " edge-r" : ""}" style="left:${a}px;right:auto;width:${b - a}px;background-position:${-a}px 0"></div>`
     )
     .join("");
-  const pits = holes.map(([a, b]) => `<div class="pit" style="left:${a}px;width:${b - a}px"></div>`).join("");
-  return pits + solid;
 }
 
 // Level shell: HUD (LEVEL n + name), optional bullet points
-// ([[fromStep, html], …]), the level's own art, ground (with holes).
+// ([[fromStep, html], …], same look as "Co je na tom špatně?"), the level's
+// own art, ground (with holes; o.ground === false drops it).
 //   o.before(root, step, prev) runs before the step flags change (to read
 //   the live position of a looping animation), o.onStep after.
 const levelScene = (o) => ({
@@ -156,12 +156,12 @@ const levelScene = (o) => ({
   notes: o.notes,
   render: () => `
     <div class="scene level ${o.className || ""}">
-      ${ground(o.holes)}
+      ${o.ground === false ? "" : ground(o.holes)}
       <div class="lvl-hud">
         <span class="lvl-chip">LEVEL ${o.n}</span>
         <span class="lvl-name">${o.name}</span>
       </div>
-      ${o.points ? `<ul class="lvl-points">${o.points.map(([from, t]) => `<li data-from="${from}">${t}</li>`).join("")}</ul>` : ""}
+      ${o.points ? `<ul class="plain-list lvl-points">${o.points.map(([from, t]) => `<li data-from="${from}">${t}</li>`).join("")}</ul>` : ""}
       ${o.art()}
     </div>`,
   onStep: (root, step, prev) => {
@@ -170,13 +170,6 @@ const levelScene = (o) => ({
     if (o.onStep) o.onStep(root, step, prev);
   },
 });
-
-// Info bubble ("i" + text), revealed on step `from`.
-const tip = (text, from, extra = "") => `
-  <div class="tip ${extra}" data-from="${from}">
-    <div class="tip-i">i</div>
-    <div class="tip-text">${text}</div>
-  </div>`;
 
 // Signpost on the ground: board on a post, `x` = post centre.
 const sign = (text, x, extra = "") =>
@@ -256,30 +249,37 @@ function mazeSvg() {
   return `<svg class="mz-walls" viewBox="0 0 ${MAZE[0].length} ${MAZE.length}" shape-rendering="crispEdges" aria-hidden="true">${rects}</svg>`;
 }
 
-// Minesweeper board for the "nothing crashed" level: most of the field is
-// revealed, numbers count what hides in the covered corner (the bug too).
-const MS_W = 18;
-const MS_H = 8;
-const MS_BUG = [6, 14];
-const MS_HIDDEN = [[4, 12], [6, 12], [3, 14], [2, 16], [MS_BUG[0], MS_BUG[1]]];
-const msCovered = (r, c) => (c >= 12 && r >= 3 && !(c === 12 && r === 3)) || (r === 2 && c >= 15);
+// Minesweeper for the "nothing crashed" level. The bug is the player: it
+// stands in the middle of the revealed field. Mines hide in the covered
+// right part (one already flagged); numbers count them as usual.
+const MS_W = 12;
+const MS_H = 6;
+const MS_CELL = 72;
+const MS_MINES = [[1, 8], [3, 8], [4, 7], [2, 10], [4, 10], [0, 11]];
+const MS_FLAG = [1, 8];
+const msCovered = (r, c) => c >= 8 || (c === 7 && r >= 3);
+const MS_FLAG_SVG = `
+  <svg class="ms-flag" viewBox="0 0 40 48" aria-hidden="true">
+    <rect x="19" y="6" width="5" height="34" fill="var(--ink)"/>
+    <polygon points="19,5 19,25 4,15" fill="var(--coral)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+    <rect x="8" y="38" width="26" height="6" fill="var(--ink)"/>
+  </svg>`;
 function minesweeper() {
-  const isHidden = (r, c) => MS_HIDDEN.some(([hr, hc]) => hr === r && hc === c);
+  const isMine = (r, c) => MS_MINES.some(([mr, mc]) => mr === r && mc === c);
   let cells = "";
   for (let r = 0; r < MS_H; r++) {
     for (let c = 0; c < MS_W; c++) {
-      if (r === MS_BUG[0] && c === MS_BUG[1]) {
-        cells += `<div class="ms-cell ms-bugcell"><div class="ms-cover"></div><div class="ms-bug">${bug({ size: 36, pose: "idle" })}</div></div>`;
-      } else if (msCovered(r, c)) {
-        cells += `<div class="ms-cell"><div class="ms-cover"></div></div>`;
+      if (msCovered(r, c)) {
+        const flag = r === MS_FLAG[0] && c === MS_FLAG[1] ? MS_FLAG_SVG : "";
+        cells += `<div class="ms-cell ms-covered">${flag}</div>`;
       } else {
         let n = 0;
-        for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) if ((dr || dc) && isHidden(r + dr, c + dc)) n++;
+        for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) if ((dr || dc) && isMine(r + dr, c + dc)) n++;
         cells += `<div class="ms-cell is-open">${n ? `<b class="n${n}">${n}</b>` : ""}</div>`;
       }
     }
   }
-  return `<div class="ms-board" style="--cols:${MS_W}">${cells}</div>`;
+  return `<div class="ms-board" style="--cols:${MS_W};--cell:${MS_CELL}px">${cells}</div>`;
 }
 
 // Starburst for the "BUM!" (n spikes), SVG in a 400×400 box.
@@ -957,15 +957,15 @@ const scenes = [
 
   // ============================================================ Přepnutí do hry
   // No headline: the question is spoken. Ground is there from the start.
-  // 0 empty level · 1 agent jumps in · 2 agent makes five bugs (they fly
-  // out of him in arcs) · 3 "Běžte a zničte produkci!"
+  // 0 agent jumps in right away · 1 he throws out five bugs (arcs) and the
+  // order appears at the same time (tail-less bubble, top centre)
   {
     id: "switch-to-game",
     world: "game",
-    steps: 4,
-    verifyWait: [800, 1400, 2400, 1000],
+    steps: 2,
+    verifyWait: [1400, 2400],
     notes:
-      "Jak se tam ten řádek vůbec dostal? Pojďme si to zahrát. (→) Přijde agent (→) a vyrobí pět bugů. (→) Běžte a zničte produkci!",
+      "Jak se tam ten řádek vůbec dostal? Pojďme si to zahrát. Přijde agent (→) a vyrobí pět bugů: Běžte a zničte produkci!",
     render: () => `
       <div class="scene intro-game">
         ${ground()}
@@ -973,21 +973,22 @@ const scenes = [
         <div class="ig-bugs">${[0, 1, 2, 3, 4]
           .map((i) => `<div class="ig-bug" style="--i:${i}"><div class="ig-arc">${bug({ size: 108, pose: "jump" })}</div></div>`)
           .join("")}</div>
-        <div class="bubble ig-bubble" data-from="3">Běžte a zničte produkci!</div>
+        <div class="bubble ig-bubble" data-from="1">Běžte a zničte produkci!</div>
       </div>
     `,
     onStep: (root, step, prev) => {
-      markSteps(root, step, 4);
-      if (step < 2) return choreo(root, []), pose(root, ".ig-bugs", "jump");
-      if (prev < 2) poses(root, [0, 1, 2, 3, 4].map((i) => [800 + i * 220, `.ig-bug:nth-child(${i + 1})`, "idle"]));
+      markSteps(root, step, 2);
+      if (step < 1) return choreo(root, []), pose(root, ".ig-bugs", "jump");
+      if (prev < 1) poses(root, [0, 1, 2, 3, 4].map((i) => [800 + i * 220, `.ig-bug:nth-child(${i + 1})`, "idle"]));
     },
   },
 
   // ============================================================ Levels
-  // L1 static checks = three crushers (format / lint / types).
-  // 0 crushers loop · 1 bug 1 walks under the first one and gets squashed ·
-  // 2 bug 2 walks through all three (the loops restart in sync with it, so
-  // every crusher is up while it passes) · 3 info bubble (hooks)
+  // L1 static checks = three floating islands (format / lint / types) that
+  // drop like crushers. 0 islands loop · 1 bug 1 walks under the first one
+  // and ends as a coral splat · 2 bug 2 walks through all three (the loops
+  // restart in sync with it, so every island is up while it passes) ·
+  // 3 yellow note (hooks)
   levelScene({
     id: "level-1",
     n: 1,
@@ -998,41 +999,45 @@ const scenes = [
     notes:
       "Level 1: statické kontroly. Code format, lint, type checking. Fungují jako buchary. (→) Prvního bugu rozmáčknou. (→) Druhý projde, protože kontrolují formu, ne chování. (→) Dají se nastavit třeba v Claude jako post-edit nebo stop hook.",
     art: () => {
-      // Bug 2 walks 120 → 1300 px in 3 s; crusher i starts its
-      // cycle 0.15 s before the bug reaches it (crushers are 220 px wide), so it stays up for 1.2 s.
+      // Bug 2 walks 120 → 1300 px in 3 s; island i (220 px wide) starts its
+      // cycle 0.15 s before the bug reaches it, so it stays up for 1.2 s.
       const v = 1180 / 3;
       const xs = [640, 900, 1160];
       const labels = ["code format", "lint", "type checking"];
-      const crushers = xs
+      const islands = xs
         .map((x, i) => {
           const delay = ((x - 110 - 156 - 120) / v - 0.15).toFixed(2);
           return `<div class="crusher" style="left:${x - 110}px;--idle:${-0.7 * i - 0.3}s;--pass:${delay}s"><div class="crusher-plate">${labels[i]}</div></div>`;
         })
         .join("");
       return `
-        <div class="l1-beam"></div>
-        <div class="l1-crushers">${crushers}</div>
+        <div class="l1-crushers">${islands}</div>
+        <svg class="l1-splat" viewBox="0 0 220 44" aria-hidden="true">
+          <ellipse cx="110" cy="36" rx="96" ry="9"/>
+          <circle cx="18" cy="20" r="7"/><circle cx="54" cy="12" r="5"/><circle cx="166" cy="10" r="6"/>
+          <circle cx="204" cy="24" r="5"/><circle cx="128" cy="18" r="4"/>
+        </svg>
         <div class="l1-bug l1-bug1">${bug({ size: 108 })}</div>
         <div class="l1-bug l1-bug2">${bug({ size: 108 })}</div>
-        ${tip("Dá se nastavit třeba v Claude jako <b>post-edit</b> nebo <b>stop hook</b>.", 3, "l1-tip")}`;
+        <div class="l1-note" data-from="3">Dají se nastavit třeba v Claude jako <b>post-edit</b> nebo <b>stop hook</b>.</div>`;
     },
     onStep: (root, step, prev) => {
-      if (step <= prev) return choreo(root, []), pose(root, ".l1-bug2", "idle"), pose(root, ".l1-bug1", step >= 1 ? "jump" : "idle");
-      if (step === 1) poses(root, [[0, ".l1-bug1", "walk"], [1100, ".l1-bug1", "idle"], [1250, ".l1-bug1", "jump"]]);
+      if (step <= prev) return choreo(root, []), pose(root, ".l1-bug", "idle");
+      if (step === 1) poses(root, [[0, ".l1-bug1", "walk"], [1100, ".l1-bug1", "idle"]]);
       if (step === 2) poses(root, [[0, ".l1-bug2", "walk"], [3000, ".l1-bug2", "idle"]]);
     },
   }),
 
-  // L2 tests = two holes (unit / integration).
-  // 0 holes · 1 "dřív silné" · 2 bug jumps the first hole, stops at the
-  // second (too wide) · 3 "dnes menší hodnota" · 4 agent jumps in, builds a
-  // floating bridge, the bug walks across and away
+  // L2 tests = two gaps (unit / integration).
+  // 0 gaps · 1 "dřív silné" · 2 bug jumps the first gap, stops at the
+  // second (too wide) · 3 "dnes menší hodnota" + the agent jumps in, builds
+  // a floating bridge, the bug walks across and away
   levelScene({
     id: "level-2",
     n: 2,
     name: "Testy",
-    steps: 5,
-    verifyWait: [1200, 900, 2000, 900, 5000],
+    steps: 4,
+    verifyWait: [1200, 900, 2000, 5000],
     className: "l2",
     holes: [[560, 720], [980, 1300]],
     points: [
@@ -1040,7 +1045,7 @@ const scenes = [
       [3, "Dnes menší hodnota, pokud testy píše <b>stejný agent jako kód</b>."],
     ],
     notes:
-      "Level 2: testy. Unit testy a integrační testy, dvě díry, které musí bug přeskočit. (→) Dřív to byla velmi silná ochrana. (→) První díru bug přeskočí, druhá je moc široká. (→) Jenže dnes mají testy menší hodnotu, pokud je píše stejný agent jako kód. (→) Agent přijde a bugovi postaví most.",
+      "Level 2: testy. Unit testy a integrační testy, dvě díry, které musí bug přeskočit. (→) Dřív to byla velmi silná ochrana. (→) První díru bug přeskočí, druhá je moc široká. (→) Jenže dnes mají testy menší hodnotu, pokud je píše stejný agent jako kód. Agent přijde a bugovi postaví most.",
     art: () => `
       ${sign("unit testy", 470)}
       ${sign("integrační testy", 880)}
@@ -1051,12 +1056,14 @@ const scenes = [
       if (step <= prev) return choreo(root, []), pose(root, ".l2-bug", "idle");
       if (step === 2)
         poses(root, [[0, ".l2-bug", "walk"], [600, ".l2-bug", "jump"], [1300, ".l2-bug", "walk"], [1600, ".l2-bug", "idle"]]);
-      if (step === 4) poses(root, [[2000, ".l2-bug", "walk"], [4600, ".l2-bug", "idle"]]);
+      if (step === 3) poses(root, [[2000, ".l2-bug", "walk"], [4600, ".l2-bug", "idle"]]);
     },
   }),
 
-  // L3 automated code review = traps in the middle; the bug teleports
-  // over them. 0 traps · 1–2 points · 3 walk, beam out, beam in, walk on
+  // L3 automated code review = spike traps in the middle; teleport pads
+  // (disc + mist) visible all the time before and after them; the bug
+  // beams out on the first pad and in on the second.
+  // 0 traps + pads · 1–2 points · 3 walk, beam out, beam in, walk on
   levelScene({
     id: "level-3",
     n: 3,
@@ -1072,12 +1079,14 @@ const scenes = [
       "Level 3: automatizované code review. (→) Agent měl vlastní krok code review. (→) Je specializované na známé chyby. (→) Jenže tenhle bug nebyl známý, takže se pastem prostě vyhnul.",
     art: () => {
       const spikes = (n) => {
-        let pts = "0,76";
-        for (let i = 0; i < n; i++) pts += ` ${i * 36 + 18},6 ${(i + 1) * 36},76`;
+        let pts = "0,80";
+        for (let i = 0; i < n; i++) pts += ` ${i * 36 + 18},6 ${(i + 1) * 36},80`;
         return `<svg class="trap" viewBox="0 0 ${n * 36} 80" width="${n * 36}" height="80" aria-hidden="true"><polygon points="${pts}"/></svg>`;
       };
       return `
         <div class="l3-traps">${spikes(4)}${spikes(4)}${spikes(4)}</div>
+        <div class="tp-pad" style="left:458px"></div>
+        <div class="tp-pad" style="left:1238px"></div>
         <div class="beam beam-out"></div>
         <div class="beam beam-in"></div>
         <div class="l3-bug"><div class="l3-tp">${bug({ size: 108 })}</div></div>`;
@@ -1090,7 +1099,7 @@ const scenes = [
   }),
 
   // L4 user testing: three bugs walk in, one hides behind a bush, the
-  // pointer clicks the other two away, then hovers over the bush (all fine).
+  // pointer clicks the other two away and disappears.
   // 0 scene · 1–3 points · 4 action · 5 the problem
   levelScene({
     id: "level-4",
@@ -1121,7 +1130,7 @@ const scenes = [
     },
   }),
 
-  // L5 feature flag: a big hole, a moving platform labelled FEATURE FLAG.
+  // L5 feature flag: a wide gap, a moving platform labelled FEATURE FLAG.
   // 0 platform shuttles · 1 point · 2 the platform comes to the left edge
   // (from wherever its loop was), the bug steps on, goes half-stealth,
   // rides across and steps off · 3 the catch
@@ -1155,15 +1164,16 @@ const scenes = [
     },
   }),
 
-  // L6 unknown domain = a maze. 0 maze · 1 point + question marks ·
-  // 2 point + "tým: ?" sign · 3 the bug finds its way through (offset-path)
+  // L6 unknown domain = a maze (no ground, soft walls on the cream).
+  // 0 maze · 1–2 points · 3 the bug finds its way through (offset-path)
   levelScene({
     id: "level-6",
     n: 6,
     name: "Neznámá doména",
     steps: 4,
-    verifyWait: [1200, 1200, 900, 4600],
+    verifyWait: [1200, 900, 900, 4600],
     className: "l6",
+    ground: false,
     points: [
       [1, "Refaktoring v „cizí“ části aplikace: nevěděl jsem přesně, jak všechno funguje."],
       [2, "Hůř se shání člověk na review, když nevím ani, který tým to má na starosti."],
@@ -1173,65 +1183,63 @@ const scenes = [
     art: () => `
       <div class="l6-maze" style="width:${MAZE[0].length * MAZE_CELL}px;height:${MAZE.length * MAZE_CELL}px">
         ${mazeSvg()}
-        ${[[7, 5], [1, 7], [3, 14], [1, 13]]
-          .map(([r, c], k) => `<div class="mz-q" data-from="1" style="left:${c * MAZE_CELL}px;top:${r * MAZE_CELL}px;transition-delay:${k * 0.15}s">?</div>`)
-          .join("")}
         <div class="mz-bug" style="offset-path:path('${mazePath()}')">${bug({ size: 36 })}</div>
-      </div>
-      ${sign("tým: ?", 220, "l6-sign")}`,
+      </div>`,
     onStep: (root, step, prev) => {
       if (step <= prev) return choreo(root, []), pose(root, ".mz-bug", "idle");
       if (step === 3) poses(root, [[0, ".mz-bug", "walk"], [4200, ".mz-bug", "idle"]]);
     },
   }),
 
-  // L7 code review: a huge PR keeps scrolling; two bugs jump in and hide
-  // between the lines. 0 scene · 1 point · 2 bugs hide · 3 point
+  // L7 code review: a long PR keeps scrolling with two bugs already inside
+  // it, so they scroll into view now and then. No ground.
+  // 0 PR · 1–2 points
   levelScene({
     id: "level-7",
     n: 7,
     name: "Code review",
-    steps: 4,
-    verifyWait: [1200, 900, 2200, 1000],
+    steps: 3,
+    verifyWait: [1600, 900, 1000],
     className: "l7",
+    ground: false,
     points: [
       [1, "Abych projekt posouval dopředu, musel jsem posílat velká PR."],
-      [3, "10 malých PR by se ověřilo snáz než jedno velké. Ale je v tom organizační overhead."],
+      [2, "10 malých PR by se ověřilo snáz než jedno velké. Ale je v tom organizační overhead."],
     ],
     notes:
-      "Level 7: code review. (→) Abych projekt posouval dopředu, musel jsem posílat velká PR. (→) A ve velkém PR se bugy schovají snadno. (→) Deset malých PR by se ověřilo snáz než jedno velké, ale je v tom organizační overhead.",
+      "Level 7: code review. Ve velkém PR se bugy schovají snadno. (→) Abych projekt posouval dopředu, musel jsem posílat velká PR. (→) Deset malých PR by se ověřilo snáz než jedno velké, ale je v tom organizační overhead.",
     art: () => {
       const half = (seed) => `<div class="l7-half">${diffBars(34, seed)}
-        <div class="l7-hidden" style="top:${7 * 19}px;left:330px">${bug({ size: 36, pose: "idle" })}</div>
-        <div class="l7-hidden" style="top:${24 * 19}px;left:120px">${bug({ size: 36, pose: "idle" })}</div>
+        <div class="l7-hidden" style="top:${6 * 19}px;left:520px">${bug({ size: 54, pose: "idle" })}</div>
+        <div class="l7-hidden" style="top:${23 * 19}px;left:200px">${bug({ size: 54, pose: "idle", facing: "left" })}</div>
       </div>`;
       return `
         <div class="l7-pr">
           <div class="l7-head"><span>Pull request</span><span class="l7-files">Files changed</span></div>
           <div class="l7-body"><div class="l7-scroll">${half(11)}${half(11)}</div></div>
-        </div>
-        <div class="l7-bug l7-b1"><div class="l7-arc">${bug({ size: 108 })}</div></div>
-        <div class="l7-bug l7-b2"><div class="l7-arc">${bug({ size: 108 })}</div></div>`;
-    },
-    onStep: (root, step, prev) => {
-      if (step <= prev) return choreo(root, []), pose(root, ".l7-bug", "idle");
-      if (step === 2) poses(root, [[0, ".l7-bug", "jump"]]);
+        </div>`;
     },
   }),
 
-  // L8 nothing crashed = minesweeper, most of the field revealed, nothing
-  // went off. 0 board · 1 point · 2 one covered tile flips: it's the bug
+  // L8 nothing crashed = minesweeper without a frame. The bug is the player
+  // standing in the middle of the revealed field; one mine is flagged.
+  // No ground. 0 board · 1 point
   levelScene({
     id: "level-8",
     n: 8,
     name: "Nic nespadlo",
-    steps: 3,
-    verifyWait: [1200, 900, 1400],
+    steps: 2,
+    verifyWait: [1200, 900],
     className: "l8",
+    ground: false,
     points: [[1, "Padající kód bychom si všimli hned."]],
     notes:
-      "Level 8: bug nezpůsoboval crash. Většina pole je odkrytá a nic nevybuchlo. (→) Padající kód bychom si všimli hned. (→) Tenhle bug nic neshodil. Jen tiše čekal.",
-    art: () => `<div class="l8-board">${minesweeper()}</div>`,
+      "Level 8: bug nezpůsoboval crash. Bug tu hraje hledání min: většina pole je odkrytá a nic nevybuchlo. (→) Padající kód bychom si všimli hned.",
+    art: () => `
+      <div class="l8-board">
+        ${minesweeper()}
+        <div class="ms-player">${bug({ size: 108, pose: "idle" })}</div>
+      </div>`,
   }),
 
   // ============================================================ Bug vyhrál
@@ -1287,39 +1295,6 @@ const scenes = [
         <div class="tk-thanks" data-from="4">Díky!</div>
         <div class="tk-agent">${agent({ size: 224 })}</div>
         ${ground()}
-      </div>
-    `,
-  },
-  // ============================================================ DEV
-  {
-    id: "bug-sheet",
-    notes: "DEV ONLY: character sheet hrdiny, před talkem smazat.",
-    world: "game",
-    render: () => `
-      <div class="scene bug-sheet">
-        <h2>HRDINA: BUG</h2>
-        <div class="sheet-big">
-          <figure>${bug({ size: 288, pose: "idle" })}<figcaption>idle (288 px)</figcaption></figure>
-          <div class="sheet-note">
-            Krunýř = <b>řádky kódu</b>, odsazené jako blok.<br>
-            Třetí řádek <b>chybí</b>.<br>
-            Paleta přes CSS proměnné <b>--bug-*</b>.
-          </div>
-        </div>
-        <div class="sheet-row">
-          <figure>${bug({ size: 108, pose: "walk" })}<figcaption>walk</figcaption></figure>
-          <figure>${bug({ size: 108, pose: "jump" })}<figcaption>jump</figcaption></figure>
-          <figure>${bug({ size: 108, pose: "idle", facing: "left" })}<figcaption>vlevo</figcaption></figure>
-          <figure>${bug({ size: 108, pose: "idle", className: "bug--stealth" })}<figcaption>stealth</figcaption></figure>
-          <figure>
-            <div class="sheet-clones">
-              ${bug({ size: 72, pose: "idle" })}
-              ${bug({ size: 72, pose: "idle", className: "bug--clone" })}
-              ${bug({ size: 72, pose: "idle", className: "bug--clone" })}
-            </div>
-            <figcaption>klony</figcaption>
-          </figure>
-        </div>
       </div>
     `,
   },
