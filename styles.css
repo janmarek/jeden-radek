@@ -1243,7 +1243,7 @@ body {
  * ===================================================================== */
 .dbtables .dbt-rooms { position: absolute; left: 120px; top: 250px; }
 .dbtables .dbt-cats { position: absolute; left: 560px; top: 250px; }
-.dbtables .dbt-main { position: absolute; left: 120px; top: 560px; }
+.dbtables .dbt-main { position: absolute; left: 120px; top: 550px; }
 .dbt-name { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font: 700 24px var(--font-mono); color: var(--coral); }
 .dbt-frame {
   background: var(--paper);
@@ -1255,13 +1255,19 @@ body {
 .dbt { width: 100%; border-collapse: collapse; font: 500 21px var(--font-mono); }
 .dbt-main .dbt-name { justify-content: flex-end; }
 .dbt th {
-  padding: 8px 18px;
+  padding: 14px 18px 10px;
   text-align: left;
   background: var(--cream-2);
   font-size: 16px;
   font-weight: 700;
 }
 .dbt td { padding: 6px 18px; border-top: 2px solid var(--cream-2); white-space: nowrap; transition: background 0.4s; }
+/* Breathing room against the rounded frame: outer columns, header, last
+   visible row (the duplicate row is hidden until step 2). */
+.dbt tr > :first-child { padding-left: 26px; }
+.dbt tr > :last-child { padding-right: 26px; }
+.dbt tbody tr:last-child td,
+.dbtables:not([data-step="2"]) .dbt-main tbody tr:nth-last-child(2) td { padding-bottom: 14px; }
 .dbt-new { display: none; }
 .dbtables[data-step="2"] .dbt-new { display: table-row; animation: dbt-row-in 0.4s ease-out; }
 @keyframes dbt-row-in { from { opacity: 0; } }

@@ -585,8 +585,8 @@ const scenes = [
         const path = root.querySelector(`.dbt-links ${sel}`);
         if (!fromTh || !frame || !toTh || !path) return;
         const f = pos(fromTh), fr = pos(frame), t = pos(toTh);
-        const x1 = f.x + f.w / 2, y1 = fr.y + fr.h + 26;
-        const x2 = t.x + t.w / 2, y2 = t.y - 26;
+        const x1 = f.x + f.w / 2, y1 = fr.y + fr.h + 12;
+        const x2 = t.x + t.w / 2, y2 = t.y - 14;
         const my = (y1 + y2) / 2;
         path.setAttribute("d", `M${x1} ${y1} C${x1} ${my} ${x2} ${my} ${x2} ${y2}`);
       };
