@@ -198,6 +198,9 @@ Tohle je zdroj pravdy. Co tu není, se nesmí prezentovat jako fakt.
   velmi nebezpečné a autor neměl práva; job je pomalý (kód + deploy, rychleji by to
   bezpečně nezvládl), ale bezpečný, ukáže rozsah a nechá rozhodnout člověka.
   Id v jobech jako 6znakové hashe (jako zkrácené git commity).
+- Slajdy „Jeden řádek kódu chyběl…“ (what-happened), „Najdi chybu“ (teaser
+  s odpočtem) a „Nikdo ji nenašel“ (reveal) autor smazal; nahradily je
+  room-edit, db-tables a find-bug.
 - Ve Slacku vypíná flag **Hector** (dříve E'Tore). Slajd „Co se děje?“ bez štítku „já“.
 
 ### Nevymýšlet (zatím neznámé)
@@ -331,7 +334,3 @@ agent nerozhoduje sám.
   (stejná kategorie), nebo nový řádek s novou kategorií? Teď je tam nová kategorie.
 - Názvy jobů: autor psal „Duplicite…Asignments“, na slajdu je
   „Duplicate…Assignments“. Jak se jmenovaly doopravdy?
-- Zůstanou staré slajdy `teaser`, `reveal` a `what-happened`, když teď incident
-  má konkrétní kód a tabulky?
-- Kde má být klíčový obrázek „Co se stalo“ (propojovací tabulka)? Teď je po
-  slajdu s jobem.

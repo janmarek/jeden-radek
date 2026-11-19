@@ -521,27 +521,9 @@ body {
 
 
 /* =====================================================================
- * 2 teaser: diff + 10s countdown (step 1 scrolls the diff)
+ * Shared diff/code card bits (level obstacles, find-bug's file header)
  * ===================================================================== */
-.teaser .countdown {
-  position: absolute;
-  right: 120px;
-  top: 70px;
-  font-size: 150px;
-  font-weight: 800;
-  color: var(--coral);
-  line-height: 1;
-}
-.teaser .cd-unit { font-size: 48px; margin-left: 6px; }
-.diff-win {
-  position: absolute;
-  left: 120px;
-  top: 290px;
-  width: 1360px;
-  height: 520px;
-  overflow: hidden;
-}
-.diff-win, .zoom, .o-diff, .o-wall {
+.o-diff, .o-wall {
   background: var(--paper);
   border: 3px solid var(--ink);
   border-radius: 18px;
@@ -557,64 +539,6 @@ body {
   font-size: 20px;
   font-weight: 600;
 }
-.diff-stat .add { color: #079aa8; }
-.diff-body {
-  position: relative;
-  height: calc(100% - 56px);
-  overflow: hidden;
-  padding-top: 14px;
-  background: linear-gradient(90deg, #f1e7da 0 56px, transparent 56px);
-}
-.diff-scroll { transition: transform 0.4s ease-out; }
-.teaser[data-step="1"] .diff-scroll {
-  transform: translateY(-2400px);
-  transition: transform 10s linear;
-}
-
-/* =====================================================================
- * 3 reveal: zoom into the diff, the dashed slot is the missing line
- * ===================================================================== */
-.zoom {
-  position: absolute;
-  left: 120px;
-  top: 400px;
-  width: 1360px;
-  height: 400px;
-  padding: 12px 0;
-  overflow: hidden;
-}
-.zoom-gutter {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 80px;
-  background: #f1e7da;
-  border-right: 3px solid var(--ink);
-}
-.zoom-gutter span { display: none; }
-.zoom .dl {
-  height: 18px;
-  margin: 13px 0 13px calc(120px + var(--i) * 50px);
-  border-radius: 8px;
-}
-.zoom .dl-gap { transition: border-color 0.4s, background 0.4s; }
-.reveal[data-step="1"] .zoom .dl-gap {
-  border-color: var(--coral);
-  background: rgba(254, 113, 96, 0.14);
-}
-.zoom-tag {
-  position: absolute;
-  left: 690px;
-  top: 134px;
-  padding: 6px 16px;
-  background: var(--coral);
-  border: 3px solid var(--ink);
-  border-radius: 10px;
-  font-size: 22px;
-  font-weight: 800;
-}
-.zoom-tag::before { content: "← "; }
 
 /* =====================================================================
  * true-story: the bug picks up where the title left it (left 700px),
@@ -1030,7 +954,6 @@ body {
   font-weight: 800;
   font-style: italic;
   color: var(--coral);
-  text-shadow: 8px 8px 0 var(--ink);
 }
 
 /* =====================================================================
@@ -1545,67 +1468,6 @@ body {
 }
 .job .jo-human { position: absolute; left: 120px; top: 806px; font-size: 34px; font-weight: 600; }
 .job .jo-human b { color: var(--coral); }
-
-/* =====================================================================
- * what-happened: join table before/after + UI (after the job)
- * ===================================================================== */
-.what .what-left { position: absolute; left: 120px; top: 300px; width: 620px; }
-.erd { display: flex; align-items: center; }
-.erd-box {
-  padding: 10px 18px;
-  border: 3px solid var(--ink);
-  border-radius: 12px;
-  background: var(--paper);
-  font-size: 24px;
-  font-weight: 600;
-}
-.erd-link { width: 80px; height: 3px; background: var(--ink); }
-.erd-label {
-  margin-top: 30px;
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--coral);
-}
-.jt { margin-top: 12px; background: var(--paper); border: 3px solid var(--ink); border-radius: 0; box-shadow: 6px 6px 0 var(--ink); width: 420px; border-collapse: collapse; font-size: 30px; }
-.jt th {
-  padding: 12px 20px;
-  text-align: left;
-  background: var(--cream-2);
-  font-size: 18px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-.jt td { padding: 14px 20px; border-top: 2px solid var(--cream-2); }
-.jt td { transition: opacity 0.4s; }
-.jt-new td { background: rgba(254, 113, 96, 0.25); }
-.what[data-step="2"] .jt-old td { text-decoration: line-through; opacity: 0.5; }
-.what .what-right { position: absolute; left: 860px; top: 300px; width: 620px; }
-.ui-card {
-  padding: 28px 32px;
-  background: var(--paper);
-  color: var(--ink);
-  border: 3px solid var(--ink);
-  border-radius: 18px;
-  box-shadow: 8px 8px 0 var(--ink);
-}
-.ui-title { font-size: 22px; font-weight: 700; color: var(--ink-soft); }
-.ui-field { margin-top: 10px; font-size: 34px; font-weight: 600; }
-.ui-field .pick { color: #079aa8; }
-.ui-save {
-  margin-top: 20px;
-  padding: 10px 22px;
-  font: 700 22px var(--font-sans);
-  background: var(--cyan);
-  border: 3px solid var(--ink);
-  border-radius: 12px;
-}
-.ui-note { margin-top: 14px; font-size: 22px; font-weight: 600; color: var(--coral); }
-.what .what-caption { position: absolute; left: 120px; right: 120px; top: 700px; }
-.what .what-caption span { position: absolute; left: 0; top: 0; font-size: 34px; font-weight: 600; }
-.what .what-caption b { color: var(--coral); }
 
 /* =====================================================================
  * 14 switch-to-game: the hero introduces itself

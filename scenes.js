@@ -31,22 +31,6 @@ function diffBars(n, seed = 7, gapAt = -1) {
   return out;
 }
 
-// 10 s countdown in .cd-num (teaser, find-bug). Resets when inactive.
-function runCountdown(root, active) {
-  clearInterval(root._cd);
-  const num = root.querySelector(".cd-num");
-  if (!num) return;
-  let t = 10;
-  num.textContent = String(t);
-  if (!active) return;
-  root._cd = setInterval(() => {
-    if (!num.isConnected) return clearInterval(root._cd);
-    t = Math.max(0, t - 1);
-    num.textContent = String(t);
-    if (t === 0) clearInterval(root._cd);
-  }, 1000);
-}
-
 // Bug walks during the CSS move, then stands still.
 function walkThenIdle(root, ms = 1600) {
   root.querySelectorAll(".bug").forEach((b) => {
@@ -628,7 +612,7 @@ const scenes = [
           .replace(KW, (m, str, kw, fn) =>
             str ? `<span class="cs">${m}</span>` : kw ? `<span class="ck">${m}</span>` : `<span class="cf">${m}</span>`);
       const MISSING = "  await loadCategories(room);";
-      // The rest of the file is abstract bars (like the old teaser diff);
+      // The rest of the file is abstract bars (same look as the level diffs);
       // only updateRoom() is real code. Blank lines every few rows.
       const bars = (n, seed) => {
         const rnd = seeded(seed);
@@ -808,96 +792,6 @@ const scenes = [
         <div class="jo-human" data-from="2">Co smazat, rozhoduje <b>člověk</b>.</div>
       </div>`;
     },
-  },
-
-  // ============================================================ Co se stalo (key visual, after the job showed the data)
-  {
-    id: "what-happened",
-    world: "serious",
-    steps: 5,
-    notes:
-      "Klíčový obrázek. Pokoj má kategorii; vztah je v propojovací tabulce, jeden řádek. Změním kategorii v UI. Mělo se stát: starý řádek smazat, nový vložit. Stalo se: nový přibyl, starý zůstal. A UI ukazuje ten nejstarší, takže to vypadá, že se nic nezměnilo.",
-    render: () => `
-      <div class="scene slide what">
-        <div class="kicker">Co se stalo</div>
-        <h1 class="headline">Jeden řádek kódu chyběl…</h1>
-        <div class="what-left">
-          <div class="erd"><span class="erd-box">Pokoj A</span><span class="erd-link"></span><span class="erd-box">Kategorie</span></div>
-          <div class="erd-label">propojovací tabulka</div>
-          <table class="jt">
-            <thead><tr><th>pokoj</th><th>kategorie</th></tr></thead>
-            <tbody>
-              <tr class="jt-old"><td>A</td><td>X</td></tr>
-              <tr class="jt-new" data-from="3"><td>A</td><td>Y</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="what-right">
-          <div class="ui-card">
-            <div class="ui-title">Pokoj A</div>
-            <div class="ui-field">Kategorie:
-              <span class="swap">
-                <b data-to="0">X</b><b class="pick" data-from="1" data-to="3">Y</b><b data-from="4">X</b>
-              </span>
-            </div>
-            <button class="ui-save" data-from="1" data-to="3">Uložit</button>
-            <div class="ui-note" data-from="4">UI bere nejstarší řádek</div>
-          </div>
-        </div>
-        <div class="what-caption">
-          <span data-from="1" data-to="1">Změním kategorii na Y a uložím.</span>
-          <span data-from="2" data-to="2">Mělo se stát: starý řádek smazat, nový vložit.</span>
-          <span data-from="3" data-to="3">Stalo se: nový řádek přibyl, <b>starý zůstal</b>.</span>
-          <span data-from="4">…a v databázi z něj vznikly dva. Navenek se nic nezměnilo.</span>
-        </div>
-      </div>
-    `,
-  },
-
-  // ============================================================ Rozcvička (po incidentu)
-  {
-    id: "teaser",
-    world: "game",
-    steps: 2,
-    verifyWait: [900, 4000],
-    notes:
-      "Rozcvička. Tady je pull request, asi 800 řádků. Máte 10 sekund, najděte chybu. Klidně hádejte nahlas. (→ spustí odpočet)",
-    render: () => `
-      <div class="scene slide teaser">
-        <div class="kicker">Rozcvička</div>
-        <h1 class="headline">Najdi chybu.</h1>
-        <div class="countdown" data-from="1"><span class="cd-num">10</span><span class="cd-unit">s</span></div>
-        <div class="diff-win">
-          <div class="diff-head">
-            <span class="diff-title">Pull request</span>
-            <span class="diff-stat"><b class="add">+ ~800</b> řádků změn</span>
-          </div>
-          <div class="diff-body"><div class="diff-scroll">${diffBars(220, 11)}</div></div>
-        </div>
-      </div>
-    `,
-    onStep: (root, step) => runCountdown(root, step === 1),
-  },
-
-  // ============================================================ Odhalení
-  {
-    id: "reveal",
-    world: "game",
-    steps: 2,
-    notes:
-      "Nikdo ji nenašel. A nemohl: chyba není v řádku, který tam je. Chyběl jeden řádek, ten, který měl starou vazbu pokoj–kategorie načíst a smazat.",
-    render: () => `
-      <div class="scene slide reveal">
-        <div class="kicker">Odhalení</div>
-        <h1 class="headline">Nikdo ji nenašel.</h1>
-        <p class="lede" data-from="1">Protože tam není. <b>Chyběl jeden řádek.</b></p>
-        <div class="zoom">
-          <div class="zoom-gutter">${Array.from({ length: 8 }, () => "<span></span>").join("")}</div>
-          <div class="zoom-lines">${diffBars(7, 3, 4)}</div>
-          <div class="zoom-tag" data-from="1">tady</div>
-        </div>
-      </div>
-    `,
   },
 
   // ============================================================ Přepnutí do hry
