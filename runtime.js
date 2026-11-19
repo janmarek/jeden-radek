@@ -419,7 +419,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 // DEV ONLY: [data-goto="scene-id"] jumps straight to that scene (the quiet
-// "incident →" link on the title, gated by DEV_JUMP in scenes.js). This is
+// "incident →" / "hra →" links on the title, gated by DEV_JUMP in scenes.js). This is
 // a rehearsal shortcut, not click-to-advance: nothing else reacts to clicks.
 document.addEventListener("click", (e) => {
   const link = e.target.closest && e.target.closest("[data-goto]");

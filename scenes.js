@@ -97,8 +97,8 @@ const notif = ({ when = "Pátek 13.&nbsp;8. 16:00", text = INCIDENT_MSG, extra =
     </div>
   </div>`;
 
-// DEV ONLY: quiet link on the title slide that jumps straight to the
-// incident (runtime handles [data-goto]). Set to false before the talk.
+// DEV ONLY: quiet links on the title slide that jump straight to the
+// incident and to the game part (runtime handles [data-goto]). Set to false before the talk.
 const DEV_JUMP = true;
 
 // Level template for the game part (slides 15–21).
@@ -148,7 +148,8 @@ const scenes = [
         <div class="title-name">Jan Marek</div>
         <div class="title-bug">${bug({ size: 144, pose: "walk" })}</div>
         <div class="pixel-ground"></div>
-        ${DEV_JUMP ? `<span class="dev-jump" data-goto="mostly">incident →</span>` : ""}
+        ${DEV_JUMP ? `<span class="dev-jump" data-goto="mostly">incident →</span>
+        <span class="dev-jump dev-jump-2" data-goto="switch-to-game">hra →</span>` : ""}
       </div>
     `,
     onStep: (root, step, prev) => {

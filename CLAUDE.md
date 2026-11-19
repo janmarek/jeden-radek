@@ -36,10 +36,10 @@ scenes have a `world`; verify waits live on the scene (`verifyWait`).
 - `→` `↓` `Space` `PageDown` next step/scene; `←` `↑` `PageUp` back; `Home` / `End`.
 - **Keyboard only.** No click-to-advance, no URL hash sync. Don't add them back.
 - Scene render is wrapped in try/catch with a visible fallback. Never bypass it.
-- **DEV only exception:** the faint "incident →" link on the title (`data-goto`,
-  gated by `DEV_JUMP` in scenes.js) jumps to the `mostly` scene (just before the
-  Slack notification that opens the incident) for rehearsing
-  later parts. Set `DEV_JUMP = false` before the talk.
+- **DEV only exception:** the faint "incident →" and "hra →" links on the title
+  (`data-goto`, gated by `DEV_JUMP` in scenes.js) jump to the `mostly` scene (just
+  before the Slack notification that opens the incident) and to `switch-to-game`
+  (start of the game part) for rehearsing later parts. Set `DEV_JUMP = false` before the talk.
 
 ## Architecture
 
