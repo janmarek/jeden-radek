@@ -1005,6 +1005,33 @@ body {
 }
 .mostly .ms-notif.is-on { translate: 0 0; }
 
+/* Language switch, title slide top left ([data-lang], runtime.js).
+   Small ink-bordered chip pair; the active language is filled yellow. */
+.lang-switch {
+  position: absolute;
+  left: 28px;
+  top: 24px;
+  display: flex;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: 4px 4px 0 var(--ink);
+  overflow: hidden;
+  background: var(--paper);
+  z-index: 5;
+}
+.lang-switch span {
+  padding: 6px 16px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  user-select: none;
+}
+.lang-switch span + span { border-left: 3px solid var(--ink); }
+.lang-switch span:not(.is-active) { opacity: 0.55; }
+.lang-switch span:not(.is-active):hover { opacity: 1; }
+.lang-switch .is-active { background: var(--yellow); cursor: default; }
+
 /* DEV ONLY: quiet jump link on the title (DEV_JUMP in scenes.js). */
 .dev-jump {
   position: absolute;

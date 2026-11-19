@@ -11,6 +11,8 @@
 // Wait per step defaults to 900ms. A scene can declare longer waits:
 //   verifyWait: 2800            same wait for every step
 //   verifyWait: [2800, 900]     per step
+//
+// English deck: DECK_LANG=en node verify.mjs  → shots go to verify-shots/en/.
 import { chromium } from "playwright";
 import { createServer } from "http";
 import { readFile, mkdir, readdir, unlink } from "fs/promises";
@@ -60,6 +62,10 @@ page.on("console", (msg) => {
 });
 page.on("pageerror", (err) => console.log("[pageerror]", err.message));
 
+const DECK_LANG = process.env.DECK_LANG === "en" ? "en" : "cs";
+await page.addInitScript((l) => {
+  try { localStorage.setItem("jeden-radek-lang", l); } catch (e) {}
+}, DECK_LANG);
 await page.goto(`http://localhost:${PORT}/`);
 await page.waitForFunction(() => document.querySelector(".scene") !== null);
 await page.evaluate(() => document.fonts.ready);
@@ -74,7 +80,7 @@ const manifest = await page.evaluate(() =>
   }))
 );
 
-const shotDir = join(__dirname, "verify-shots");
+const shotDir = join(__dirname, "verify-shots", ...(DECK_LANG === "en" ? ["en"] : []));
 await mkdir(shotDir, { recursive: true });
 
 // Drop stale shots of the scenes we're about to shoot (scene numbers shift

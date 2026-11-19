@@ -7,6 +7,18 @@
 // Reveal per step without CSS: data-from="N" (visible from step N),
 // optional data-to="M" (hidden after step M). See syncReveals() in runtime.js.
 
+// ---------------------------------------------------------------- language
+// The deck exists in Czech (default) and English. The title slide has a
+// česky / english switch (top left, [data-lang], handled in runtime.js);
+// the choice is kept in localStorage.
+// T(cs, en) is lazy: it returns an object that picks the language when it is
+// interpolated into a template, so it also works in values built at
+// definition time (levelScene names and points).
+const LANG_KEY = "jeden-radek-lang";
+let LANG = "cs";
+try { if (localStorage.getItem(LANG_KEY) === "en") LANG = "en"; } catch (e) {}
+const T = (cs, en) => ({ toString: () => (LANG === "en" ? en : cs) });
+
 // ---------------------------------------------------------------- helpers
 
 // Deterministic pseudo-random so diff art renders identically every time.
@@ -80,15 +92,15 @@ function tallySvg(count) {
 // Small "for juniors" sticker: one picture instead of a definition.
 const junior = (pic, text, from = 0, extra = "") => `
   <div class="junior ${extra}" data-from="${from}">
-    <div class="junior-tag">pro juniory</div>
+    <div class="junior-tag">${T("pro juniory", "for juniors")}</div>
     <div class="junior-pic">${pic}</div>
     <div class="junior-text">${text}</div>
   </div>`;
 
 // Slack notification like in the bdd deck (Slack mark on the left), in the
 // deck's ink-border card style. The date sits right in the card, prominent.
-const INCIDENT_MSG = "Řešíme incident, pojď nám pomoct.";
-const notif = ({ when = "Pátek 13.&nbsp;8. 16:00", text = INCIDENT_MSG, extra = "", attrs = "" } = {}) => `
+const INCIDENT_MSG = T("Řešíme incident, pojď nám pomoct.", "We have an incident, come help us.");
+const notif = ({ when = T("Pátek 13.&nbsp;8. 16:00", "Friday, Aug&nbsp;13, 4&nbsp;PM"), text = INCIDENT_MSG, extra = "", attrs = "" } = {}) => `
   <div class="notif ${extra}" ${attrs}>
     <div class="notif-ico"><img src="img/slack-mark.svg" alt="Slack"></div>
     <div class="notif-body">
@@ -312,12 +324,16 @@ const scenes = [
     notes: "Ahoj, jsem Jan. Tohle je příběh o jednom řádku.",
     render: () => `
       <div class="scene title">
-        <div class="title-logo">JEDEN ŘÁDEK</div>
+        <div class="lang-switch">
+          <span data-lang="cs"${LANG === "cs" ? ' class="is-active"' : ""}>česky</span>
+          <span data-lang="en"${LANG === "en" ? ' class="is-active"' : ""}>english</span>
+        </div>
+        <div class="title-logo">${T("JEDEN ŘÁDEK", "ONE LINE")}</div>
         <div class="title-name">Jan Marek</div>
         <div class="title-bug">${bug({ size: 144, pose: "walk" })}</div>
         <div class="pixel-ground"></div>
         ${DEV_JUMP ? `<span class="dev-jump" data-goto="mostly">incident →</span>
-        <span class="dev-jump dev-jump-2" data-goto="switch-to-game">hra →</span>` : ""}
+        <span class="dev-jump dev-jump-2" data-goto="switch-to-game">${T("hra", "game")} →</span>` : ""}
       </div>
     `,
     onStep: (root, step, prev) => {
@@ -353,12 +369,12 @@ const scenes = [
                 <div class="bb-fog bb-fog-1"></div>
                 <div class="bb-fog bb-fog-2"></div>
                 <div class="bb-text" data-to="1">
-                  <h1 class="bb-title">Věřte nevěřte</h1>
-                  <p class="bb-sub" data-from="1">…tohle se opravdu stalo.</p>
+                  <h1 class="bb-title">${T("Věřte nevěřte", "Believe It or Not")}</h1>
+                  <p class="bb-sub" data-from="1">${T("…tohle se opravdu stalo.", "…this really happened.")}</p>
                 </div>
                 <div class="ts-mews" data-from="2">Mews</div>
-                <div class="ts-what" data-from="3">software pro hotely</div>
-                <div class="ts-size" data-from="4">&gt;&nbsp;1000 zaměstnanců, stovky vývojářů</div>
+                <div class="ts-what" data-from="3">${T("software pro hotely", "hotel software")}</div>
+                <div class="ts-size" data-from="4">&gt;&nbsp;1000 ${T("zaměstnanců, stovky vývojářů", "employees, hundreds of developers")}</div>
               </div>
               <div class="tv-glass"></div>
             </div>
@@ -397,22 +413,22 @@ const scenes = [
     render: () => `
       <div class="scene slide pms">
         <h1 class="headline">Mews PMS</h1>
-        <p class="lede">Hlavní produkt.</p>
+        <p class="lede">${T("Hlavní produkt.", "The main product.")}</p>
         <div class="screens">
           <figure class="screen-new" data-from="1">
             <div class="mock mock-new">
-              <div class="mk-head"><span></span><button class="mn-danger">${icon("trash-2", { size: 20, stroke: 2.5 })} Smazat vybrané</button></div>
+              <div class="mk-head"><span></span><button class="mn-danger">${icon("trash-2", { size: 20, stroke: 2.5 })} ${T("Smazat vybrané", "Delete selected")}</button></div>
               ${Array.from({ length: 5 }, (_, i) => `<div class="mk-row"><i class="mn-check${i === 1 || i === 2 ? " on" : ""}"></i><span class="mk-text"></span><span class="mn-edit">${icon("pencil", { size: 30, stroke: 2.75 })}</span></div>`).join("")}
             </div>
-            <figcaption><b>Většina</b> · React + REST API</figcaption>
+            <figcaption><b>${T("Většina", "Most of it")}</b> · React + REST API</figcaption>
           </figure>
           <figure class="screen-old" data-from="2">
             <div class="mock mock-old">
               <div class="mk-head"><span></span></div>
-              ${[180, 120, 220, 150, 200].map((w) => `<div class="mk-row"><span class="mk-text" style="width:${w}px"></span><a class="mo-edit">Upravit</a><a class="mo-edit">Smazat</a></div>`).join("")}
+              ${[180, 120, 220, 150, 200].map((w) => `<div class="mk-row"><span class="mk-text" style="width:${w}px"></span><a class="mo-edit">${T("Upravit", "Edit")}</a><a class="mo-edit">${T("Smazat", "Delete")}</a></div>`).join("")}
             </div>
-            <figcaption><b>Starší části</b> · Razor, HTML z backendu</figcaption>
-            <div class="pms-age" data-from="3">Firma existuje <b>14 let</b>.</div>
+            <figcaption><b>${T("Starší části", "Older parts")}</b> · Razor, ${T("HTML z backendu", "HTML from the backend")}</figcaption>
+            <div class="pms-age" data-from="3">${T("Firma existuje <b>14 let</b>.", "The company is <b>14 years</b> old.")}</div>
             <div class="brp-label" data-from="4">Backend rendered pages</div>
           </figure>
         </div>
@@ -430,14 +446,14 @@ const scenes = [
     render: () => `
       <div class="scene slide wrong">
         <div class="kicker">Backend rendered pages</div>
-        <h1 class="headline">Co je na tom špatně?</h1>
+        <h1 class="headline">${T("Co je na tom špatně?", "What’s wrong with them?")}</h1>
         <ul class="plain-list">
-          <li data-from="1">Vypadají trochu jinak než zbytek aplikace</li>
-          <li data-from="2">Legacy kód, vývojáři do toho neradi sahají</li>
-          <li data-from="3">Způsobuje technické problémy</li>
+          <li data-from="1">${T("Vypadají trochu jinak než zbytek aplikace", "They look a bit different from the rest of the app")}</li>
+          <li data-from="2">${T("Legacy kód, vývojáři do toho neradi sahají", "Legacy code, developers don’t like touching it")}</li>
+          <li data-from="3">${T("Způsobuje technické problémy", "They cause technical problems")}</li>
         </ul>
         <div class="dilemma-line" data-from="4">
-          Potřebuju doplnit něco malého:<br><b>postaru</b>, nebo <b>přepsat celou stránku</b>?
+          ${T("Potřebuju doplnit něco malého:<br><b>postaru</b>, nebo <b>přepsat celou stránku</b>?", "I need to add something small:<br><b>the old way</b>, or <b>rewrite the whole page</b>?")}
         </div>
       </div>
     `,
@@ -454,13 +470,13 @@ const scenes = [
       "Proč se s tím nic nedělá? (→) Ve firmě to byl problém pojmenovaný už několik let. (→) Jenže postaru bylo napsaných nižší stovky stránek. (→) A co zákazníkovi přinese přepis? Oproti novým funkcím nic moc. (→) Přesto se o to pokoušelo mnoho lidí a byl to jeden z cílů firmy v oblasti technických vylepšení. (→) Tak jsem se rozhodl, že to zkusím taky. (Počet čárek je ilustrační.)",
     render: () => `
       <div class="scene slide named">
-        <h1 class="headline">Proč se s tím nic nedělá?</h1>
+        <h1 class="headline">${T("Proč se s tím nic nedělá?", "Why isn’t anyone fixing it?")}</h1>
         <ul class="plain-list named-list">
-          <li data-from="1">Problém pojmenovaný několik let.</li>
-          <li data-from="2"><b>Nižší stovky</b> stránek.</li>
-          <li data-from="3">Co to přinese zákazníkovi?</li>
-          <li data-from="4">Přesto to zkoušelo řešit mnoho lidí.<span class="li-tally">${tallySvg(7)}</span></li>
-          <li data-from="5" class="named-me">Rozhodl jsem se, že to zkusím taky.</li>
+          <li data-from="1">${T("Problém pojmenovaný několik let.", "A problem known for several years.")}</li>
+          <li data-from="2">${T("<b>Nižší stovky</b> stránek.", "<b>Low hundreds</b> of pages.")}</li>
+          <li data-from="3">${T("Co to přinese zákazníkovi?", "What’s in it for the customer?")}</li>
+          <li data-from="4">${T("Přesto to zkoušelo řešit mnoho lidí.", "Still, many people tried to solve it.")}<span class="li-tally">${tallySvg(7)}</span></li>
+          <li data-from="5" class="named-me">${T("Rozhodl jsem se, že to zkusím taky.", "I decided to give it a try too.")}</li>
         </ul>
       </div>
     `,
@@ -479,26 +495,26 @@ const scenes = [
       "Vyrobil jsem refaktorovacího agenta. Nebylo to těžké: (→) navázal jsem na práci ostatních. (→) Napsali dobrou dokumentaci a některé věci částečně zautomatizovali. (→) Jejich práci jsem použil jako příklad. (→) K tomu jsem dodal svou představu fungování: (→) zanalyzovat kód, napsat specifikaci, napsat API, napsat frontendové komponenty, propojit API a frontend, udělat code review a opravit chyby.",
     render: () => `
       <div class="scene slide agentscene">
-        <h1 class="headline">Vyrobil jsem refaktorovacího agenta</h1>
+        <h1 class="headline">${T("Vyrobil jsem refaktorovacího agenta", "I built a refactoring agent")}</h1>
         <div class="ag-fig">${agent({ size: 336 })}</div>
         <div class="ag-a" data-from="1" data-to="4">
-          <div class="ag-lead">Nebylo to těžké.</div>
+          <div class="ag-lead">${T("Nebylo to těžké.", "It wasn’t hard.")}</div>
           <ul class="plain-list ag-list">
-            <li data-from="2">Navázal jsem na práci ostatních.</li>
-            <li data-from="3">Napsali dobrou dokumentaci a některé věci částečně zautomatizovali.</li>
-            <li data-from="4">Jejich práci jsem použil jako příklad.</li>
+            <li data-from="2">${T("Navázal jsem na práci ostatních.", "I built on the work of others.")}</li>
+            <li data-from="3">${T("Napsali dobrou dokumentaci a některé věci částečně zautomatizovali.", "They wrote good docs and partly automated some things.")}</li>
+            <li data-from="4">${T("Jejich práci jsem použil jako příklad.", "I used their work as an example.")}</li>
           </ul>
         </div>
         <div class="ag-b" data-from="5">
-          <div class="ag-lead">K tomu jsem dodal svou představu fungování:</div>
+          <div class="ag-lead">${T("K tomu jsem dodal svou představu fungování:", "On top of that, I added my idea of how it should work:")}</div>
           <ol class="ag-steps">
             ${[
-              "zanalyzovat kód",
-              "napsat specifikaci",
-              "napsat API",
-              "napsat frontendové komponenty",
-              "propojit API a frontend",
-              "udělat code review a opravit chyby",
+              T("zanalyzovat kód", "analyse the code"),
+              T("napsat specifikaci", "write a spec"),
+              T("napsat API", "write the API"),
+              T("napsat frontendové komponenty", "write the frontend components"),
+              T("propojit API a frontend", "connect the API and the frontend"),
+              T("udělat code review a opravit chyby", "do a code review and fix the bugs"),
             ]
               .map((t, k) => `<li data-from="${6 + k}"><b>${k + 1}</b>${t}</li>`)
               .join("")}
@@ -520,13 +536,13 @@ const scenes = [
       "A fungovalo to. (→) Agent vytvořil dobrý základ v produkční kvalitě. (→) Lepší UX, (→) jednotný vzhled se zbytkem aplikace, (→) snadné další vylepšování (→) a přibyly nové funkce: inline edit a bulk delete.",
     render: () => `
       <div class="scene slide worked">
-        <h1 class="headline">Fungovalo to.</h1>
-        <p class="lede" data-from="1">Agent vytvořil <b>dobrý základ v produkční kvalitě</b>.</p>
+        <h1 class="headline">${T("Fungovalo to.", "It worked.")}</h1>
+        <p class="lede" data-from="1">${T("Agent vytvořil <b>dobrý základ v produkční kvalitě</b>.", "The agent built <b>a solid, production-quality foundation</b>.")}</p>
         <div class="tiles">
-          <div class="tile t-yellow" data-from="2"><div class="tile-ico">${icon("smile", { size: 64 })}</div>Lepší UX</div>
-          <div class="tile t-cyan" data-from="3"><div class="tile-ico">${icon("layout-grid", { size: 64 })}</div>Jednotný vzhled</div>
-          <div class="tile t-lavender" data-from="4"><div class="tile-ico">${icon("trending-up", { size: 64 })}</div>Snadné další vylepšování</div>
-          <div class="tile t-coral" data-from="5"><div class="tile-ico">${icon("pencil", { size: 56 })}${icon("trash-2", { size: 56 })}</div>Nové funkce<small>inline edit, bulk delete</small></div>
+          <div class="tile t-yellow" data-from="2"><div class="tile-ico">${icon("smile", { size: 64 })}</div>${T("Lepší UX", "Better UX")}</div>
+          <div class="tile t-cyan" data-from="3"><div class="tile-ico">${icon("layout-grid", { size: 64 })}</div>${T("Jednotný vzhled", "Consistent look")}</div>
+          <div class="tile t-lavender" data-from="4"><div class="tile-ico">${icon("trending-up", { size: 64 })}</div>${T("Snadné další vylepšování", "Easy to improve further")}</div>
+          <div class="tile t-coral" data-from="5"><div class="tile-ico">${icon("pencil", { size: 56 })}${icon("trash-2", { size: 56 })}</div>${T("Nové funkce", "New features")}<small>inline edit, bulk delete</small></div>
         </div>
       </div>
     `,
@@ -544,7 +560,7 @@ const scenes = [
       "…většinou… (pauza, nechat dojít) (→) Pátek 13. srpna, 16:00. Přijde zpráva na Slacku: Řešíme incident, pojď nám pomoct.",
     render: () => `
       <div class="scene slide mostly">
-        <div class="mostly-big">…většinou…</div>
+        <div class="mostly-big">${T("…většinou…", "…mostly…")}</div>
         ${notif({ extra: "ms-notif", attrs: 'data-from="1"' })}
       </div>
     `,
@@ -573,12 +589,12 @@ const scenes = [
       return `
       <div class="scene slide slackscene">
         <div class="sl-win">
-          <div class="sl-head"><img src="img/slack-mark.svg" alt=""><span>#incident-duplicite-category-assignments</span></div>
+          <div class="sl-head"><img src="img/slack-mark.svg" alt=""><span>#incident-${T("duplicite", "duplicate")}-category-assignments</span></div>
           <div class="sl-feed">
-            ${msg("Astrid", "A", "coral", "Nefunguje synchronizace do našeho systému.", 0)}
-            ${msg("Astrid", "A", "coral", "Padá to, hotelové pokoje mají více kategorií.", 1, true)}
-            ${msg("Janse", "J", "cyan", "Potvrzuji, v databázi vidím <b>140 duplicit</b>.", 2)}
-            ${msg("Hector", "H", "lavender", "To bude naše nová stránka, vypnu to.", 3)}
+            ${msg("Astrid", "A", "coral", T("Nefunguje synchronizace do našeho systému.", "Sync to our system isn’t working."), 0)}
+            ${msg("Astrid", "A", "coral", T("Padá to, hotelové pokoje mají více kategorií.", "It’s failing, hotel rooms have multiple categories."), 1, true)}
+            ${msg("Janse", "J", "cyan", T("Potvrzuji, v databázi vidím <b>140 duplicit</b>.", "Confirmed, I see <b>140 duplicates</b> in the database."), 2)}
+            ${msg("Hector", "H", "lavender", T("To bude naše nová stránka, vypnu to.", "That’ll be our new page, I’m turning it off."), 3)}
           </div>
         </div>
       </div>`;
@@ -597,16 +613,16 @@ const scenes = [
       "Co se děje? (→) Přístup do produkční aplikace. (→) Přístup k logům a metrikám. (→) Přístup do produkční databáze. (→) Dost informací o problému. (→) Znalost systému na správu incidentů. (→) Jak jsem na tom byl já: produkce ano, logy ano, produkční databáze ne, informace ne, incidenty ano. (→) Příprava je důležitá. Ale buď v klidu, příště to zvládneš líp.",
     render: () => {
       const items = [
-        ["Přístup do produkční aplikace", true],
-        ["Přístup k logům a metrikám", true],
-        ["Přístup do produkční databáze", false],
-        ["Dost informací o problému", false],
-        ["Znalost systému na správu incidentů", true],
+        [T("Přístup do produkční aplikace", "Access to the production app"), true],
+        [T("Přístup k logům a metrikám", "Access to logs and metrics"), true],
+        [T("Přístup do produkční databáze", "Access to the production database"), false],
+        [T("Dost informací o problému", "Enough information about the problem"), false],
+        [T("Znalost systému na správu incidentů", "Knowing the incident management tool"), true],
       ];
       return `
       <div class="scene slide panic">
         <div class="kicker">Incident</div>
-        <h1 class="headline">Co se děje?</h1>
+        <h1 class="headline">${T("Co se děje?", "What’s going on?")}</h1>
         <div class="pn-emoji" aria-hidden="true">😱</div>
         <ul class="pn-list">
           ${items
@@ -619,7 +635,7 @@ const scenes = [
             .join("")}
         </ul>
         <div class="pn-takeaway" data-from="7">
-          Příprava je důležitá. Ale buď v klidu, <b>příště to zvládneš líp.</b>
+          ${T("Příprava je důležitá. Ale buď v klidu, <b>příště to zvládneš líp.</b>", "Preparation matters. But stay calm, <b>you’ll do better next time.</b>")}
         </div>
       </div>`;
     },
@@ -637,11 +653,11 @@ const scenes = [
     render: () => `
       <div class="scene slide react">
         <div class="kicker">Incident</div>
-        <h1 class="headline">Jak reagovat</h1>
+        <h1 class="headline">${T("Jak reagovat", "How to react")}</h1>
         <div class="tiles tiles-3">
           <div class="tile t-cyan" data-from="1"><div class="tile-ico">${icon("toggle-right", { size: 64 })}</div>Feature flag</div>
-          <div class="tile t-lavender" data-from="2"><div class="tile-ico">${icon("snowflake", { size: 64 })}</div>Chladná hlava</div>
-          <div class="tile t-yellow" data-from="3"><div class="tile-ico">${icon("megaphone", { size: 64 })}</div>Informovat</div>
+          <div class="tile t-lavender" data-from="2"><div class="tile-ico">${icon("snowflake", { size: 64 })}</div>${T("Chladná hlava", "Keep a cool head")}</div>
+          <div class="tile t-yellow" data-from="3"><div class="tile-ico">${icon("megaphone", { size: 64 })}</div>${T("Informovat", "Communicate")}</div>
         </div>
       </div>
     `,
@@ -668,32 +684,32 @@ const scenes = [
       return `
       <div class="scene slide roomedit">
         <div class="kicker">Incident</div>
-        <h1 class="headline">Co bylo rozbité?</h1>
+        <h1 class="headline">${T("Co bylo rozbité?", "What was broken?")}</h1>
         <div class="re-win">
-          <div class="re-head">Pokoje
-            <span class="re-toast" data-from="3">${icon("check", { size: 28, stroke: 3.5 })} Uloženo</span>
+          <div class="re-head">${T("Pokoje", "Rooms")}
+            <span class="re-toast" data-from="3">${icon("check", { size: 28, stroke: 3.5 })} ${T("Uloženo", "Saved")}</span>
           </div>
-          <div class="re-row re-th"><span>číslo</span><span>patro</span><span>kategorie</span><span></span></div>
+          <div class="re-row re-th"><span>${T("číslo", "number")}</span><span>${T("patro", "floor")}</span><span>${T("kategorie", "category")}</span><span></span></div>
           ${rooms
             .map(
               ([n, f, c], i) => `
             <div class="re-row${i === 0 ? " re-hit" : ""}">
               <span>${n}</span><span>${f}</span><span class="re-cat">${c}</span>
-              <span><span class="re-edit">${icon("pencil", { size: 22 })} Upravit</span></span>
+              <span><span class="re-edit">${icon("pencil", { size: 22 })} ${T("Upravit", "Edit")}</span></span>
             </div>`
             )
             .join("")}
           <div class="re-panel">
-            <div class="re-ptitle">Upravit pokoj</div>
-            <label class="re-field"><span>Číslo pokoje</span><span class="re-input">101</span></label>
-            <label class="re-field"><span>Patro</span><span class="re-input">1</span></label>
-            <label class="re-field"><span>Kategorie</span>
+            <div class="re-ptitle">${T("Upravit pokoj", "Edit room")}</div>
+            <label class="re-field"><span>${T("Číslo pokoje", "Room number")}</span><span class="re-input">101</span></label>
+            <label class="re-field"><span>${T("Patro", "Floor")}</span><span class="re-input">1</span></label>
+            <label class="re-field"><span>${T("Kategorie", "Category")}</span>
               <span class="re-input re-select">
                 <span class="swap"><span data-to="1">Standard</span><span data-from="2">Deluxe</span></span>
                 ${icon("chevron-down", { size: 30 })}
               </span>
             </label>
-            <span class="re-save">Uložit</span>
+            <span class="re-save">${T("Uložit", "Save")}</span>
           </div>
         </div>
       </div>`;
@@ -726,7 +742,7 @@ const scenes = [
       return `
       <div class="scene slide dbtables">
         <div class="kicker">Incident</div>
-        <h1 class="headline">Jak to vypadalo v databázi</h1>
+        <h1 class="headline">${T("Jak to vypadalo v databázi", "Inside the database")}</h1>
         ${tbl("rooms", ["id", "number", "floor"], [[1, "101", 1], [2, "102", 1], [3, "201", 2], [4, "202", 2]].map((r) => tr(r)).join(""), "dbt-rooms")}
         ${tbl("room_categories", ["id", "name"], [[1, "Standard"], [2, "Deluxe"], [3, "Suite"]].map((r) => tr(r)).join(""), "dbt-cats")}
         ${tbl(
@@ -743,7 +759,7 @@ const scenes = [
         <svg class="dbt-links" data-from="1" viewBox="0 0 1600 900" aria-hidden="true">
           <path class="lk-room"/><path class="lk-cat"/>
         </svg>
-        <div class="dbt-caption" data-from="2">Uložení přidalo řádek,<br><b>ale starý zůstal.</b></div>
+        <div class="dbt-caption" data-from="2">${T("Uložení přidalo řádek,<br><b>ale starý zůstal.</b>", "Saving added a row,<br><b>but the old one stayed.</b>")}</div>
       </div>`;
     },
     // Dotted links rooms.id → room_id and room_categories.id → room_category_id.
@@ -824,7 +840,7 @@ const scenes = [
       const body = file
         .map((l) =>
           l === null
-            ? `<div class="fb-line fb-missing"><span class="fb-no">+</span><span class="fb-code">${hl(MISSING)}</span><span class="fb-tag">jeden řádek</span></div>`
+            ? `<div class="fb-line fb-missing"><span class="fb-no">+</span><span class="fb-code">${hl(MISSING)}</span><span class="fb-tag">${T("jeden řádek", "one line")}</span></div>`
             : typeof l === "object"
             ? `<div class="fb-line"><span class="fb-no">${++n}</span><span class="fb-code"><span class="fb-bar dl-${l.kind}" style="margin-left:${l.indent * 30}px;width:${l.w}px"></span></span></div>`
             : `<div class="fb-line"><span class="fb-no">${++n}</span><span class="fb-code">${hl(l)}</span></div>`
@@ -833,12 +849,12 @@ const scenes = [
       return `
       <div class="scene slide findbug">
         <div class="kicker">Incident</div>
-        <h1 class="headline">Oprava kódu</h1>
+        <h1 class="headline">${T("Oprava kódu", "Fixing the code")}</h1>
         <div class="fb-win">
           <div class="diff-head"><span class="diff-title">roomService.ts</span></div>
           <div class="fb-body"><div class="fb-scroll" style="--scroll:${-target * 38}px">${body}</div></div>
         </div>
-        <div class="stamp fb-stamp" data-from="3">${icon("circle-check", { size: 56, stroke: 3 })}<span>Opraveno<span class="fb-q">?</span></span></div>
+        <div class="stamp fb-stamp" data-from="3">${icon("circle-check", { size: 56, stroke: 3 })}<span>${T("Opraveno", "Fixed")}<span class="fb-q">?</span></span></div>
       </div>`;
     },
   },
@@ -853,11 +869,11 @@ const scenes = [
     render: () => `
       <div class="scene slide damage">
         <div class="kicker">Incident</div>
-        <h1 class="headline">Napravení škod</h1>
+        <h1 class="headline">${T("Napravení škod", "Repairing the damage")}</h1>
         <ul class="dm-list">
-          <li data-from="1"><span class="dm-ico t-coral">${icon("database", { size: 46 })}</span><span>V databázi zůstal nepořádek.</span></li>
-          <li data-from="2"><span class="dm-ico t-lavender">${icon("search", { size: 46 })}</span><span>Co přesně smazat?</span></li>
-          <li data-from="3"><span class="dm-ico t-yellow">${icon("eraser", { size: 46 })}</span><span>Jakým způsobem to vyčistit?</span></li>
+          <li data-from="1"><span class="dm-ico t-coral">${icon("database", { size: 46 })}</span><span>${T("V databázi zůstal nepořádek.", "The database was left in a mess.")}</span></li>
+          <li data-from="2"><span class="dm-ico t-lavender">${icon("search", { size: 46 })}</span><span>${T("Co přesně smazat?", "What exactly to delete?")}</span></li>
+          <li data-from="3"><span class="dm-ico t-yellow">${icon("eraser", { size: 46 })}</span><span>${T("Jakým způsobem to vyčistit?", "How to clean it up?")}</span></li>
         </ul>
       </div>
     `,
@@ -883,21 +899,21 @@ const scenes = [
         </div>`;
       return `
       <div class="scene slide poll">
-        <div class="kicker">Napravení škod</div>
-        <h1 class="headline">Jak to vyčistit?</h1>
+        <div class="kicker">${T("Napravení škod", "Repairing the damage")}</div>
+        <h1 class="headline">${T("Jak to vyčistit?", "How to clean it up?")}</h1>
         <div class="pl-cards">
-          ${card("A", "Naklikat to v UI",
-            pro("Možná stačí stávající UI.", 4) +
-            con("Chyba v UI není vidět.", 4), 1)}
-          ${card("B", "Pustit SQL v DB",
-            pro("Oprava hned.", 5) +
-            con("Velmi nebezpečné.", 5) +
-            con("Nemám práva.", 5), 2)}
-          ${card("C", "Uklízecí job",
-            pro("Bezpečné.", 6) +
-            pro("Ukáže rozsah, rozhodnu já.", 6) +
-            con("Nový kód.", 6) +
-            con("Nutnost čekat na deploy.", 6), 3, "pl-pick")}
+          ${card("A", T("Naklikat to v UI", "Click through it in the UI"),
+            pro(T("Možná stačí stávající UI.", "The existing UI might do."), 4) +
+            con(T("Chyba v UI není vidět.", "The bug isn’t visible in the UI."), 4), 1)}
+          ${card("B", T("Pustit SQL v DB", "Run SQL in the DB"),
+            pro(T("Oprava hned.", "Fixed right away."), 5) +
+            con(T("Velmi nebezpečné.", "Very dangerous."), 5) +
+            con(T("Nemám práva.", "I don’t have the permissions."), 5), 2)}
+          ${card("C", T("Uklízecí job", "A cleanup job"),
+            pro(T("Bezpečné.", "Safe."), 6) +
+            pro(T("Ukáže rozsah, rozhodnu já.", "Shows the scope, I decide."), 6) +
+            con(T("Nový kód.", "New code."), 6) +
+            con(T("Nutnost čekat na deploy.", "Have to wait for a deploy."), 6), 3, "pl-pick")}
         </div>
       </div>`;
     },
@@ -935,8 +951,8 @@ const scenes = [
       const list = (key) => `{\n  ${k(key)}: [\n${ids.map((i) => `    ${s(i)}`).join(",\n")}\n  ]\n}`;
       return `
       <div class="scene slide job">
-        <div class="kicker">Napravení škod</div>
-        <h1 class="headline">Jednorázový job</h1>
+        <div class="kicker">${T("Napravení škod", "Repairing the damage")}</div>
+        <h1 class="headline">${T("Jednorázový job", "One-off job")}</h1>
         <div class="jo-win">
           <div class="jo-head">
             <span class="jo-label">Job</span>
@@ -970,8 +986,8 @@ const scenes = [
             </div>
           </div>
         </div>
-        <div class="jo-human" data-from="2">Co smazat, rozhoduje <b>člověk</b>.</div>
-        <div class="stamp jo-done" data-from="3">${icon("circle-check", { size: 56, stroke: 3 })}Hotovo</div>
+        <div class="jo-human" data-from="2">${T("Co smazat, rozhoduje <b>člověk</b>.", "A <b>human</b> decides what to delete.")}</div>
+        <div class="stamp jo-done" data-from="3">${icon("circle-check", { size: 56, stroke: 3 })}${T("Hotovo", "Done")}</div>
       </div>`;
     },
   },
@@ -989,13 +1005,13 @@ const scenes = [
       "Proč se to tedy stalo? Pojďme si to zahrát. Přijde agent (→) a vyrobí pět bugů: Běžte a zničte produkci!",
     render: () => `
       <div class="scene intro-game">
-        <h1 class="headline ig-title">Proč se to tedy stalo?</h1>
+        <h1 class="headline ig-title">${T("Proč se to tedy stalo?", "So why did it happen?")}</h1>
         ${ground()}
         <div class="ig-agent">${agent({ size: 280 })}</div>
         <div class="ig-bugs">${[0, 1, 2, 3, 4]
           .map((i) => `<div class="ig-bug" style="--i:${i}"><div class="ig-arc">${bug({ size: 108, pose: "jump" })}</div></div>`)
           .join("")}</div>
-        <div class="bubble ig-bubble" data-from="1">Běžte a zničte produkci!</div>
+        <div class="bubble ig-bubble" data-from="1">${T("Běžte a zničte produkci!", "Go and destroy production!")}</div>
       </div>
     `,
     onStep: (root, step, prev) => {
@@ -1014,7 +1030,7 @@ const scenes = [
   levelScene({
     id: "level-1",
     n: 1,
-    name: "Statické kontroly",
+    name: T("Statické kontroly", "Static checks"),
     steps: 4,
     verifyWait: [1200, 2400, 3400, 1000],
     className: "l1",
@@ -1037,7 +1053,7 @@ const scenes = [
         <svg class="l1-splat" viewBox="0 0 220 24" aria-hidden="true"><ellipse cx="110" cy="15" rx="104" ry="9"/></svg>
         <div class="l1-bug l1-bug1">${bug({ size: 108 })}</div>
         <div class="l1-bug l1-bug2">${bug({ size: 108 })}</div>
-        <div class="l1-note" data-from="3">Dají se nastavit třeba v Claude jako <b>post-edit</b> nebo <b>stop hook</b>.</div>`;
+        <div class="l1-note" data-from="3">${T("Dají se nastavit třeba v Claude jako <b>post-edit</b> nebo <b>stop hook</b>.", "You can set them up e.g. in Claude as a <b>post-edit</b> or <b>stop hook</b>.")}</div>`;
     },
     // Islands ease back up from wherever their loop was before a scripted
     // step takes over (--y0, see the L1 CSS).
@@ -1062,20 +1078,20 @@ const scenes = [
   levelScene({
     id: "level-2",
     n: 2,
-    name: "Testy",
+    name: T("Testy", "Tests"),
     steps: 5,
     verifyWait: [1200, 900, 2200, 2000, 5000],
     className: "l2",
     holes: [[560, 720], [980, 1300]],
     points: [
-      [1, "Dřív velmi silná ochrana."],
-      [4, "Dnes menší hodnota, pokud testy píše <b>stejný agent jako kód</b>."],
+      [1, T("Dřív velmi silná ochrana.", "Used to be very strong protection.")],
+      [4, T("Dnes menší hodnota, pokud testy píše <b>stejný agent jako kód</b>.", "Worth less today if <b>the same agent writes the tests and the code</b>.")],
     ],
     notes:
       "Level 2: testy. Unit testy a integrační testy, dvě díry, které musí bug přeskočit. (→) Dřív to byla velmi silná ochrana. (→) První bug spadne rovnou do unit testů. (→) Druhý první díru přeskočí, ta druhá je moc široká. (→) Jenže dnes mají testy menší hodnotu, pokud je píše stejný agent jako kód. Agent přijde a bugovi postaví most.",
     art: () => `
-      ${sign("unit testy", 470)}
-      ${sign("integrační testy", 880)}
+      ${sign(T("unit testy", "unit tests"), 470)}
+      ${sign(T("integrační testy", "integration tests"), 880)}
       <div class="l2-bridge">${[0, 1, 2, 3].map((i) => `<i style="--i:${i}"></i>`).join("")}</div>
       <div class="l2-agent">${agent({ size: 224 })}</div>
       <div class="l2-faller">${bug({ size: 108 })}</div>
@@ -1096,13 +1112,13 @@ const scenes = [
   levelScene({
     id: "level-3",
     n: 3,
-    name: "Automatizované code review",
+    name: T("Automatizované code review", "Automated code review"),
     steps: 4,
     verifyWait: [1200, 900, 900, 3000],
     className: "l3",
     points: [
-      [1, "Agent měl vlastní krok code review."],
-      [2, "Řeší především známé chyby."],
+      [1, T("Agent měl vlastní krok code review.", "The agent had its own code review step.")],
+      [2, T("Řeší především známé chyby.", "It mostly catches known bugs.")],
     ],
     notes:
       "Level 3: automatizované code review. (→) Agent měl vlastní krok code review. (→) Řeší především známé chyby. (→) Jenže tenhle bug nebyl známý, takže se pastem prostě vyhnul.",
@@ -1133,15 +1149,15 @@ const scenes = [
   levelScene({
     id: "level-4",
     n: 4,
-    name: "Testování uživatelem",
+    name: T("Testování uživatelem", "User testing"),
     steps: 6,
     verifyWait: [1200, 900, 900, 900, 4400, 1000],
     className: "l4",
     points: [
-      [1, "Proklikej aplikaci. Vypadá ok?"],
-      [2, "Lze částečně automatizovat."],
-      [3, "Nedeterministické."],
-      [5, "<b>Problém:</b> chyba byla vizuálně nenápadná. Při výběru stejné kategorie vypadalo UI správně."],
+      [1, T("Proklikej aplikaci. Vypadá ok?", "Click through the app. Looks OK?")],
+      [2, T("Lze částečně automatizovat.", "Can be partly automated.")],
+      [3, T("Nedeterministické.", "Non-deterministic.")],
+      [5, T("<b>Problém:</b> chyba byla vizuálně nenápadná. Při výběru stejné kategorie vypadalo UI správně.", "<b>Problem:</b> the bug was visually subtle. Picking the same category, the UI looked right.")],
     ],
     notes:
       "Level 4: testování uživatelem. (→) Proklikej aplikaci. Vypadá ok? (→) Lze částečně automatizovat: agent pustí Playwright, pořídí screenshoty a podívá se na ně. (→) Je to nedeterministické. (→) Dva bugy chytíme, třetí se schová. (→) Problém: chyba byla vizuálně nenápadná, a když jsem vybral stejnou kategorii, UI vypadalo správně.",
@@ -1172,8 +1188,8 @@ const scenes = [
     className: "l5",
     holes: [[460, 1180]],
     points: [
-      [1, "Funkci jde zapnout a vypnout, kdyby byl problém."],
-      [2, "Ale kvůli tomu se na chybu přišlo <b>později</b>."],
+      [1, T("Funkci jde zapnout a vypnout, kdyby byl problém.", "The feature can be switched on and off if there’s a problem.")],
+      [2, T("Ale kvůli tomu se na chybu přišlo <b>později</b>.", "But because of it, the bug was found <b>later</b>.")],
     ],
     notes:
       "Level 5: feature flag. (→) Díky flagu jde funkci zapnout a vypnout, kdyby byl problém. (→) Ale právě kvůli tomu se na chybu přišlo později: bug na flag naskočí, trochu se zneviditelní a dostane se na druhou stranu.",
@@ -1198,14 +1214,14 @@ const scenes = [
   levelScene({
     id: "level-6",
     n: 6,
-    name: "Znalost domény",
+    name: T("Znalost domény", "Domain knowledge"),
     steps: 4,
     verifyWait: [1200, 900, 900, 4600],
     className: "l6",
     ground: false,
     points: [
-      [1, "Cizí část aplikace: nevěděl jsem přesně, jak vše funguje."],
-      [2, "Vím, kdo mi udělá review?"],
+      [1, T("Cizí část aplikace: nevěděl jsem přesně, jak vše funguje.", "Someone else’s part of the app: I didn’t know exactly how it all worked.")],
+      [2, T("Vím, kdo mi udělá review?", "Do I know who will review it?")],
     ],
     notes:
       "Level 6: znalost domény. Tou by se bug zastavil. (→) Jenže já refaktoroval cizí část aplikace a nevěděl jsem přesně, jak všechno funguje. (→) Vím, kdo mi udělá review? Hůř se shání, když nevím ani, který tým to má na starosti. (→) Bug se tu vyzná líp než já.",
@@ -1232,8 +1248,8 @@ const scenes = [
     className: "l7",
     ground: false,
     points: [
-      [1, "Posílal jsem velké PR, aby projekt běžel dopředu rychleji."],
-      [2, "10 malých PR se ověří snáz než jedno velké."],
+      [1, T("Posílal jsem velké PR, aby projekt běžel dopředu rychleji.", "I sent big PRs to move the project forward faster.")],
+      [2, T("10 malých PR se ověří snáz než jedno velké.", "10 small PRs are easier to verify than one big one.")],
     ],
     notes:
       "Level 7: code review. Ve velkém PR se bugy schovají snadno. (→) Posílal jsem velké PR, aby projekt běžel dopředu rychleji. (→) Deset malých PR se ověří snáz než jedno velké.",
@@ -1257,12 +1273,12 @@ const scenes = [
   levelScene({
     id: "level-8",
     n: 8,
-    name: "Sledování pádů",
+    name: T("Sledování pádů", "Crash monitoring"),
     steps: 3,
     verifyWait: [1200, 1200, 900],
     className: "l8",
     ground: false,
-    points: [[2, "Padajícího kódu bychom si všimli hned."]],
+    points: [[2, T("Padajícího kódu bychom si všimli hned.", "We’d notice crashing code right away.")]],
     notes:
       "Level 8: sledování pádů. Jenže bug nezpůsoboval crash. Bug tu hraje hledání min: většina pole je odkrytá. (→) Odkryje další políčka a zase nic nevybuchlo. (→) Padajícího kódu bychom si všimli hned.",
     art: () => `
@@ -1289,14 +1305,14 @@ const scenes = [
             <polygon class="bw-star-out" points="${starburst(14, 196, 128)}"/>
             <polygon class="bw-star-in" points="${starburst(14, 150, 96)}"/>
           </svg>
-          <div class="bw-boom">BUM!</div>
+          <div class="bw-boom">${T("BUM!", "BOOM!")}</div>
           <div class="bw-server">
-            <div class="bw-label">PRODUKCE</div>
+            <div class="bw-label">${T("PRODUKCE", "PRODUCTION")}</div>
             ${[0, 1, 2, 3].map(() => `<div class="bw-slot"><i></i><i></i><i></i></div>`).join("")}
           </div>
           <div class="bw-bug">${bug({ size: 144 })}</div>
         </div>
-        <div class="bw-title" data-from="1">BUG VYHRÁL</div>
+        <div class="bw-title" data-from="1">${T("BUG VYHRÁL", "BUG WINS")}</div>
       </div>
     `,
     onStep: (root, step, prev) => {
@@ -1316,11 +1332,11 @@ const scenes = [
       "Co tedy s tím? (→) Držet se best practices pomáhá, třeba malých PR. (→) Agenta jsme vylepšili, aby se problém neopakoval. (→) Nestačí skoro dobře, jeden řádek může všechno pokazit.",
     render: () => `
       <div class="scene slide takeaways">
-        <h1 class="headline">Co tedy s tím?</h1>
+        <h1 class="headline">${T("Co tedy s tím?", "So what now?")}</h1>
         <ul class="plain-list tk-list">
-          <li data-from="1">Držet se <b>best practices</b> pomáhá.</li>
-          <li data-from="2">Agenta jsme <b>vylepšili</b>, aby se problém neopakoval.</li>
-          <li data-from="3">Nestačí <b>skoro dobře</b>, jeden řádek může vše pokazit.</li>
+          <li data-from="1">${T("Držet se <b>best practices</b> pomáhá.", "Sticking to <b>best practices</b> helps.")}</li>
+          <li data-from="2">${T("Agenta jsme <b>vylepšili</b>, aby se problém neopakoval.", "We <b>improved</b> the agent so it won’t happen again.")}</li>
+          <li data-from="3">${T("Nestačí <b>skoro dobře</b>, jeden řádek může vše pokazit.", "<b>Almost right</b> isn’t enough, one line can break everything.")}</li>
         </ul>
         <div class="tk-agent">${agent({ size: 224 })}</div>
         ${ground()}
@@ -1339,9 +1355,9 @@ const scenes = [
     render: () => `
       <div class="scene slide closing">
         <div class="cl-bug">${bug({ size: 216, pose: "idle" })}</div>
-        <p class="cl-line">Snažíme se <b>zmenšit pravděpodobnost</b> chyby.</p>
-        <p class="cl-line" data-from="1">100&nbsp;% úspěšnosti se dosáhnout nedá.</p>
-        <div class="cl-thanks" data-from="2">Díky!</div>
+        <p class="cl-line">${T("Snažíme se <b>zmenšit pravděpodobnost</b> chyby.", "We try to <b>reduce the probability</b> of bugs.")}</p>
+        <p class="cl-line" data-from="1">${T("100&nbsp;% úspěšnosti se dosáhnout nedá.", "You can’t reach 100&nbsp;% success.")}</p>
+        <div class="cl-thanks" data-from="2">${T("Díky!", "Thanks!")}</div>
       </div>
     `,
   },

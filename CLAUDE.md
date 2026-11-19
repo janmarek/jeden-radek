@@ -42,6 +42,17 @@ scenes have a `world`; verify waits live on the scene (`verifyWait`).
   (start of the game part) for rehearsing later parts. They fade out 5 s after
   the title mounts. Set `DEV_JUMP = false` before the talk.
 
+## Language (cs / en)
+
+The deck has a Czech (default) and an English version. The title slide has a
+`česky / english` switch in the top-left corner (`.lang-switch`, `[data-lang]`
+handled in runtime.js). The choice is kept in localStorage (`jeden-radek-lang`).
+Any on-slide text goes through `T("česky", "english")` in scenes.js. It is lazy
+(it resolves when the template is built), so it also works in values set at
+definition time such as `levelScene` names and points. Speaker `notes` stay Czech.
+Check the English layout with `DECK_LANG=en node verify.mjs` (shots go to
+`verify-shots/en/`): English strings can be longer and wrap.
+
 ## Architecture
 
 - `index.html`: shell only (`#backdrop`, `#stage`, `#hud`). Build inside scenes.

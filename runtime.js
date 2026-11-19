@@ -430,6 +430,26 @@ document.addEventListener("click", (e) => {
   mountScene(i, 0);
 });
 
+// Language switch on the title slide ([data-lang], LANG / T() in scenes.js).
+// Re-renders the current scene in the new language. Like [data-goto], it is a
+// click on a specific control, not click-to-advance.
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.title = String(T("Jeden řádek", "One Line"));
+  const hint = document.getElementById("hint");
+  if (hint) hint.textContent = String(T("← → šipky nebo mezerník", "← → arrows or space"));
+}
+document.addEventListener("click", (e) => {
+  const el = e.target.closest && e.target.closest("[data-lang]");
+  if (!el || el.dataset.lang === LANG) return;
+  LANG = el.dataset.lang === "en" ? "en" : "cs";
+  try { localStorage.setItem(LANG_KEY, LANG); } catch (err) {}
+  applyLang();
+  isAdvancing = false;
+  mountScene(sceneIndex, stepIndex);
+});
+applyLang();
+
 function fit() {
   const pad = 40;
   const sw = (window.innerWidth - pad) / STAGE_W;
