@@ -44,6 +44,7 @@
   --green: #3cc47a;        /* "Opraveno" stamp, added code line (Jan asked for green) */
   --code-kw: #d4493a;      /* code: keywords */
   --code-fn: #0592a0;      /* code: function names */
+  --slate: #7d8ba8;        /* grey-blue: DB link dots */
 
   /* Bug sprite palette (override per instance or via modifier class) */
   --bug-ink: var(--ink);
@@ -1268,8 +1269,7 @@ body {
 .dbtables[data-step="2"] .dbt-old td { background: rgba(221, 212, 255, 0.85); }
 .dbt-links { position: absolute; inset: 0; width: 1600px; height: 900px; pointer-events: none; overflow: visible; }
 .dbt-links path { fill: none; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 0 13; }
-.dbt-links .lk-room { stroke: var(--code-fn); }
-.dbt-links .lk-cat { stroke: var(--coral); }
+.dbt-links path { stroke: var(--slate); }
 .dbtables .dbt-caption { position: absolute; left: 960px; top: 300px; font-size: 40px; font-weight: 600; line-height: 1.3; }
 .dbtables .dbt-caption b { color: var(--coral); }
 
