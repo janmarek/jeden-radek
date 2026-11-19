@@ -214,7 +214,7 @@ const MAZE = [
   "#...#.....#.....#",
   "#################",
 ];
-const MAZE_CELL = 52;
+const MAZE_CELL = 62;
 function mazePath() {
   const H = MAZE.length;
   const W = MAZE[0].length;
@@ -258,6 +258,8 @@ const MS_CELL = 72;
 const MS_MINES = [[1, 8], [3, 8], [4, 7], [2, 10], [4, 10], [0, 11]];
 const MS_FLAG = [1, 8];
 const msCovered = (r, c) => c >= 8 || (c === 7 && r >= 3);
+// Cells the bug opens on step 1 (no mines among them).
+const MS_REVEAL = [[3, 7], [5, 7], [5, 8], [5, 9], [4, 9], [3, 9], [5, 10], [5, 11], [4, 11]];
 const MS_FLAG_SVG = `
   <svg class="ms-flag" viewBox="0 0 40 48" aria-hidden="true">
     <rect x="19" y="6" width="5" height="34" fill="var(--ink)"/>
@@ -266,16 +268,22 @@ const MS_FLAG_SVG = `
   </svg>`;
 function minesweeper() {
   const isMine = (r, c) => MS_MINES.some(([mr, mc]) => mr === r && mc === c);
+  const opens = (r, c) => MS_REVEAL.some(([rr, rc]) => rr === r && rc === c);
+  const count = (r, c) => {
+    let n = 0;
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) if ((dr || dc) && isMine(r + dr, c + dc)) n++;
+    return n ? `<b class="n${n}">${n}</b>` : "";
+  };
   let cells = "";
   for (let r = 0; r < MS_H; r++) {
     for (let c = 0; c < MS_W; c++) {
-      if (msCovered(r, c)) {
+      if (opens(r, c)) {
+        cells += `<div class="ms-cell is-open ms-reveal">${count(r, c)}<div class="ms-cover"></div></div>`;
+      } else if (msCovered(r, c)) {
         const flag = r === MS_FLAG[0] && c === MS_FLAG[1] ? MS_FLAG_SVG : "";
         cells += `<div class="ms-cell ms-covered">${flag}</div>`;
       } else {
-        let n = 0;
-        for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) if ((dr || dc) && isMine(r + dr, c + dc)) n++;
-        cells += `<div class="ms-cell is-open">${n ? `<b class="n${n}">${n}</b>` : ""}</div>`;
+        cells += `<div class="ms-cell is-open">${count(r, c)}</div>`;
       }
     }
   }
@@ -985,10 +993,10 @@ const scenes = [
 
   // ============================================================ Levels
   // L1 static checks = three floating islands (format / lint / types) that
-  // drop like crushers. 0 islands loop · 1 bug 1 walks under the first one
-  // and ends as a coral splat · 2 bug 2 walks through all three (the loops
-  // restart in sync with it, so every island is up while it passes) ·
-  // 3 yellow note (hooks)
+  // drop like crushers. 0 islands loop · 1 bug 1 walks under code format
+  // (held up) and lint flattens it into a coral splat · 2 bug 2 walks
+  // through all three (the loops restart in sync with it, so every island
+  // is up while it passes) · 3 note (hooks), left of the islands
   levelScene({
     id: "level-1",
     n: 1,
@@ -997,7 +1005,7 @@ const scenes = [
     verifyWait: [1200, 2400, 3400, 1000],
     className: "l1",
     notes:
-      "Level 1: statické kontroly. Code format, lint, type checking. Fungují jako buchary. (→) Prvního bugu rozmáčknou. (→) Druhý projde, protože kontrolují formu, ne chování. (→) Dají se nastavit třeba v Claude jako post-edit nebo stop hook.",
+      "Level 1: statické kontroly. Code format, lint, type checking. Fungují jako buchary. (→) Prvního bugu rozmázne lint. (→) Druhý projde, protože kontrolují formu, ne chování. (→) Dají se nastavit třeba v Claude jako post-edit nebo stop hook.",
     art: () => {
       // Bug 2 walks 120 → 1300 px in 3 s; island i (220 px wide) starts its
       // cycle 0.15 s before the bug reaches it, so it stays up for 1.2 s.
@@ -1012,18 +1020,22 @@ const scenes = [
         .join("");
       return `
         <div class="l1-crushers">${islands}</div>
-        <svg class="l1-splat" viewBox="0 0 220 44" aria-hidden="true">
-          <ellipse cx="110" cy="36" rx="96" ry="9"/>
-          <circle cx="18" cy="20" r="7"/><circle cx="54" cy="12" r="5"/><circle cx="166" cy="10" r="6"/>
-          <circle cx="204" cy="24" r="5"/><circle cx="128" cy="18" r="4"/>
-        </svg>
+        <svg class="l1-splat" viewBox="0 0 220 24" aria-hidden="true"><ellipse cx="110" cy="15" rx="104" ry="9"/></svg>
         <div class="l1-bug l1-bug1">${bug({ size: 108 })}</div>
         <div class="l1-bug l1-bug2">${bug({ size: 108 })}</div>
         <div class="l1-note" data-from="3">Dají se nastavit třeba v Claude jako <b>post-edit</b> nebo <b>stop hook</b>.</div>`;
     },
+    // Islands ease back up from wherever their loop was before a scripted
+    // step takes over (--y0, see the L1 CSS).
+    before: (root, step, prev) => {
+      if (step <= prev || (step !== 1 && step !== 2)) return;
+      root.querySelectorAll(".crusher").forEach((c) => {
+        c.style.setProperty("--y0", `${new DOMMatrix(getComputedStyle(c).transform).m42}px`);
+      });
+    },
     onStep: (root, step, prev) => {
       if (step <= prev) return choreo(root, []), pose(root, ".l1-bug", "idle");
-      if (step === 1) poses(root, [[0, ".l1-bug1", "walk"], [1100, ".l1-bug1", "idle"]]);
+      if (step === 1) poses(root, [[300, ".l1-bug1", "walk"], [1700, ".l1-bug1", "idle"]]);
       if (step === 2) poses(root, [[0, ".l1-bug2", "walk"], [3000, ".l1-bug2", "idle"]]);
     },
   }),
@@ -1060,10 +1072,10 @@ const scenes = [
     },
   }),
 
-  // L3 automated code review = spike traps in the middle; teleport pads
-  // (disc + mist) visible all the time before and after them; the bug
-  // beams out on the first pad and in on the second.
-  // 0 traps + pads · 1–2 points · 3 walk, beam out, beam in, walk on
+  // L3 automated code review = spike traps in the middle; teleport doors
+  // (pulsing cyan mist) visible all the time before and after them; the
+  // bug beams out in the first door and in at the second.
+  // 0 traps + doors · 1–2 points · 3 walk, beam out, beam in, walk on
   levelScene({
     id: "level-3",
     n: 3,
@@ -1085,8 +1097,8 @@ const scenes = [
       };
       return `
         <div class="l3-traps">${spikes(4)}${spikes(4)}${spikes(4)}</div>
-        <div class="tp-pad" style="left:458px"></div>
-        <div class="tp-pad" style="left:1238px"></div>
+        <div class="tp-door" style="left:458px"></div>
+        <div class="tp-door" style="left:1238px"></div>
         <div class="beam beam-out"></div>
         <div class="beam beam-in"></div>
         <div class="l3-bug"><div class="l3-tp">${bug({ size: 108 })}</div></div>`;
@@ -1133,21 +1145,21 @@ const scenes = [
   // L5 feature flag: a wide gap, a moving platform labelled FEATURE FLAG.
   // 0 platform shuttles · 1 point · 2 the platform comes to the left edge
   // (from wherever its loop was), the bug steps on, goes half-stealth,
-  // rides across and steps off · 3 the catch
+  // rides across and steps off, together with the catch
   levelScene({
     id: "level-5",
     n: 5,
     name: "Feature flag",
-    steps: 4,
-    verifyWait: [1600, 900, 5200, 1000],
+    steps: 3,
+    verifyWait: [1600, 900, 5200],
     className: "l5",
     holes: [[460, 1180]],
     points: [
       [1, "Funkci jde zapnout a vypnout, kdyby byl problém."],
-      [3, "Ale kvůli tomu se na chybu přišlo <b>později</b>."],
+      [2, "Ale kvůli tomu se na chybu přišlo <b>později</b>."],
     ],
     notes:
-      "Level 5: feature flag. (→) Díky flagu jde funkci zapnout a vypnout, kdyby byl problém. (→) Bug na flag naskočí, trochu se zneviditelní a dostane se na druhou stranu. (→) Ale právě kvůli tomu se na chybu přišlo později.",
+      "Level 5: feature flag. (→) Díky flagu jde funkci zapnout a vypnout, kdyby byl problém. (→) Ale právě kvůli tomu se na chybu přišlo později: bug na flag naskočí, trochu se zneviditelní a dostane se na druhou stranu.",
     art: () => `
       <div class="l5-plat"><span>FEATURE FLAG</span></div>
       <div class="l5-bug">${bug({ size: 108 })}</div>`,
@@ -1164,7 +1176,7 @@ const scenes = [
     },
   }),
 
-  // L6 unknown domain = a maze (no ground, soft walls on the cream).
+  // L6 unknown domain = a maze (no ground, coral walls on the cream).
   // 0 maze · 1–2 points · 3 the bug finds its way through (offset-path)
   levelScene({
     id: "level-6",
@@ -1175,15 +1187,15 @@ const scenes = [
     className: "l6",
     ground: false,
     points: [
-      [1, "Refaktoring v „cizí“ části aplikace: nevěděl jsem přesně, jak všechno funguje."],
-      [2, "Hůř se shání člověk na review, když nevím ani, který tým to má na starosti."],
+      [1, "Cizí část aplikace: nevěděl jsem přesně, jak vše funguje."],
+      [2, "Hůř se shání reviewer, když nevím, který tým to vlastní."],
     ],
     notes:
       "Level 6: neznámá doména. (→) Refaktoroval jsem cizí část aplikace a nevěděl jsem přesně, jak všechno funguje. (→) A hůř se shání člověk na review, když nevím ani, který tým to má na starosti. (→) Bug se tu vyzná líp než já.",
     art: () => `
       <div class="l6-maze" style="width:${MAZE[0].length * MAZE_CELL}px;height:${MAZE.length * MAZE_CELL}px">
         ${mazeSvg()}
-        <div class="mz-bug" style="offset-path:path('${mazePath()}')">${bug({ size: 36 })}</div>
+        <div class="mz-bug" style="offset-path:path('${mazePath()}')">${bug({ size: 54 })}</div>
       </div>`,
     onStep: (root, step, prev) => {
       if (step <= prev) return choreo(root, []), pose(root, ".mz-bug", "idle");
@@ -1191,8 +1203,8 @@ const scenes = [
     },
   }),
 
-  // L7 code review: a long PR keeps scrolling with two bugs already inside
-  // it, so they scroll into view now and then. No ground.
+  // L7 code review: a long PR keeps scrolling with two bugs inside it,
+  // below the fold at first, so they only show up once it scrolls. No ground.
   // 0 PR · 1–2 points
   levelScene({
     id: "level-7",
@@ -1210,8 +1222,8 @@ const scenes = [
       "Level 7: code review. Ve velkém PR se bugy schovají snadno. (→) Abych projekt posouval dopředu, musel jsem posílat velká PR. (→) Deset malých PR by se ověřilo snáz než jedno velké, ale je v tom organizační overhead.",
     art: () => {
       const half = (seed) => `<div class="l7-half">${diffBars(34, seed)}
-        <div class="l7-hidden" style="top:${6 * 19}px;left:520px">${bug({ size: 54, pose: "idle" })}</div>
-        <div class="l7-hidden" style="top:${23 * 19}px;left:200px">${bug({ size: 54, pose: "idle", facing: "left" })}</div>
+        <div class="l7-hidden" style="top:${26 * 19}px;left:520px">${bug({ size: 54, pose: "idle" })}</div>
+        <div class="l7-hidden" style="top:${31 * 19}px;left:200px">${bug({ size: 54, pose: "idle", facing: "left" })}</div>
       </div>`;
       return `
         <div class="l7-pr">
@@ -1223,18 +1235,19 @@ const scenes = [
 
   // L8 nothing crashed = minesweeper without a frame. The bug is the player
   // standing in the middle of the revealed field; one mine is flagged.
-  // No ground. 0 board · 1 point
+  // No ground. 0 board · 1 the bug hops, a group of cells opens at once ·
+  // 2 point
   levelScene({
     id: "level-8",
     n: 8,
     name: "Nic nespadlo",
-    steps: 2,
-    verifyWait: [1200, 900],
+    steps: 3,
+    verifyWait: [1200, 1200, 900],
     className: "l8",
     ground: false,
-    points: [[1, "Padající kód bychom si všimli hned."]],
+    points: [[2, "Padající kód bychom si všimli hned."]],
     notes:
-      "Level 8: bug nezpůsoboval crash. Bug tu hraje hledání min: většina pole je odkrytá a nic nevybuchlo. (→) Padající kód bychom si všimli hned.",
+      "Level 8: bug nezpůsoboval crash. Bug tu hraje hledání min: většina pole je odkrytá. (→) Odkryje další políčka a zase nic nevybuchlo. (→) Padající kód bychom si všimli hned.",
     art: () => `
       <div class="l8-board">
         ${minesweeper()}
@@ -1277,22 +1290,23 @@ const scenes = [
   },
 
   // ============================================================ Co tedy s tím
-  // 0 question · 1–3 the three points · 4 thanks
+  // 0 question · 1–4 the four points · 5 thanks
   {
     id: "takeaways",
     world: "game",
-    steps: 5,
+    steps: 6,
     notes:
-      "Co tedy s tím? (→) Možná by nebylo od věci držet se best practices, třeba malých PR. (→) Refaktorovacího agenta jsme vylepšili, aby se přesně tohle příště už nestalo. (→) Jde o to zmenšit pravděpodobnost chyby. Na sto procent úspěšní nikdy nebudeme. (→) Díky!",
+      "Co tedy s tím? (→) Možná by nebylo od věci držet se best practices, třeba malých PR. (→) Refaktorovacího agenta jsme vylepšili, aby se přesně tohle příště už nestalo. (→) Nestačí skoro dobře, jeden řádek může všechno pokazit. (→) Jde o to zmenšit pravděpodobnost chyby. Na sto procent úspěšní nikdy nebudeme. (→) Díky!",
     render: () => `
       <div class="scene slide takeaways">
         <h1 class="headline">Co tedy s tím?</h1>
         <ul class="plain-list tk-list">
-          <li data-from="1">Možná by nebylo od věci držet se best practices, třeba <b>malých PR</b>.</li>
+          <li data-from="1">Možná by nebylo od věci držet se best practices, třeba <b>malých&nbsp;PR</b>.</li>
           <li data-from="2">Refaktorovacího agenta jsme <b>vylepšili</b>, aby se přesně tohle příště už nestalo.</li>
-          <li data-from="3">Jde o to <b>zmenšit pravděpodobnost</b> chyby. Na 100&nbsp;% úspěšní nikdy nebudeme.</li>
+          <li data-from="3">Nestačí <b>skoro dobře</b>, jeden řádek může vše pokazit.</li>
+          <li data-from="4">Jde o to <b>zmenšit pravděpodobnost</b> chyby. Na 100&nbsp;% úspěšní nikdy nebudeme.</li>
         </ul>
-        <div class="tk-thanks" data-from="4">Díky!</div>
+        <div class="tk-thanks" data-from="5">Díky!</div>
         <div class="tk-agent">${agent({ size: 224 })}</div>
         ${ground()}
       </div>

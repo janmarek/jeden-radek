@@ -181,6 +181,13 @@ reuse the browser already cached on this machine.
 - A flex container with `gap` turns every bare text run and inline element
   into its own flex item, so `Text <b>bold</b>.` gets gaps around the `<b>`.
   Wrap the text in one `<span>` (see `.dm-list` on the damage slide).
+- Switching an element to a new `animation` list on a step does not restart an
+  animation whose **name** was already running on it, even if its delay or
+  position in the list changed. Chrome just retimes it from the old start, so
+  synced choreography drifts (L1 islands hit bug 2). Give each step's
+  keyframes their own name (`crush-a`, `crush-b`). The probe that found it
+  sampled `getBoundingClientRect()` every frame via Playwright; do the same for
+  timing-critical scenes.
 - `data-step` is missing for the first frame after mount, so
   `.x:not([data-step="0"])` matches then and the element animates back on
   entry (find-bug's code scrolled down, then up). Guard with
