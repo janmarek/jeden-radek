@@ -692,31 +692,70 @@ const scenes = [
     world: "serious",
     steps: 4,
     notes:
-      "Napravení škod. Oprava kódu nestačila: (→) v databázi byl pořád nepořádek, (→) a já jsem přesně neznal rozsah. (→) Napsal jsem tedy jednorázový job.",
+      "Napravení škod. Oprava kódu nestačila: (→) v databázi byl pořád nepořádek. (→) Co přesně se musí smazat a jak to zjistit? (→) A jakým způsobem to vyčistit?",
     render: () => `
       <div class="scene slide damage">
         <div class="kicker">Incident</div>
         <h1 class="headline">Napravení škod</h1>
         <ul class="dm-list">
           <li data-from="1"><span class="dm-ico t-coral">${icon("database", { size: 46 })}</span><span>V databázi byl pořád nepořádek.</span></li>
-          <li data-from="2"><span class="dm-ico t-lavender">${icon("search-x", { size: 46 })}</span><span>Neznal jsem přesně rozsah.</span></li>
-          <li data-from="3"><span class="dm-ico t-yellow">${icon("play", { size: 46 })}</span><span>Napsal jsem tedy <b>jednorázový job</b>.</span></li>
+          <li data-from="2"><span class="dm-ico t-lavender">${icon("search-x", { size: 46 })}</span><span>Co přesně se musí smazat a jak to zjistit?</span></li>
+          <li data-from="3"><span class="dm-ico t-yellow">${icon("eraser", { size: 46 })}</span><span>Jakým způsobem to vyčistit?</span></li>
         </ul>
       </div>
     `,
   },
 
+  // ============================================================ Anketa: jak to vyčistit
+  // 0 three options (audience votes) · 1–3 pros/cons per option ·
+  // 4 the job is what I did, the others fade
+  {
+    id: "cleanup-poll",
+    world: "serious",
+    steps: 5,
+    notes:
+      "Anketa: jak byste to vyčistili? A) naklikat v UI, B) poslat SQL přímo do databáze, C) napsat uklízecí job. Hlasujte rukama. (→) UI: možná by stačilo stávající UI. Jenže nejde to, není v něm vidět ani chyba, ani která kategorie je správná. (→) SQL: není potřeba nic vyrábět, oprava hned. Ale je to velmi nebezpečné a stejně jsem na to neměl práva. (→) Job: pomalé, musím napsat kód a čekat na deploy. Ale rychleji bych to bezpečně stejně nezvládl. Je bezpečný, ukáže rozsah problému a nechá mě rozhodnout. (→) Takže job.",
+    render: () => {
+      const pro = (t, from) => `<li class="pl-pro" data-from="${from}"><span class="pl-sign">${icon("plus", { size: 22, stroke: 3.5 })}</span><span>${t}</span></li>`;
+      const con = (t, from) => `<li class="pl-con" data-from="${from}"><span class="pl-sign">${icon("minus", { size: 22, stroke: 3.5 })}</span><span>${t}</span></li>`;
+      const card = (letter, ico, title, items, cls = "") => `
+        <div class="pl-card ${cls}">
+          <div class="pl-head"><span class="pl-letter">${letter}</span>${icon(ico, { size: 40 })}</div>
+          <div class="pl-title">${title}</div>
+          <ul class="pl-list">${items}</ul>
+        </div>`;
+      return `
+      <div class="scene slide poll">
+        <h1 class="headline">Jak to vyčistit?</h1>
+        <div class="pl-cards">
+          ${card("A", "mouse-pointer-click", "Naklikat to v UI",
+            pro("Možná by stačilo stávající UI.", 1) +
+            con("Nejde to: není vidět ani chyba, ani která kategorie je správná.", 1))}
+          ${card("B", "terminal", "Poslat SQL přímo do databáze",
+            pro("Není potřeba nic vyrábět, oprava hned.", 2) +
+            con("Velmi nebezpečné.", 2) +
+            con("Stejně nemám práva.", 2))}
+          ${card("C", "play", "Napsat uklízecí job",
+            con("Pomalé: napsat kód, čekat na deploy. Rychleji bych to bezpečně stejně nezvládl.", 3) +
+            pro("Bezpečné.", 3) +
+            pro("Ukáže rozsah problému a nechá mě rozhodnout.", 3), "pl-pick")}
+        </div>
+      </div>`;
+    },
+  },
+
   // ============================================================ Jednorázový job (UI)
   // 0 Investigate… with {"hotelIds"} · 1 Run job → JSON with the duplicate
   // assignments (same or different category id? which one is older?) ·
-  // 2 Delete… with {"assignmentIds"}, a human picked them · 3 deploy quote
+  // 2 Delete… with {"assignmentIds"}, a human picked them
+  // Ids are 6-char hex, shortened like git commit hashes.
   {
     id: "job",
     world: "serious",
-    steps: 4,
-    verifyWait: [900, 1400, 1100, 900],
+    steps: 3,
+    verifyWait: [900, 1400, 1100],
     notes:
-      "Byly to dva joby s jednoduchým UI. První, InvestigateDuplicateRoomCategoryAssignments, dostal JSON se seznamem hotelů. (→) Run job a vyplivl JSON s duplicitními vazbami i s dalšími daty: jsou to stejné kategorie, nebo jiné? Která vazba je starší? (→) Podle toho jsem vybral, co smazat, a dal to druhému jobu, DeleteDuplicateRoomCategoryAssignments. Co smazat, rozhoduje člověk. (→) Deploy trvá, ale rychleji to stejně nezvládnu.",
+      "Byly to dva joby s jednoduchým UI. První, InvestigateDuplicateRoomCategoryAssignments, dostal JSON se seznamem hotelů. (→) Run job a vyplivl JSON s duplicitními vazbami i s dalšími daty: jsou to stejné kategorie, nebo jiné? Která vazba je starší? (→) Podle toho jsem vybral, co smazat, a dal to druhému jobu, DeleteDuplicateRoomCategoryAssignments. Co smazat, rozhoduje člověk.",
     render: () => {
       const s = (v) => `<span class="js">"${v}"</span>`;
       const k = (v) => `<span class="jk">"${v}"</span>`;
@@ -725,14 +764,16 @@ const scenes = [
       const investigateOut = [
         `[`,
         `  { ${k("room")}: ${s("101")}, ${k("assignments")}: [`,
-        a("7c1e…", "a10b…", "2026-07-02 09:14", "jo-diff") + ",",
-        a("e905…", "c44d…", "2026-08-13 15:42", "jo-diff") + " ] },",
+        a("7c1e4a", "a10b3c", "2026-07-02 09:14", "jo-diff") + ",",
+        a("e905b2", "c44d7e", "2026-08-13 15:42", "jo-diff") + " ] },",
         `  { ${k("room")}: ${s("202")}, ${k("assignments")}: [`,
-        a("2b8a…", "f3e2…", "2026-07-02 09:16", "jo-same") + ",",
-        a("91fd…", "f3e2…", "2026-08-27 14:31", "jo-same") + " ] },",
+        a("2b8a6f", "f3e2a9", "2026-07-02 09:16", "jo-same") + ",",
+        a("91fd03", "f3e2a9", "2026-08-27 14:31", "jo-same") + " ] },",
         `  …`,
         `]`,
       ].join("\n");
+      const ids = ["91fd03", "4e7a1c", "d2093f"];
+      const list = (key) => `{\n  ${k(key)}: [\n${ids.map((i) => `    ${s(i)}`).join(",\n")}\n  ]\n}`;
       return `
       <div class="scene slide job">
         <div class="kicker">Napravení škod</div>
@@ -752,17 +793,11 @@ const scenes = [
               <div class="jo-box swap">
 <pre data-to="1">{
   ${k("hotelIds")}: [
-    ${s("8d3f…")},
-    ${s("b71c…")},
-    …
+    ${s("8d3f21")},
+    ${s("b71c5e")}
   ]
 }</pre>
-<pre data-from="2">{
-  ${k("assignmentIds")}: [
-    ${s("91fd…")},
-    …
-  ]
-}</pre>
+<pre data-from="2">${list("assignmentIds")}</pre>
               </div>
               <span class="jo-run">${icon("play", { size: 24 })} Run job</span>
             </div>
@@ -771,18 +806,12 @@ const scenes = [
               <div class="swap">
 <pre class="jo-empty" data-to="0">–</pre>
 <pre data-from="1" data-to="1">${investigateOut}</pre>
-<pre data-from="2">{
-  ${k("deleted")}: [
-    ${s("91fd…")},
-    …
-  ]
-}</pre>
+<pre data-from="2">${list("deleted")}</pre>
               </div>
             </div>
           </div>
         </div>
         <div class="jo-human" data-from="2">Co smazat, rozhoduje <b>člověk</b>.</div>
-        <div class="jo-quote" data-from="3">Deploy trvá. Rychleji to stejně nezvládnu.</div>
       </div>`;
     },
   },

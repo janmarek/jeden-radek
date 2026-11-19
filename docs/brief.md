@@ -192,6 +192,12 @@ Tohle je zdroj pravdy. Co tu není, se nesmí prezentovat jako fakt.
     `{"hotelIds": [...]}`, po „Run job“ vrátí JSON s duplicitními vazbami a daty
     (stejná/jiná kategorie, která je starší). Výběr pak dostane
     `DeleteDuplicateRoomCategoryAssignments` `{"assignmentIds": [...]}`.
+- Napravení škod: v DB nepořádek; co přesně smazat a jak to zjistit; jak to
+  vyčistit. Anketa (UI / SQL do DB / uklízecí job) s plusy a mínusy: UI by možná
+  stačilo, ale není vidět chyba ani správná kategorie; SQL je hned bez výroby, ale
+  velmi nebezpečné a autor neměl práva; job je pomalý (kód + deploy, rychleji by to
+  bezpečně nezvládl), ale bezpečný, ukáže rozsah a nechá rozhodnout člověka.
+  Id v jobech jako 6znakové hashe (jako zkrácené git commity).
 - Ve Slacku vypíná flag **Hector** (dříve E'Tore). Slajd „Co se děje?“ bez štítku „já“.
 
 ### Nevymýšlet (zatím neznámé)

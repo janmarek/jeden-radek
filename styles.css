@@ -1433,6 +1433,58 @@ body {
 }
 
 /* =====================================================================
+ * cleanup-poll: three options as cards (A/B/C), pros/cons per step,
+ * then the job card is picked and the others fade
+ * ===================================================================== */
+.pl-cards {
+  position: absolute;
+  left: 120px;
+  top: 250px;
+  display: grid;
+  grid-template-columns: repeat(3, 420px);
+  gap: 50px;
+}
+.pl-card {
+  position: relative;
+  height: 560px;
+  padding: 26px 28px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 22px;
+  box-shadow: 8px 8px 0 var(--ink);
+  transition: opacity 0.4s, translate 0.4s cubic-bezier(.34, 1.5, .64, 1), background 0.4s;
+}
+.pl-head { display: flex; align-items: center; gap: 16px; }
+.pl-letter {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  background: var(--lavender);
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  font-size: 28px;
+  font-weight: 800;
+}
+.pl-title { margin-top: 18px; font-size: 34px; font-weight: 800; line-height: 1.15; }
+.pl-list { margin: 22px 0 0; padding: 0; list-style: none; }
+.pl-list li { display: flex; align-items: flex-start; gap: 14px; margin-top: 16px; font-size: 24px; font-weight: 600; line-height: 1.35; }
+.pl-sign {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  margin-top: 1px;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--ink);
+  border-radius: 9px;
+}
+.pl-pro .pl-sign { background: var(--green); }
+.pl-con .pl-sign { background: var(--coral); }
+.poll[data-step="4"] .pl-card:not(.pl-pick) { opacity: 0.4; }
+.poll[data-step="4"] .pl-pick { translate: 0 -14px; background: var(--yellow); }
+
+/* =====================================================================
  * job: one-off job runner with a small UI (not a console): job picker,
  * JSON input, Run job, JSON output. Investigate → Delete.
  * ===================================================================== */
@@ -1490,15 +1542,6 @@ body {
 }
 .job .jo-human { position: absolute; left: 120px; top: 806px; font-size: 34px; font-weight: 600; }
 .job .jo-human b { color: var(--coral); }
-.job .jo-quote {
-  position: absolute;
-  left: 690px;
-  top: 800px;
-  padding-left: 24px;
-  border-left: 8px solid var(--coral);
-  font-size: 34px;
-  font-weight: 700;
-}
 
 /* =====================================================================
  * what-happened: join table before/after + UI (after the job)
