@@ -490,14 +490,15 @@ const scenes = [
 
   // ============================================================ Co bylo rozbité: editace pokoje
   // 0 room table · 1 Upravit on 101 opens the side panel · 2 category
-  // Standard → Deluxe · 3 save: toast "Uloženo", panel closes, row still Standard
+  // Standard → Deluxe · 3 save: "Uloženo", panel closes · 4 the row still
+  // says Standard (highlighted)
   {
     id: "room-edit",
     world: "serious",
-    steps: 4,
-    verifyWait: [900, 1000, 900, 1100],
+    steps: 5,
+    verifyWait: [900, 1000, 900, 1000, 900],
     notes:
-      "Co bylo rozbité? Obyčejná stránka: seznam pokojů, u každého tlačítko Upravit. (→) Otevře se formulář v bočním panelu: číslo pokoje, patro a hlavně kategorie. (→) Změním kategorii ze Standard na Deluxe (→) a uložím. Uloženo. A kategorie je pořád Standard.",
+      "Co bylo rozbité? Obyčejná stránka: seznam pokojů, u každého tlačítko Upravit. (→) Otevře se formulář v bočním panelu: číslo pokoje, patro a hlavně kategorie. (→) Změním kategorii ze Standard na Deluxe (→) a uložím. Uloženo. (→) A kategorie je pořád Standard.",
     render: () => {
       const rooms = [
         ["101", "1", "Standard"],
@@ -507,11 +508,10 @@ const scenes = [
       ];
       return `
       <div class="scene slide roomedit">
-        <div class="kicker">Co bylo rozbité</div>
-        <h1 class="headline">Změna kategorie pokoje</h1>
+        <h1 class="headline">Co bylo rozbité?</h1>
         <div class="re-win">
           <div class="re-head">Pokoje
-            <span class="re-toast" data-from="3">${icon("check", { size: 26, stroke: 3.5 })} Uloženo</span>
+            <span class="re-toast" data-from="3">${icon("check", { size: 28, stroke: 3.5 })} Uloženo</span>
           </div>
           <div class="re-row re-th"><span>číslo</span><span>patro</span><span>kategorie</span><span></span></div>
           ${rooms
@@ -536,38 +536,38 @@ const scenes = [
             <span class="re-save">Uložit</span>
           </div>
         </div>
-        <div class="re-caption" data-from="3">Uloženo. A kategorie je pořád <b>Standard</b>.</div>
       </div>`;
     },
   },
 
-  // ============================================================ Co bylo rozbité: databáze
-  // 0 the three tables with sample data · 1 the save from room-edit added a row
+  // ============================================================ Jak to vypadalo v databázi
+  // 0 rooms + room_categories · 1 the join table + dotted links to both ·
+  // 2 the save from room-edit added a row, the old one stayed
   {
     id: "db-tables",
     world: "serious",
-    steps: 2,
+    steps: 3,
+    verifyWait: [900, 1000, 1000],
     notes:
-      "Jak to vypadá v databázi. Tabulka pokojů, tabulka kategorií a mezi nimi propojovací tabulka room_category_assignments: který pokoj má kterou kategorii, kdo a kdy to založil a jestli je vazba smazaná. (→) Uložení přidalo nový řádek. Ten starý zůstal.",
+      "Jak to vypadalo v databázi. Tabulka pokojů a tabulka kategorií. (→) Mezi nimi propojovací tabulka room_category_assignments: který pokoj má kterou kategorii, kdo a kdy vazbu založil a jestli je smazaná. (→) Uložení přidalo nový řádek, ale ten starý zůstal.",
     render: () => {
-      const tbl = (name, cols, rows, extra = "") => `
-        <div class="dbt-tbl ${extra}">
+      const tbl = (name, cols, rows, cls = "", attrs = "") => `
+        <div class="dbt-tbl ${cls}" ${attrs}>
           <div class="dbt-name">${icon("database", { size: 26 })} ${name}</div>
-          <table class="dbt">
-            <thead><tr>${cols.map((c) => `<th>${c}</th>`).join("")}</tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
+          <div class="dbt-frame">
+            <table class="dbt">
+              <thead><tr>${cols.map((c) => `<th data-col="${c}">${c}</th>`).join("")}</tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
         </div>`;
       const tr = (cells, attrs = "") => `<tr ${attrs}>${cells.map((c) => `<td>${c}</td>`).join("")}</tr>`;
       const asg = (id, r, c, at) => [id, r, c, "admin", at, "false"];
       return `
       <div class="scene slide dbtables">
-        <div class="kicker">Co bylo rozbité</div>
-        <h1 class="headline">V databázi</h1>
-        <div class="dbt-left">
-          ${tbl("rooms", ["id", "number"], [[1, "101"], [2, "102"], [3, "201"], [4, "202"]].map((r) => tr(r)).join(""))}
-          ${tbl("room_categories", ["id", "name"], [[1, "Standard"], [2, "Deluxe"], [3, "Suite"]].map((r) => tr(r)).join(""))}
-        </div>
+        <h1 class="headline">Jak to vypadalo v databázi</h1>
+        ${tbl("rooms", ["id", "number", "floor"], [[1, "101", 1], [2, "102", 1], [3, "201", 2], [4, "202", 2]].map((r) => tr(r)).join(""), "dbt-rooms")}
+        ${tbl("room_categories", ["id", "name"], [[1, "Standard"], [2, "Deluxe"], [3, "Suite"]].map((r) => tr(r)).join(""), "dbt-cats")}
         ${tbl(
           "room_category_assignments",
           ["id", "room_id", "room_category_id", "created_by", "created_at", "deleted"],
@@ -576,62 +576,114 @@ const scenes = [
             tr(asg(3, 3, 2, "2026-07-02 09:15")) +
             tr(asg(4, 4, 3, "2026-07-02 09:16")) +
             tr(asg(5, 1, 2, "2026-08-13 15:42"), 'class="dbt-new"'),
-          "dbt-main"
+          "dbt-main",
+          'data-from="1"'
         )}
-        <div class="dbt-caption" data-from="1">Uložení přidalo řádek.<br><b>Starý zůstal.</b></div>
+        <svg class="dbt-links" data-from="1" viewBox="0 0 1600 900" aria-hidden="true">
+          <path class="lk-room"/><path class="lk-cat"/>
+        </svg>
+        <div class="dbt-caption" data-from="2">Uložení přidalo řádek,<br><b>ale starý zůstal.</b></div>
       </div>`;
+    },
+    // Dotted links rooms.id → room_id and room_categories.id → room_category_id.
+    // Measured with offsets (layout px, unaffected by the stage scale and the
+    // data-from translate), so the tables can move without touching this.
+    onStep: (root) => {
+      const pos = (el) => {
+        let x = 0, y = 0;
+        for (let e = el; e && e !== root; e = e.offsetParent) { x += e.offsetLeft; y += e.offsetTop; }
+        return { x, y, w: el.offsetWidth, h: el.offsetHeight };
+      };
+      const link = (fromTbl, fromCol, toCol, sel) => {
+        const fromTh = root.querySelector(`${fromTbl} th[data-col="${fromCol}"]`);
+        const frame = root.querySelector(`${fromTbl} .dbt-frame`);
+        const toTh = root.querySelector(`.dbt-main th[data-col="${toCol}"]`);
+        const path = root.querySelector(`.dbt-links ${sel}`);
+        if (!fromTh || !frame || !toTh || !path) return;
+        const f = pos(fromTh), fr = pos(frame), t = pos(toTh);
+        const x1 = f.x + f.w / 2, y1 = fr.y + fr.h + 10;
+        const x2 = t.x + t.w / 2, y2 = t.y - 12;
+        const my = (y1 + y2) / 2;
+        path.setAttribute("d", `M${x1} ${y1} C${x1} ${my} ${x2} ${my} ${x2} ${y2}`);
+      };
+      link(".dbt-rooms", "id", "room_id", ".lk-room");
+      link(".dbt-cats", "id", "room_category_id", ".lk-cat");
     },
   },
 
-  // ============================================================ Najdi chybu (konkrétní kód)
-  // 0 updateRoom() · 1 10s countdown · 2 the missing line slides in ·
-  // 3 green "Opraveno" stamp · 4 "Opraveno?"
+  // ============================================================ Oprava kódu
+  // 0 top of roomService.ts · 1 scrolls to updateRoom() · 2 the missing line
+  // slides in · 3 green "Opraveno" stamp · 4 "Opraveno?"
   {
     id: "find-bug",
     world: "serious",
     steps: 5,
-    verifyWait: [900, 3000, 1000, 900, 900],
+    verifyWait: [900, 1300, 1000, 900, 900],
     notes:
-      "Rozcvička: tady je zjednodušená funkce updateRoom. Najdete chybu? (→ spustí odpočet 10 s) (→) Chyba není v žádném řádku, který tam je. Chyběl jeden řádek: loadCategories. Bez něj je room.categories prázdné, takže se stará vazba nikdy nesmaže a vždycky se jen přidá nová. (→) Opraveno. (→) …opraveno?",
+      "Oprava kódu. Tohle je zjednodušený soubor s logikou pokojů. (→) A tady je funkce updateRoom. Najdete chybu? (→) Chyba není v žádném řádku, který tam je. Chyběl jeden řádek: loadCategories. Funkce existovala, jen se nezavolala. Bez ní je room.categories prázdné, takže se stará vazba nikdy nesmaže a vždycky se jen přidá nová. (→) Opraveno. (→) …opraveno?",
     render: () => {
-      const kw = (s) => `<span class="ck">${s}</span>`;
-      const fn = (s) => `<span class="cf">${s}</span>`;
-      const lines = [
-        `${kw("async function")} ${fn("updateRoom")}(input) {`,
-        `  ${kw("const")} room = ${kw("await")} ${fn("getRoom")}(input.roomId);`,
+      const KW = /("[^"]*")|\b(import|from|export|async|function|return|const|await|if)\b|\b([A-Za-z_]\w*)(?=\()/g;
+      const hl = (l) =>
+        l.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+          .replace(KW, (m, str, kw, fn) =>
+            str ? `<span class="cs">${m}</span>` : kw ? `<span class="ck">${m}</span>` : `<span class="cf">${m}</span>`);
+      const MISSING = "  await loadCategories(room);";
+      const file = [
+        `import { db } from "./db";`,
+        `import { Room, UpdateRoomInput } from "./types";`,
+        ``,
+        `export async function getRoom(id: string) {`,
+        `  return db.rooms.findById(id);`,
+        `}`,
+        ``,
+        `export async function loadCategories(room: Room) {`,
+        `  room.categories = await db.roomCategoryAssignments`,
+        `    .where({ roomId: room.id, deleted: false });`,
+        `}`,
+        ``,
+        `export async function createRoom(input: CreateRoomInput) {`,
+        `  const room = db.rooms.create(input);`,
+        `  await createCategoryAssignment(room, input.categoryId);`,
+        `  return saveRoom(room);`,
+        `}`,
+        ``,
+        `export async function updateRoom(input: UpdateRoomInput) {`,
+        `  const room = await getRoom(input.roomId);`,
         null,
         `  room.number = input.number;`,
         `  room.floor = input.floor;`,
         ``,
-        `  ${kw("if")} (room.categories.length &gt; 0) {`,
-        `    ${kw("await")} ${fn("deleteCategoryAssignment")}(room.categories[0]);`,
+        `  if (room.categories.length > 0) {`,
+        `    await deleteCategoryAssignment(room.categories[0]);`,
         `  }`,
-        `  ${kw("await")} ${fn("createCategoryAssignment")}(room, input.categoryId);`,
+        `  await createCategoryAssignment(room, input.categoryId);`,
         ``,
-        `  ${kw("await")} ${fn("saveRoom")}(room);`,
+        `  await saveRoom(room);`,
+        `}`,
+        ``,
+        `export async function deleteRoom(id: string) {`,
+        `  await db.rooms.softDelete(id);`,
         `}`,
       ];
+      const target = file.indexOf(`export async function updateRoom(input: UpdateRoomInput) {`);
       let n = 0;
-      const body = lines
+      const body = file
         .map((l) =>
           l === null
-            ? `<div class="fb-line fb-missing"><span class="fb-no">+</span><span class="fb-code">  ${kw("await")} ${fn("loadCategories")}(room);</span><span class="fb-tag">jeden řádek</span></div>`
-            : `<div class="fb-line"><span class="fb-no">${++n}</span><span class="fb-code">${l}</span></div>`
+            ? `<div class="fb-line fb-missing"><span class="fb-no">+</span><span class="fb-code">${hl(MISSING)}</span><span class="fb-tag">jeden řádek</span></div>`
+            : `<div class="fb-line"><span class="fb-no">${++n}</span><span class="fb-code">${hl(l)}</span></div>`
         )
         .join("");
       return `
       <div class="scene slide findbug">
-        <div class="kicker">Rozcvička</div>
-        <h1 class="headline">Najdi chybu.</h1>
-        <div class="countdown" data-from="1" data-to="1"><span class="cd-num">10</span><span class="cd-unit">s</span></div>
+        <h1 class="headline">Oprava kódu</h1>
         <div class="fb-win">
-          <div class="diff-head"><span class="diff-title">room-service.ts</span></div>
-          <div class="fb-body">${body}</div>
+          <div class="diff-head"><span class="diff-title">roomService.ts</span></div>
+          <div class="fb-body"><div class="fb-scroll" style="--scroll:${-target * 38}px">${body}</div></div>
         </div>
         <div class="fb-stamp" data-from="3">${icon("circle-check", { size: 56, stroke: 3 })}<span class="swap"><span data-to="3">Opraveno</span><span data-from="4">Opraveno?</span></span></div>
       </div>`;
     },
-    onStep: (root, step) => runCountdown(root, step === 1),
   },
 
   // ============================================================ Napravení škod

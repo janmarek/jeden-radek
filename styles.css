@@ -523,8 +523,7 @@ body {
 /* =====================================================================
  * 2 teaser: diff + 10s countdown (step 1 scrolls the diff)
  * ===================================================================== */
-.teaser .countdown,
-.findbug .countdown {
+.teaser .countdown {
   position: absolute;
   right: 120px;
   top: 70px;
@@ -533,9 +532,7 @@ body {
   color: var(--coral);
   line-height: 1;
 }
-.findbug .countdown { top: 60px; }
-.teaser .cd-unit,
-.findbug .cd-unit { font-size: 48px; margin-left: 6px; }
+.teaser .cd-unit { font-size: 48px; margin-left: 6px; }
 .diff-win {
   position: absolute;
   left: 120px;
@@ -1142,7 +1139,7 @@ body {
 
 /* =====================================================================
  * panic: "Co se děje?" + static emoji, checklist questions one by one, then
- * my own answers drop into the boxes (staggered), then the takeaway
+ * my own answers drop into all boxes at once, then the takeaway
  * ===================================================================== */
 .panic .pn-emoji {
   position: absolute;
@@ -1164,9 +1161,9 @@ body {
   border: 3px solid var(--ink);
   border-radius: 12px;
   box-shadow: 4px 4px 0 var(--ink);
-  transition: background 0.25s calc(var(--k) * 0.3s);
+  transition: background 0.25s;
 }
-.pn-box .icon { opacity: 0; scale: 0.3; transition: opacity 0.2s calc(var(--k) * 0.3s), scale 0.35s cubic-bezier(.34, 1.8, .64, 1) calc(var(--k) * 0.3s); }
+.pn-box .icon { opacity: 0; scale: 0.3; transition: opacity 0.2s, scale 0.35s cubic-bezier(.34, 1.8, .64, 1); }
 .panic[data-step="6"] .pn-box .icon,
 .panic[data-step="7"] .pn-box .icon { opacity: 1; scale: 1; }
 .panic[data-step="6"] .pn-box.ok,
@@ -1205,13 +1202,13 @@ body {
 .worked .tile.is-on { translate: 0 0; scale: 1; }
 
 /* =====================================================================
- * room-edit: room table + side-panel form; after save the row still
- * shows the old category
+ * room-edit: room table + side-panel form (over the header too); after
+ * save the row still shows the old category, highlighted one step later
  * ===================================================================== */
 .roomedit .re-win {
   position: absolute;
   left: 120px;
-  top: 250px;
+  top: 290px;
   width: 1360px;
   height: 500px;
   background: var(--paper);
@@ -1233,16 +1230,14 @@ body {
 }
 .re-toast {
   position: absolute;
-  right: 26px;
-  top: 14px;
+  right: 34px;
+  top: 0;
+  height: 100%;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 18px;
-  background: var(--cyan);
-  border: 3px solid var(--ink);
-  border-radius: 12px;
-  font-size: 24px;
+  gap: 10px;
+  font-size: 28px;
+  font-weight: 800;
 }
 .re-row {
   display: grid;
@@ -1271,15 +1266,15 @@ body {
 .roomedit[data-step="2"] .re-hit { background: rgba(254, 218, 60, 0.35); }
 .roomedit[data-step="1"] .re-hit .re-edit,
 .roomedit[data-step="2"] .re-hit .re-edit { background: var(--yellow); }
-.re-cat { justify-self: start; padding: 2px 12px; margin-left: -12px; border-radius: 10px; transition: background 0.4s 0.3s; }
-.roomedit[data-step="3"] .re-hit .re-cat { background: rgba(254, 113, 96, 0.35); }
+.re-cat { justify-self: start; padding: 2px 12px; margin-left: -12px; border-radius: 10px; transition: background 0.4s; }
+.roomedit[data-step="4"] .re-hit .re-cat { background: rgba(254, 113, 96, 0.4); }
 .re-panel {
   position: absolute;
-  top: 76px;
+  top: 0;
   right: 0;
   bottom: 0;
   width: 560px;
-  padding: 30px 36px;
+  padding: 26px 36px;
   background: var(--paper);
   border-left: 3px solid var(--ink);
   box-shadow: -10px 0 0 rgba(35, 33, 42, 0.1);
@@ -1289,7 +1284,7 @@ body {
 .roomedit[data-step="1"] .re-panel,
 .roomedit[data-step="2"] .re-panel { translate: 0 0; }
 .re-ptitle { font-size: 30px; font-weight: 800; }
-.re-field { display: block; margin-top: 18px; }
+.re-field { display: block; margin-top: 16px; }
 .re-field > span:first-child { display: block; font-size: 17px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
 .re-input {
   display: flex;
@@ -1308,7 +1303,7 @@ body {
 .re-save {
   position: absolute;
   right: 36px;
-  top: 22px;
+  bottom: 26px;
   padding: 10px 28px;
   background: var(--cyan);
   border: 3px solid var(--ink);
@@ -1317,48 +1312,53 @@ body {
   font-size: 24px;
   font-weight: 800;
 }
-.roomedit .re-caption { position: absolute; left: 120px; top: 790px; font-size: 38px; font-weight: 600; }
-.roomedit .re-caption b { color: var(--coral); }
 
 /* =====================================================================
- * db-tables: rooms, room_categories, room_category_assignments with
- * sample rows; step 1 = the save appended a row, the old one stayed
+ * db-tables: rooms + room_categories first, then the join table with
+ * dotted links (SVG paths set in onStep), then the duplicate row
  * ===================================================================== */
-.dbtables .dbt-left { position: absolute; left: 120px; top: 250px; width: 300px; }
-.dbtables .dbt-left .dbt-tbl + .dbt-tbl { margin-top: 34px; }
-.dbtables .dbt-main { position: absolute; left: 500px; top: 250px; }
+.dbtables .dbt-rooms { position: absolute; left: 120px; top: 250px; }
+.dbtables .dbt-cats { position: absolute; left: 560px; top: 250px; }
+.dbtables .dbt-main { position: absolute; left: 120px; top: 560px; }
 .dbt-name { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font: 700 24px var(--font-mono); color: var(--coral); }
-.dbt {
+.dbt-frame {
   background: var(--paper);
   border: 3px solid var(--ink);
+  border-radius: 16px;
   box-shadow: 6px 6px 0 var(--ink);
-  border-collapse: collapse;
-  font: 500 22px var(--font-mono);
+  overflow: hidden;
 }
-.dbt-left .dbt { width: 300px; }
+.dbt { width: 100%; border-collapse: collapse; font: 500 21px var(--font-mono); }
+.dbt-main .dbt-name { justify-content: flex-end; }
 .dbt th {
-  padding: 10px 16px;
+  padding: 8px 18px;
   text-align: left;
   background: var(--cream-2);
   font-size: 16px;
   font-weight: 700;
 }
-.dbt td { padding: 9px 16px; border-top: 2px solid var(--cream-2); white-space: nowrap; transition: background 0.4s; }
-.dbt-new { opacity: 0; transition: opacity 0.4s; }
-.dbtables[data-step="1"] .dbt-new { opacity: 1; }
-.dbtables[data-step="1"] .dbt-new td { background: rgba(254, 113, 96, 0.3); }
-.dbtables[data-step="1"] .dbt-old td { background: rgba(221, 212, 255, 0.8); }
-.dbtables .dbt-caption { position: absolute; left: 500px; top: 640px; font-size: 38px; font-weight: 600; line-height: 1.3; }
+.dbt td { padding: 6px 18px; border-top: 2px solid var(--cream-2); white-space: nowrap; transition: background 0.4s; }
+.dbt-new { display: none; }
+.dbtables[data-step="2"] .dbt-new { display: table-row; animation: dbt-row-in 0.4s ease-out; }
+@keyframes dbt-row-in { from { opacity: 0; } }
+.dbtables[data-step="2"] .dbt-new td { background: rgba(254, 113, 96, 0.3); }
+.dbtables[data-step="2"] .dbt-old td { background: rgba(221, 212, 255, 0.85); }
+.dbt-links { position: absolute; inset: 0; width: 1600px; height: 900px; pointer-events: none; overflow: visible; }
+.dbt-links path { fill: none; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 0 13; }
+.dbt-links .lk-room { stroke: var(--code-fn); }
+.dbt-links .lk-cat { stroke: var(--coral); }
+.dbtables .dbt-caption { position: absolute; left: 960px; top: 300px; font-size: 40px; font-weight: 600; line-height: 1.3; }
 .dbtables .dbt-caption b { color: var(--coral); }
 
 /* =====================================================================
- * find-bug: concrete updateRoom(); the missing line slides in, then a
- * green "Opraveno" stamp, then "Opraveno?"
+ * find-bug ("Oprava kódu"): a longer roomService.ts, scrolls to
+ * updateRoom(); the missing line slides in, then a green "Opraveno"
+ * stamp, then "Opraveno?" (same tilt)
  * ===================================================================== */
 .findbug .fb-win {
   position: absolute;
   left: 120px;
-  top: 240px;
+  top: 236px;
   width: 1360px;
   background: var(--paper);
   border: 3px solid var(--ink);
@@ -1367,18 +1367,22 @@ body {
   overflow: hidden;
 }
 .fb-body {
-  padding: 12px 0;
+  height: 532px;
+  overflow: hidden;
   background: linear-gradient(90deg, #f1e7da 0 76px, transparent 76px);
-  font: 500 26px/40px var(--font-mono);
+  font: 500 25px/38px var(--font-mono);
   white-space: pre;
 }
-.fb-line { position: relative; display: flex; height: 40px; }
+.fb-scroll { transition: transform 1s cubic-bezier(.45, 0, .2, 1); }
+.findbug:not([data-step="0"]) .fb-scroll { transform: translateY(var(--scroll)); }
+.fb-line { position: relative; display: flex; height: 38px; }
 .fb-no { flex: none; width: 76px; padding-right: 18px; text-align: right; color: var(--ink-soft); opacity: 0.6; }
 .fb-code { padding-left: 24px; }
 .ck { color: var(--code-kw); font-weight: 700; }
 .cf { color: var(--code-fn); font-weight: 700; }
+.cs { color: var(--ink-soft); }
 .fb-missing { height: 0; overflow: hidden; transition: height 0.5s cubic-bezier(.3, .9, .4, 1), background 0.4s; }
-.findbug:is([data-step="2"], [data-step="3"], [data-step="4"]) .fb-missing { height: 40px; background: color-mix(in srgb, var(--green) 28%, transparent); }
+.findbug:is([data-step="2"], [data-step="3"], [data-step="4"]) .fb-missing { height: 38px; background: color-mix(in srgb, var(--green) 28%, transparent); }
 .fb-missing .fb-no { color: var(--ink); opacity: 1; font-weight: 800; }
 .fb-tag {
   margin-left: 30px;
@@ -1392,7 +1396,7 @@ body {
 .findbug .fb-stamp {
   position: absolute;
   left: 1000px;
-  top: 700px;
+  top: 690px;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -1405,10 +1409,9 @@ body {
   font-weight: 800;
   rotate: -6deg;
   scale: 1.6;
-  transition: opacity 0.2s, scale 0.35s cubic-bezier(.34, 1.6, .64, 1), rotate 0.4s;
+  transition: opacity 0.2s, scale 0.35s cubic-bezier(.34, 1.6, .64, 1);
 }
 .findbug .fb-stamp.is-on { scale: 1; }
-.findbug[data-step="4"] .fb-stamp { rotate: 3deg; }
 .fb-stamp .swap > [data-from],
 .fb-stamp .swap > [data-to] { translate: 0 0; transition: opacity 0.25s; }
 

@@ -165,3 +165,9 @@ reuse the browser already cached on this machine.
 4. Commit once per iteration: `iter N: <summary>`, body says what and why.
 5. Tell Jan what changed and what to look at; leave a question open.
 6. When a bug's root cause wasn't obvious, add it to this file.
+
+## Pitfalls
+
+- A flex container with `gap` turns every bare text run and inline element
+  into its own flex item, so `Text <b>bold</b>.` gets gaps around the `<b>`.
+  Wrap the text in one `<span>` (see `.dm-list` on the damage slide).
